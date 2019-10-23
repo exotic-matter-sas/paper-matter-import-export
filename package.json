@@ -17,7 +17,7 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "paper-matter-import-export",
+    "productName": "Paper Matter import and export",
     "appId": "fr.exotic-matter.app.paper-matter.import-export",
     "directories": {
       "output": "build"
@@ -47,12 +47,14 @@
       "icon": "build/icons/icon.ico"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons",
+      "category": "Utility"
     }
   },
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap-vue": "^2.0.4",
+    "jquery": "^3.4.1",
     "vue": "^2.5.16",
     "vue-electron": "1.0.6",
     "vue-router": "^3.0.1",
