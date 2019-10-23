@@ -7,6 +7,8 @@ import store from './store'
 import BootstrapVue from "bootstrap-vue";
 
 import './customBootstrap.scss'
+import '../../node_modules/bootstrap/js/dist/tab.js';
+
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;

@@ -1,5 +1,7 @@
 $em-purple: #313851;
 $em-orange: #f99947;
+$white-50: hsla(0,0%,100%,.5);
+$white-75: hsla(0,0%,100%,.75);
 
 $theme-colors: (
     "primary": lighten($em-purple, 28%),
@@ -25,67 +27,6 @@ button svg {
     vertical-align: -0.125em;
 }
 
-main{
-    min-height: 100vh;
-}
-
-// LOGIN PAGE
-// ==========
-#login-form {
-    .form-label-group {
-        position: relative;
-        margin-bottom: 1rem;
-
-        input, label {
-            height: 3.125rem;
-            padding: .75rem;
-        }
-
-        input:not(:placeholder-shown) {
-            padding-top: 1.25rem;
-            padding-bottom: .25rem;
-        }
-
-        input:not(:placeholder-shown) ~ label {
-            padding-top: .25rem;
-            padding-bottom: .25rem;
-            font-size: 12px;
-            color: #777;
-        }
-
-        label {
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: block;
-            width: 100%;
-            margin-bottom: 0;
-            line-height: 1.5;
-            color: #495057;
-            pointer-events: none;
-            cursor: text;
-            border: 1px solid transparent;
-            border-radius: .25rem;
-            transition: all .1s ease-in-out;
-        }
-    }
-
-    ul {
-        list-style: none;
-        padding-left: 0;
-        text-align: justify;
-        margin-bottom: 0;
-    }
-
-    .alert-danger li {
-        border-top: 1px solid lighten($danger, 20%);
-        margin-top: 0.5em;
-        padding-top: 0.5em;
-
-        &:first-child {
-            margin-top: 0;
-            padding-top: 0;
-            border-top: none;
-        }
-    }
+.align-content-evenly {
+    align-content: space-evenly;
 }

@@ -23,6 +23,8 @@ function createWindow () {
     width: 500
   });
 
+  mainWindow.setMenuBarVisibility(false);
+
   mainWindow.loadURL(winURL);
 
   mainWindow.on('closed', () => {
