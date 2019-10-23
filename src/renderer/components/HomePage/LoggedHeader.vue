@@ -1,7 +1,7 @@
 <template>
   <b-row id="logged-header" class="bg-dark text-white-50">
     <b-col class="text-center py-1">
-      Logged as: <span>{{account}}</span>
+      Logged as: <span>{{accountName}}</span>
       <button @click.prevent="disconnect" type="button" aria-label="Disconnect" class="close text-white-50" title="Disconnect">
         ×
       </button>
@@ -15,7 +15,7 @@
     name: 'logged-header',
 
     props: {
-      account: {
+      accountName: {
         type: String,
         required: true
       },

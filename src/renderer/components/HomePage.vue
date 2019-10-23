@@ -1,6 +1,6 @@
 <template>
   <b-container fluid class="min-vh-100 d-flex flex-column">
-    <LoggedHeader :account="account"/>
+    <LoggedHeader :accountName="accountName"/>
     <ul class="nav nav-tabs row bg-dark" role="tablist">
       <li class="nav-item col">
         <a class="nav-link active text-center" id="import-tab" data-toggle="tab" href="#import" role="tab" aria-controls="home" aria-selected="true">Import</a>
@@ -33,10 +33,11 @@
             ExportTab
         },
 
-        data() {
-            return {
-                account: 'fabien@exotic-matter.fr', // TODO FIX THAT
-            }
+        props: {
+          accountName: {
+            type: String,
+            required: true
+          },
         },
 
         methods: {
