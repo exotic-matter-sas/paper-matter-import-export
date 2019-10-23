@@ -32,6 +32,8 @@
 <script>
   import SystemInformation from './LandingPage/SystemInformation'
 
+  // TODO delete this file
+
   export default {
     name: 'landing-page',
     components: { SystemInformation },

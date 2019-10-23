@@ -4,10 +4,16 @@ import axios from 'axios'
 import App from './App'
 import router from './router'
 import store from './store'
+import BootstrapVue from "bootstrap-vue";
 
-if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
-Vue.http = Vue.prototype.$http = axios
-Vue.config.productionTip = false
+import './customBootstrap.scss'
+
+if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
+Vue.http = Vue.prototype.$http = axios;
+Vue.config.productionTip = false;
+
+// register Bootstrap vue components
+Vue.use(BootstrapVue);
 
 /* eslint-disable no-new */
 new Vue({
@@ -15,4 +21,4 @@ new Vue({
   router,
   store,
   template: '<App/>'
-}).$mount('#app')
+}).$mount('#app');
