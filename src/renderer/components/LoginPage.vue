@@ -2,36 +2,116 @@
   <b-container>
     <b-row class="align-items-center min-vh-100">
       <b-col>
-        <form action="#" id="login-form">
+        <form v-if="!refreshPending" id="login-form">
           <img src="~@/assets/colors_logo.svg" alt="Paper Matter logo" class="d-block mx-auto my-3">
           <div class="form-label-group">
             <input autofocus="" class="form-control" id="id_email" name="username" placeholder="Email" required=""
-                   type="text">
+                   type="text" v-model="email">
             <label for="id_email">Email</label>
           </div>
           <div class="form-label-group">
             <input class="form-control" id="id_password" name="password" placeholder="Password" required=""
-                   type="password">
+                   type="password"  v-model="password">
             <label for="id_password">Password</label>
-            <button class="btn btn-link px-0 pt-1 pb-0" @click="open('https://papermatter.app/password_reset/')"
+            <button class="btn btn-link px-0 pt-1 pb-0" @click.prevent="open('https://papermatter.app/password_reset/')"
                     id="password-reset">Forgot password?
             </button>
           </div>
-          <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" value="Login">
+          <div v-if="lastError" class="alert alert-danger">{{lastError}}</div>
+          <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" value="Login" @click.prevent="login"
+          :disabled="loginPending || !(login && password)">
         </form>
+
+        <div v-else class="text-center">
+          <b-spinner type="grow" variant="primary" label="Loading..." style="width:4em;height:4em;"></b-spinner>
+        </div>
       </b-col>
     </b-row>
   </b-container>
 </template>
 
 <script>
+    import {mapState} from "vuex";
+    import jwt_decode from "jwt-decode"
 
     export default {
         name: 'login',
+
+        data(){
+            return{
+                email: '',
+                password: '',
+                loginPending: false,
+                refreshPending: false,
+                lastError: ''
+            }
+        },
+
+        mounted () {
+            // redirect to home if user access token is set (and still valid or can be refresh)
+            this.skipLoginIfAuthenticated();
+        },
+
+        computed: {
+          ...mapState('auth', ['accessToken', 'refreshToken'])
+        },
+
         methods: {
             open(link) {
                 this.$electron.shell.openExternal(link)
-            }
+            },
+
+            skipLoginIfAuthenticated(){
+                let vi = this;
+
+                if(vi.accessToken){
+                    const currentDate = new Date();
+                    const tokenExpirationDate = new Date(jwt_decode(vi.accessToken).exp * 1000);
+                    // access token still valid
+                    if(currentDate < tokenExpirationDate){
+                        vi.$router.push({name: 'home'});
+                    // access token need a refresh
+                    } else {
+                        vi.refreshPending = true;
+                        vi.$store.dispatch('auth/refreshAccessToken', {
+                            apiClient: vi.$api,
+                            refreshToken: vi.refreshToken
+                        })
+                        .then(() => vi.$router.push({name: 'home'}))
+                        .catch((error)=>{});
+                        vi.refreshPending = false;
+                    }
+                }
+            },
+
+            async login(){
+                let vi = this;
+
+                vi.lastError = '';
+                vi.loginPending = true;
+
+                await vi.$api.getAccessToken(vi.email, vi.password).then(response => {
+                        vi.$store.commit('auth/SAVE_AUTHENTICATION_DATA', {
+                            accountName: vi.email,
+                            accessToken: response.data.access,
+                            refreshToken: response.data.refresh
+                        });
+                        vi.$router.push({name: 'home'});
+                    })
+                    .catch((error) => {
+                        if (error.response) {
+                            if (error.response.data.detail) {
+                                vi.lastError = error.response.data.detail
+                            } else {
+                                vi.lastError = 'Unknown error, please retry later.'
+                            }
+                        } else if (error.request) {
+                         vi.lastError = 'The Paper Matter server seems unreachable, please check your connection.'
+                        }
+                    });
+
+                vi.loginPending = false;
+            },
         }
     }
 </script>
@@ -79,22 +159,22 @@
     }
 
     ul {
-        list-style: none;
-        padding-left: 0;
-        text-align: justify;
-        margin-bottom: 0;
+      list-style: none;
+      padding-left: 0;
+      text-align: justify;
+      margin-bottom: 0;
     }
 
     .alert-danger li {
-        border-top: 1px solid lighten($danger, 20%);
-        margin-top: 0.5em;
-        padding-top: 0.5em;
+      border-top: 1px solid lighten($danger, 20%);
+      margin-top: 0.5em;
+      padding-top: 0.5em;
 
-        &:first-child {
-            margin-top: 0;
-            padding-top: 0;
-            border-top: none;
-        }
+      &:first-child {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+      }
     }
   }
 </style>

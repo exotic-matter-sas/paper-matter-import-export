@@ -11,19 +11,19 @@
 
 <script>
 
+  import {mapState} from "vuex";
+
   export default {
     name: 'logged-header',
 
-    props: {
-      accountName: {
-        type: String,
-        required: true
-      },
+    computed: {
+      ...mapState('auth', ['accountName'])
     },
 
     methods: {
-      disconnect (link) {
-        // TODO
+      disconnect () {
+        this.$store.commit('auth/CLEAR_AUTHENTICATION_DATA');
+        this.$router.push({name: 'login'});
       }
     }
   }

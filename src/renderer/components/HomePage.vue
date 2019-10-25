@@ -1,6 +1,6 @@
 <template>
   <b-container fluid class="min-vh-100 d-flex flex-column">
-    <LoggedHeader :accountName="accountName"/>
+    <LoggedHeader/>
     <ul class="nav nav-tabs row bg-dark" role="tablist">
       <li class="nav-item col">
         <a class="nav-link active text-center" id="import-tab" data-toggle="tab" href="#import" role="tab" aria-controls="home" aria-selected="true">Import</a>
@@ -31,13 +31,6 @@
             LoggedHeader,
             ImportTab,
             ExportTab
-        },
-
-        props: {
-          accountName: {
-            type: String,
-            required: true
-          },
         },
 
         methods: {

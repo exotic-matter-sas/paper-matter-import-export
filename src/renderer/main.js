@@ -8,10 +8,11 @@ import BootstrapVue from "bootstrap-vue";
 
 import './customBootstrap.scss'
 import '../../node_modules/bootstrap/js/dist/tab.js';
+import ApiClient from './apiClient'
 
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
-Vue.http = Vue.prototype.$http = axios;
+Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiBaseUrl);
 Vue.config.productionTip = false;
 
 // register Bootstrap vue components
@@ -24,3 +25,14 @@ new Vue({
   store,
   template: '<App/>'
 }).$mount('#app');
+
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.status === 403) {
+    // TODO refresh access token or reconnect user when an XHR returns 403 ?
+    console.log('access token expire TODO')
+  } else {
+    return Promise.reject(error);
+  }
+});
