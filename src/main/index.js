@@ -20,7 +20,10 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 350,
     useContentSize: true,
-    width: 500
+    width: 500,
+    webPreferences: {
+      webSecurity: process.env.NODE_ENV !== 'development' // to allow requesting API from localhost during development
+    }
   });
 
   mainWindow.setMenuBarVisibility(false);
