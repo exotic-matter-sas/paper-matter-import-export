@@ -55,11 +55,12 @@
     "axios": "^0.18.0",
     "bootstrap-vue": "^2.0.4",
     "jquery": "^3.4.1",
+    "jwt-decode": "^2.2.0",
     "vue": "^2.5.16",
     "vue-electron": "1.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "vuex-electron": "^1.0.0"
+    "vuex-persist": "^2.1.1"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
