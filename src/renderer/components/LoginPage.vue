@@ -61,27 +61,15 @@
                 this.$electron.shell.openExternal(link)
             },
 
-            skipLoginIfAuthenticated(){
+            async skipLoginIfAuthenticated(){
                 let vi = this;
+                vi.refreshPending = true;
 
-                if(vi.accessToken){
-                    const currentDate = new Date();
-                    const tokenExpirationDate = new Date(jwt_decode(vi.accessToken).exp * 1000);
-                    // access token still valid
-                    if(currentDate < tokenExpirationDate){
-                        vi.$router.push({name: 'home'});
-                    // access token need a refresh
-                    } else {
-                        vi.refreshPending = true;
-                        vi.$store.dispatch('auth/refreshAccessToken', {
-                            apiClient: vi.$api,
-                            refreshToken: vi.refreshToken
-                        })
-                        .then(() => vi.$router.push({name: 'home'}))
-                        .catch((error)=>{});
-                        vi.refreshPending = false;
-                    }
-                }
+                await vi.$store.dispatch('auth/tryToRefreshAccessToken', vi.$api)
+                .then(() => vi.$router.push({name: 'home'}))
+                .catch((error)=>{});
+
+                vi.refreshPending = false;
             },
 
             async login(){

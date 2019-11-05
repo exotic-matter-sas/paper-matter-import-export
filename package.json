@@ -54,6 +54,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap-vue": "^2.0.4",
+    "electron-log": "^3.0.8",
     "jquery": "^3.4.1",
     "jwt-decode": "^2.2.0",
     "vue": "^2.5.16",
