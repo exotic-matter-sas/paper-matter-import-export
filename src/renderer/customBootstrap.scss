@@ -30,3 +30,8 @@ button svg {
 .align-content-evenly {
     align-content: space-evenly;
 }
+
+.b-form-file label{
+    white-space: nowrap;
+    overflow: hidden;
+}

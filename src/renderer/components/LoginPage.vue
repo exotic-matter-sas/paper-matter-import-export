@@ -32,7 +32,7 @@
 
 <script>
     import {mapState} from "vuex";
-    import jwt_decode from "jwt-decode"
+    const log = require('electron-log');
 
     export default {
         name: 'login',
@@ -63,16 +63,18 @@
 
             async skipLoginIfAuthenticated(){
                 let vi = this;
-                vi.refreshPending = true;
 
-                await vi.$store.dispatch('auth/tryToRefreshAccessToken', vi.$api)
-                .then(() => vi.$router.push({name: 'home'}))
-                .catch((error)=>{});
-
-                vi.refreshPending = false;
+                if (vi.accessToken) {
+                  vi.refreshPending = true;
+                  await vi.$store.dispatch('auth/refreshAccessToken', vi.$api)
+                  .then(() => vi.$router.push({name: 'home'}))
+                  .catch((error)=>{});
+                  vi.refreshPending = false;
+                }
             },
 
             async login(){
+                log.debug('login start');
                 let vi = this;
 
                 vi.lastError = '';
@@ -99,6 +101,7 @@
                     });
 
                 vi.loginPending = false;
+                log.debug('login end');
             },
         }
     }

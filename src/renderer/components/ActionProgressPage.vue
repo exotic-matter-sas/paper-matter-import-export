@@ -17,12 +17,12 @@
         </b-row>
         <b-row>
           <b-col>
-            <b-button id="stop-button" variant="outline-danger" @click="stopImport" class="w-100">
+            <b-button id="stop-button" variant="outline-danger" @click.prevent="stopImport" class="w-100">
               Stop
             </b-button>
           </b-col>
           <b-col>
-            <b-button id="pause-button" variant="primary" @click="pauseImport" class="w-100">
+            <b-button id="pause-button" variant="primary" @click.prevent="pauseImport" class="w-100">
               Pause
             </b-button>
           </b-col>

@@ -32,12 +32,6 @@
             ImportTab,
             ExportTab
         },
-
-        methods: {
-            open(link) {
-                this.$electron.shell.openExternal(link)
-            }
-        }
     }
 </script>
 

@@ -57,6 +57,7 @@
     "electron-log": "^3.0.8",
     "jquery": "^3.4.1",
     "jwt-decode": "^2.2.0",
+    "pdfjs-dist": "^2.2.228",
     "vue": "^2.5.16",
     "vue-electron": "1.0.6",
     "vue-router": "^3.0.1",

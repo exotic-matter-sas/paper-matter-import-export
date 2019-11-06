@@ -2,7 +2,7 @@
   <b-row id="logged-header" class="bg-dark text-white-50">
     <b-col class="text-center py-1">
       Logged as: <span>{{accountName}}</span>
-      <button @click.prevent="disconnect" type="button" aria-label="Disconnect" class="close text-white-50" title="Disconnect">
+      <button @click.prevent="disconnectUser" type="button" aria-label="Disconnect" class="close text-white-50" title="Disconnect">
         ×
       </button>
     </b-col>
@@ -21,9 +21,8 @@
     },
 
     methods: {
-      disconnect () {
-        this.$store.commit('auth/CLEAR_AUTHENTICATION_DATA');
-        this.$router.push({name: 'login'});
+      disconnectUser () {
+        this.$store.dispatch('auth/disconnectUser', 'user disconnect himself');
       }
     }
   }
