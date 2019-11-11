@@ -10,7 +10,7 @@
     ></b-form-file>
 
     <b-button class="w-100" id="import-button" variant="primary"
-              :disabled="(files.length === 0 && documentsPathToImport.length === 0) || importing"
+              :disabled="(files.length === 0 && docsPathToImport.length === 0) || importing"
               @click.prevent="importDocuments">
       Import
     </b-button>
@@ -44,8 +44,8 @@
 
     mounted() {
       // if last import wasn't properly completed
-      let documentsToImportCount = this.documentsPathToImport.length;
-      if (documentsToImportCount > 0){
+      let docsToImportCount = this.docsPathToImport.length;
+      if (docsToImportCount > 0){
         log.info('last import wasn\'t fully completed, inform user that he can finish it');
         const win = remote.getCurrentWindow();
         remote.dialog.showMessageBox(win,
@@ -53,7 +53,7 @@
             type: 'info',
             title: 'You can resume last import',
             message: 'Last import wasn\'t fully completed.',
-            detail: `There is ${documentsToImportCount} files left to import, you can finish the import by clicking ` +
+            detail: `There is ${docsToImportCount} files left to import, you can finish the import by clicking ` +
                 'the Import button.',
             buttons: ['Ok'],
             defaultId: 0
@@ -64,14 +64,14 @@
 
     computed: {
       placeholder () {
-        if (this.documentsPathToImport.length) {
-          return this.documentsPathToImport.map(file => file.name).join(', ')
+        if (this.docsPathToImport.length) {
+          return this.docsPathToImport.map(file => file.name).join(', ')
         } else {
           return 'Choose pdf documents to import...'
         }
       },
       ...mapState('auth', ['accessToken']),
-      ...mapState('import', ['documentsPathToImport', 'documentsPathInError'])
+      ...mapState('import', ['docsPathToImport', 'docsPathInError'])
     },
 
     methods: {
@@ -92,7 +92,7 @@
           );
         }
 
-        const totalCount = this.documentsPathToImport.length;
+        const totalCount = this.docsPathToImport.length;
         vi.$emit('event-import-start', totalCount); // display progressModal
 
         // create folder
@@ -103,15 +103,15 @@
         .catch((error) => {
           vi.importing = false;
           log.error('error during folder creation\n'+ error);
-          vi.$emit('event-import-end', this.documentsPathToImport.length); // close progressModal
+          vi.$emit('event-import-end', this.docsPathToImport.length); // close progressModal
           throw new Error('Creation of import folder failed');
         });
 
         let serializedDocument;
         let file;
-        while (vi.documentsPathToImport.length > 0){
+        while (vi.docsPathToImport.length > 0){
           // Get file blob from serialized document
-          serializedDocument = vi.documentsPathToImport[0];
+          serializedDocument = vi.docsPathToImport[0];
           try {
             file = new File([fs.readFileSync(serializedDocument.path)], serializedDocument.name, {
               type: serializedDocument.type,
@@ -155,15 +155,15 @@
         log.debug('importing end');
         vi.importing = false;
         vi.files = [];
-        vi.$emit('event-import-end', this.documentsPathToImport.length); // close progressModal
+        vi.$emit('event-import-end', this.docsPathToImport.length); // close progressModal
 
-        const errorCount = vi.documentsPathInError.length;
+        const errorCount = vi.docsPathInError.length;
         const win = remote.getCurrentWindow();
         const export_interrupted_mention = this.importInterrupted ? ' (export has been interrupted)' : '';
 
         if (errorCount) {
-          const s = vi.documentsPathInError.length > 1 ? 's' : '';
-          log.error('theses files could not be imported:', vi.documentsPathInError);
+          const s = vi.docsPathInError.length > 1 ? 's' : '';
+          log.error('theses files could not be imported:', vi.docsPathInError);
           // define Sync dialog (with no callback)
           remote.dialog.showMessageBox(win,
             {
@@ -182,13 +182,13 @@
             vi.$store.commit('import/MOVE_DOCS_FROM_ERROR_TO_IMPORT');
           });
         } else {
-          const s = vi.documentsPathToImport.length > 1 ? 's' : '';
+          const s = vi.docsPathToImport.length > 1 ? 's' : '';
           // define Sync dialog (with no callback)
           remote.dialog.showMessageBox(win,
             {
               type: 'info',
               title: `Documents successfully imported`,
-              message: `${totalCount - this.documentsPathToImport.length} document${s} imported without error${export_interrupted_mention}.`,
+              message: `${totalCount - this.docsPathToImport.length} document${s} imported without error${export_interrupted_mention}.`,
               buttons: ['Ok'],
               defaultId: 0
             }, (res) => {}
@@ -199,7 +199,7 @@
       displayImportErrorReport() {
         const report = new HtmlReport(
             ['Name', 'Path', 'Error detail'],
-            this.documentsPathInError.map(({name, path, reason}) => ([name, path, reason]))
+            this.docsPathInError.map(({name, path, reason}) => ([name, path, reason]))
         );
         this.$electron.shell.openExternal('file:///'+ report.save());
       }

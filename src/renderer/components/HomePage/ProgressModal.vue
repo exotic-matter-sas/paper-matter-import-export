@@ -11,14 +11,14 @@
           </b-row>
           <b-row class="align-items-end">
             <b-col cols="12">
-              <b-progress id="progress-bar" height="2rem" :value="totalCount - documentsPathToImport.length"
+              <b-progress id="progress-bar" height="2rem" :value="totalCount - docsPathToImport.length"
                   :max="totalCount" variant="primary" show-progress animated/>
             </b-col>
-            <b-col cols="6" v-if="documentsPathInError.length" id="error-count" class="text-left text-danger">
-              {{documentsPathInError.length}} error{{documentsPathInError.length > 1 ? 's' : ''}}
+            <b-col cols="6" v-if="docsPathInError.length" id="error-count" class="text-left text-danger">
+              {{docsPathInError.length}} error{{docsPathInError.length > 1 ? 's' : ''}}
             </b-col>
             <b-col cols="6" id="progression-count" class="text-right text-muted">
-              {{totalCount - documentsPathToImport.length}}/{{totalCount}}
+              {{totalCount - docsPathToImport.length}}/{{totalCount}}
             </b-col>
           </b-row>
         </b-col>
@@ -53,7 +53,7 @@
     },
 
     computed: {
-      ...mapState('import', ['documentsPathToImport', 'documentsPathInError'])
+      ...mapState('import', ['docsPathToImport', 'docsPathInError'])
     },
 
     methods: {

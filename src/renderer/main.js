@@ -31,7 +31,7 @@ const vi = new Vue({
 // listen to webContents close event to ask user for confirmation on close (if needed)
 ipcRenderer.on('closeMainWindow', (event, message) => {
   console.log('close event from main received!');
-  if (store.state.import.documentsPathToImport.length  > 0){
+  if (store.state.import.docsPathToImport.length  > 0){
     remote.dialog.showMessageBox(null,
       {
         type: 'question',
