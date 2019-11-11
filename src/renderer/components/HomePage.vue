@@ -21,18 +21,20 @@
 </template>
 
 <script>
-    import LoggedHeader from "./HomePage/LoggedHeader";
-    import ImportTab from "./HomePage/ImportTab";
-    import ExportTab from "./HomePage/ExportTab";
+  import LoggedHeader from "./HomePage/LoggedHeader";
+  import ImportTab from "./HomePage/ImportTab";
+  import ExportTab from "./HomePage/ExportTab";
 
-    export default {
-        name: 'home',
-        components: {
-            LoggedHeader,
-            ImportTab,
-            ExportTab
-        },
-    }
+  const log = require('electron-log');
+
+  export default {
+    name: 'home',
+    components: {
+        LoggedHeader,
+        ImportTab,
+        ExportTab
+    },
+  }
 </script>
 
 <style lang="scss" scoped>

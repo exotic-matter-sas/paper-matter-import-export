@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import {app, BrowserWindow, ipcMain} from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -29,6 +29,14 @@ function createWindow () {
   mainWindow.setMenuBarVisibility(false);
 
   mainWindow.loadURL(winURL);
+
+  mainWindow.on('close', (event) => {
+    event.preventDefault();
+    mainWindow.webContents.send('closeMainWindow'); // emit event to VueJS main to ask user for confirmation if needed
+  });
+  ipcMain.on('closeConfirmed', (event, message) => {
+    mainWindow.destroy();
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null

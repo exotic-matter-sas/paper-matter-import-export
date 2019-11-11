@@ -5,6 +5,7 @@ import router from './router'
 import store from './store'
 import BootstrapVue from "bootstrap-vue";
 import axios from "axios";
+import {ipcRenderer, remote} from 'electron';
 
 import './customBootstrap.scss'
 import '../../node_modules/bootstrap/js/dist/tab.js';
@@ -27,11 +28,35 @@ const vi = new Vue({
   template: '<App/>'
 }).$mount('#app');
 
+// listen to webContents close event to ask user for confirmation on close (if needed)
+ipcRenderer.on('closeMainWindow', (event, message) => {
+  console.log('close event from main received!');
+  if (store.state.import.documentsPathToImport.length  > 0){
+    remote.dialog.showMessageBox(null,
+      {
+        type: 'question',
+        title: 'Are you sure you want to quit?',
+        message: 'There are some documents which remain to be imported.',
+        detail: 'If you close now, ongoing import or documents selection will be lost.',
+        buttons: ['Cancel', 'Close'],
+        defaultId: 0
+      }, (res) => {
+      if (res === 1){
+        store.commit('import/RESET_IMPORT_DATA');
+        ipcRenderer.sendSync('closeConfirmed');
+     }
+    })
+  } else {
+    store.commit('import/RESET_IMPORT_DATA');
+    ipcRenderer.sendSync('closeConfirmed');
+  }
+});
+
 // global API error handling
 Vue.api.http.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
-  if (error.response.status === 403) {
+  if (error.response && error.response.status === 403) {
     log.warn('last API request fail with 403 status, accessToken is not valid');
     return store.dispatch('auth/refreshAccessToken', vi.$api)
       .then((accessToken) => {

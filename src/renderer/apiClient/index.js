@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export default class Index {
+export default class ApiCient {
   constructor(baseUrl) {
     this.http = axios.create({baseURL: baseUrl})
   }
