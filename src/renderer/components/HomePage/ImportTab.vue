@@ -77,7 +77,7 @@
         // Store files to import in store if needed (not needed when documents are recover from a previous session)
         if (vi.files.length > 0){
           vi.$store.commit(
-              'import/SAVE_DOCUMENTS_TO_IMPORT',
+              'import/SET_DOCS_TO_IMPORT',
               // serialize File object by storing only useful fields
               vi.files.map(({name, path, type, lastModified}) => ({name, path, type, lastModified}))
           );
@@ -108,7 +108,7 @@
             console.log(file);
           } catch (error) {
             log.error('error during file read, the file may have been rename, move, or deleted since its selection');
-            vi.$store.commit('import/MOVE_FIRST_DOCUMENT_TO_ERROR_LIST', 'File not found (deleted, renamed or moved?)');
+            vi.$store.commit('import/MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR', 'File not found (deleted, renamed or moved?)');
             continue;
           }
           jsonData = {
@@ -126,11 +126,11 @@
           // upload doc
           await vi.$api.uploadDocument(vi.accessToken, jsonData, file, thumbnail)
           .then((response) => {
-            vi.$store.commit('import/REMOVE_FIRST_DOCUMENT_FROM_LIST');
+            vi.$store.commit('import/REMOVE_FIRST_DOC_FROM_IMPORT');
             log.debug('file uploaded', '\n', file.path);
           })
           .catch((error) => {
-            vi.$store.commit('import/MOVE_FIRST_DOCUMENT_TO_ERROR_LIST', 'Upload error (corrupt file, network error?)');
+            vi.$store.commit('import/MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR', 'Upload error (corrupt file, network error?)');
             log.error('error during upload!', file.path, '\n', error);
           });
         }
