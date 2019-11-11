@@ -11,12 +11,18 @@
     </ul>
     <div class="tab-content row flex-grow-1">
       <div class="tab-pane show active col" id="import" role="tabpanel" aria-labelledby="import-tab">
-        <ImportTab/>
+        <ImportTab
+          :importInterrupted="importInterrupted"
+          @event-import-start="displayImportProgress"
+          @event-import-end="hideImportProgress"/>
       </div>
       <div class="tab-pane col" id="export" role="tabpanel" aria-labelledby="export-tab">
         <ExportTab/>
       </div>
     </div>
+    <ProgressModal v-if="actionOnGoing" :action="actionType" :totalCount="totalCount"
+      @event-import-interrupt="interruptImport"
+    />
   </b-container>
 </template>
 
@@ -24,6 +30,7 @@
   import LoggedHeader from "./HomePage/LoggedHeader";
   import ImportTab from "./HomePage/ImportTab";
   import ExportTab from "./HomePage/ExportTab";
+  import ProgressModal from "./HomePage/ProgressModal";
 
   const log = require('electron-log');
 
@@ -32,8 +39,36 @@
     components: {
         LoggedHeader,
         ImportTab,
-        ExportTab
+        ExportTab,
+        ProgressModal
     },
+
+    data() {
+      return {
+          actionType: '',
+          actionOnGoing: false,
+          totalCount: 0,
+          importInterrupted: false,
+      }
+    },
+
+    methods: {
+      displayImportProgress(totalCount) {
+          this.actionOnGoing = true;
+          this.actionType = 'import';
+          this.totalCount = totalCount;
+      },
+      interruptImport() {
+          this.importInterrupted = true;
+          console.log('interrupt event received')
+      },
+      hideImportProgress() {
+          this.actionOnGoing = false;
+          this.actionType = '';
+          this.totalCount = 0;
+          this.importInterrupted = false;
+      }
+    }
   }
 </script>
 

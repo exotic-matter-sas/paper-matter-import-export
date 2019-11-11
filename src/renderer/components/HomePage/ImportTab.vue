@@ -29,11 +29,16 @@
   export default {
     name: 'import-tab',
 
+    props: {
+      importInterrupted: {
+        type: Boolean
+      }
+    },
+
     data(){
       return {
         files: [],
         importing: false,
-        placeholder: 'Choose pdf documents to import...'
       }
     },
 
@@ -52,14 +57,19 @@
                 'the Import button.',
             buttons: ['Ok'],
             defaultId: 0
-          }, (res) => {
-            this.placeholder = this.documentsPathToImport.map(file => file.name).join(', ')
-          }
+          }, (res) => {}
         );
       }
     },
 
     computed: {
+      placeholder () {
+        if (this.documentsPathToImport.length) {
+          return this.documentsPathToImport.map(file => file.name).join(', ')
+        } else {
+          return 'Choose pdf documents to import...'
+        }
+      },
       ...mapState('auth', ['accessToken']),
       ...mapState('import', ['documentsPathToImport', 'documentsPathInError'])
     },
@@ -71,7 +81,6 @@
         let jsonData = {};
 
         log.debug('importing start');
-        console.log(vi.files);
         vi.importing = true;
 
         // Store files to import in store if needed (not needed when documents are recover from a previous session)
@@ -83,6 +92,9 @@
           );
         }
 
+        const totalCount = this.documentsPathToImport.length;
+        vi.$emit('event-import-start', totalCount); // display progressModal
+
         // create folder
         await vi.$api.createFolder(vi.accessToken, 'import ' + new Date().toISOString()).then(response => {
           log.debug('folder created');
@@ -91,6 +103,7 @@
         .catch((error) => {
           vi.importing = false;
           log.error('error during folder creation\n'+ error);
+          vi.$emit('event-import-end', this.documentsPathToImport.length); // close progressModal
           throw new Error('Creation of import folder failed');
         });
 
@@ -133,35 +146,53 @@
             vi.$store.commit('import/MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR', 'Upload error (corrupt file, network error?)');
             log.error('error during upload!', file.path, '\n', error);
           });
+
+          if(this.importInterrupted){
+              log.info('Import interrupt by user');
+              break;
+          }
         }
         log.debug('importing end');
         vi.importing = false;
         vi.files = [];
+        vi.$emit('event-import-end', this.documentsPathToImport.length); // close progressModal
 
         const errorCount = vi.documentsPathInError.length;
-        const s = vi.documentsPathInError.length > 1 ? 's' : '';
+        const win = remote.getCurrentWindow();
+        const export_interrupted_mention = this.importInterrupted ? ' (export has been interrupted)' : '';
+
         if (errorCount) {
+          const s = vi.documentsPathInError.length > 1 ? 's' : '';
           log.error('theses files could not be imported:', vi.documentsPathInError);
-          const win = remote.getCurrentWindow();
           // define Sync dialog (with no callback)
-          const response = remote.dialog.showMessageBox(win,
+          remote.dialog.showMessageBox(win,
             {
               type: 'error',
               title: `Error${s} occurred during import`,
               message: `${errorCount} document${s} couldn't be imported:`,
-              detail: 'You can retry to import them by clicking the Import button.',
+              detail: `You can retry to import them by clicking the Import button${export_interrupted_mention}.`,
               buttons: ['Ok', 'Display detailed report'],
               defaultId: 0
             }
+          , (res) => {
+            if (res === 1){ // Second button clicked
+              this.displayImportErrorReport();
+            }
+            // Move docs in error in the import list to able to retry an import
+            vi.$store.commit('import/MOVE_DOCS_FROM_ERROR_TO_IMPORT');
+          });
+        } else {
+          const s = vi.documentsPathToImport.length > 1 ? 's' : '';
+          // define Sync dialog (with no callback)
+          remote.dialog.showMessageBox(win,
+            {
+              type: 'info',
+              title: `Documents successfully imported`,
+              message: `${totalCount - this.documentsPathToImport.length} document${s} imported without error${export_interrupted_mention}.`,
+              buttons: ['Ok'],
+              defaultId: 0
+            }, (res) => {}
           );
-
-          if (response === 1){ // Second button clicked
-            this.displayImportErrorReport();
-          }
-
-          // Move docs in error in the import list to able to retry an import
-          vi.$store.commit('import/MOVE_DOCS_FROM_ERROR_TO_IMPORT');
-          this.placeholder = this.documentsPathToImport.map(file => file.name).join(', ')
         }
       },
 

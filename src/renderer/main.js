@@ -45,7 +45,7 @@ ipcRenderer.on('closeMainWindow', (event, message) => {
         store.commit('import/RESET_IMPORT_DATA');
         ipcRenderer.sendSync('closeConfirmed');
      }
-    })
+    });
   } else {
     store.commit('import/RESET_IMPORT_DATA');
     ipcRenderer.sendSync('closeConfirmed');
