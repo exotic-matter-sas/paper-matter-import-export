@@ -13,9 +13,9 @@
             <input class="form-control" id="id_password" name="password" placeholder="Password" required=""
                    type="password"  v-model="password">
             <label for="id_password">Password</label>
-            <button class="btn btn-link px-0 pt-1 pb-0" @click.prevent="open('https://papermatter.app/password_reset/')"
+            <a class="mt-1 d-block" href @click.prevent="open('https://papermatter.app/password_reset/')"
                     id="password-reset">Forgot password?
-            </button>
+            </a>
           </div>
           <div v-if="lastError" class="alert alert-danger">{{lastError}}</div>
           <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" value="Login" @click.prevent="login"
