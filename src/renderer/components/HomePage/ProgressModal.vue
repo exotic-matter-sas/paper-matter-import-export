@@ -14,8 +14,10 @@
               <b-progress id="progress-bar" height="2rem" :value="totalCount - docsPathToImport.length"
                   :max="totalCount" variant="primary" show-progress animated/>
             </b-col>
-            <b-col cols="6" v-if="docsPathInError.length" id="error-count" class="text-left text-danger">
-              {{docsPathInError.length}} error{{docsPathInError.length > 1 ? 's' : ''}}
+            <b-col cols="6" id="error-count" class="text-left text-danger">
+              <span v-if="docsPathInError.length">
+                {{docsPathInError.length}} error{{docsPathInError.length > 1 ? 's' : ''}}
+              </span>
             </b-col>
             <b-col cols="6" id="progression-count" class="text-right text-muted">
               {{totalCount - docsPathToImport.length}}/{{totalCount}}

@@ -23,7 +23,7 @@ export default class HtmlReport {
       tableRows += `<tr>${row.map(cellValue => "<td>" + cellValue + "</td>").join('')}</tr>`;
     }
 
-    const table = `<table><th>${tableHeader}</th><tbody>${tableRows}</tbody></table>`;
+    const table = `<table><thead><th>${tableHeader}</th></thead><tbody>${tableRows}</tbody></table>`;
 
     this.htmlReport = `<!DOCTYPE html><html lang="en"><head><title>Error report ${this.reportDate.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})}</title><meta charset="utf-8"></head><body>${table}</body></html>`;
     log.debug('html report rendered');

@@ -68,20 +68,24 @@ Vue.api.http.interceptors.response.use(function (response) {
           .then((response) => {
             return Promise.resolve(response);
           })
-          .catch((error) => {
-            log.error('fail to replay last request, disconnecting user to get new accessToken');
-            return store.dispatch('auth/disconnectUser', 'fail to refresh access token')
-              .then(() => {
-                return Promise.reject(error)
-              });
-          });
       })
       .catch((error) => {
-        log.error('fail to refresh, disconnecting user to get new accessToken');
-        return store.dispatch('auth/disconnectUser', 'fail to refresh access token')
-          .then(() => {
-            return Promise.reject(error)
-          });
+        if (error.response && (error.response.data.code === 'token_not_valid' || error.response.status === 403)) {
+          if (error.response.data.code === 'token_not_valid') {
+            log.error('fail to refresh, disconnecting user to get new accessToken');
+          } else if (error.response.status === 403) {
+            log.error('refreshed token used in replayed request considered as invalid, disconnecting user to get' +
+              ' new accessToken');
+          }
+          return store.dispatch('auth/disconnectUser', 'fail to refresh access token')
+            .then(() => {
+              return Promise.reject(error)
+            });
+        } else {
+          // a non related authentication error occurred
+          log.error('last API request fail with error:\n' + error);
+          return Promise.reject(error);
+        }
       });
   } else {
     // a non 403 error occurred
