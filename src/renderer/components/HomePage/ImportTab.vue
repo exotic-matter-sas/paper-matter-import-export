@@ -1,28 +1,47 @@
 <template>
-  <b-container class="h-100 d-flex align-content-evenly flex-wrap">
-    <b-form-file
-      multiple
-      v-model="files"
-      :state="Boolean(files)"
-      :placeholder=this.filesInputPlaceholder
-      drop-placeholder="Drop pdf documents to import here..."
-      accept=".pdf"
-    ></b-form-file>
+  <b-container class="pt-2">
+    <b-row>
+      <b-col>
+        <b-form-group label="Sources" >
+          <b-form-file
+            multiple
+            v-model="files"
+            :state="Boolean(files)"
+            :placeholder=this.filesInputPlaceholder
+            drop-placeholder="Drop pdf documents to import here..."
+            accept=".pdf"
+          ></b-form-file>
 
-    <b-form-file
-      directory
-      multiple
-      v-model="filesInsideFolder"
-      :state="Boolean(filesInsideFolder)"
-      placeholder="Choose a folder to import..."
-      drop-placeholder="Drop a folder to import here..."
-    ></b-form-file>
-
-    <b-button class="w-100" id="import-button" variant="primary"
-              :disabled="(files.length === 0 && filesInsideFolder.length === 0 && docsPathToImport.length === 0) || importing"
-              @click.prevent="importDocuments">
-      Import
-    </b-button>
+          <b-form-file
+            class="mt-2"
+            directory
+            multiple
+            v-model="filesInsideFolder"
+            :state="Boolean(filesInsideFolder)"
+            placeholder="Choose a folder to import..."
+            drop-placeholder="Drop a folder to import here..."
+          ></b-form-file>
+        </b-form-group>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <b-form-group label="Destination" description="Files or content of selected folder will be imported into the destination">
+          <label class="d-block " id="update-destination" :title="folderDestinationName" @click.prevent="$emit('event-pick-folder')">
+            <font-awesome-icon icon="folder"/>{{folderDestinationName}}
+          </label>
+        </b-form-group>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <b-button class="w-100" id="import-button" variant="primary"
+                  :disabled="(files.length === 0 && filesInsideFolder.length === 0 && docsPathToImport.length === 0) || importing"
+                  @click.prevent="importDocuments">
+          Import
+        </b-button>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
@@ -69,12 +88,15 @@
                 'the Import button.',
             buttons: ['Ok'],
             defaultId: 0
-          }, (res) => {}
-        );
+          });
       }
     },
 
     computed: {
+      folderDestinationName () {
+          return this.savedImportDestination ? this.savedImportDestination.name : 'Root'
+      },
+
       filesInputPlaceholder () {
         if (this.docsPathToImport.length) {
           return this.docsPathToImport.map(file => file.name).join(', ')
@@ -83,7 +105,7 @@
         }
       },
       ...mapState('auth', ['accessToken']),
-      ...mapState('import', ['docsPathToImport', 'docsPathInError'])
+      ...mapState('import', ['docsPathToImport', 'docsPathInError', 'savedImportDestination'])
     },
 
     methods: {
@@ -120,7 +142,7 @@
           serializedDocument = vi.docsPathToImport[0];
 
           // Create parents folders if needed
-          let parentFolderId = null;
+          let parentFolderId = this.savedImportDestination.id;
           if (serializedDocument.webkitRelativePath !== '') {
               let folderCreationError = false;
               await vi.createFolderPath(serializedDocument.webkitRelativePath)
@@ -225,7 +247,12 @@
         let parent = null;
         let currentPath = '';
         let folderPathList = folderPath.split(path.sep);
-        folderPathList.pop(); // remove file name from path list
+
+        // replace local folder name selected with input directory by selected destination folder name
+        folderPathList[0] = this.savedImportDestination.name;
+        this.createdFoldersCache[this.savedImportDestination.name] = this.savedImportDestination.id;
+        // remove file name from path list
+        folderPathList.pop();
 
         for (const folderName of folderPathList){
           currentPath += path.sep + folderName;
@@ -285,10 +312,43 @@
             this.docsPathInError.map(({name, path, reason}) => ([name, path, reason]))
         );
         this.$electron.shell.openExternal('file:///'+ report.save());
-      }
+      },
     }
   }
 </script>
 
-<style>
+<style scoped lang="scss">
+  @import '../../customBootstrap.scss';
+
+  #update-destination{
+    color: map_get($theme-colors, 'primary');
+    position:relative;
+    padding: 0.375rem 0.75rem;
+    line-height: 1.5;
+    background: white;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &::after{
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 3;
+      display: block;
+      height: calc(1.5em + 0.75rem);
+      padding: 0.375rem 0.75rem;
+      line-height: 1.5;
+      color: #495057;
+      content: "Browse";
+      background-color: #e9ecef;
+      border-left: inherit;
+      border-radius: 0 0.25rem 0.25rem 0;
+    }
+
+    svg {
+      margin-right: 0.5em;
+      vertical-align: -0.125em;
+    }
+  }
 </style>

@@ -6,6 +6,13 @@ import store from './store'
 import BootstrapVue from "bootstrap-vue";
 import axios from "axios";
 import {ipcRenderer, remote} from 'electron';
+import {library} from '@fortawesome/fontawesome-svg-core';
+import {
+  faFolder,
+  faFolderOpen,
+  faFolderPlus,
+} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
 import './customBootstrap.scss'
 import '../../node_modules/bootstrap/js/dist/tab.js';
@@ -17,6 +24,9 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiBaseUrl);
 Vue.config.productionTip = false;
 
+// Font Awesome icons definition
+library.add(faFolder, faFolderOpen, faFolderPlus);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 // register Bootstrap vue components
 Vue.use(BootstrapVue);
 
@@ -30,7 +40,6 @@ const vi = new Vue({
 
 // listen to webContents close event to ask user for confirmation on close (if needed)
 ipcRenderer.on('closeMainWindow', (event, message) => {
-  console.log('close event from main received!');
   if (store.state.import.docsPathToImport.length  > 0){
     remote.dialog.showMessageBox(null,
       {
@@ -40,11 +49,11 @@ ipcRenderer.on('closeMainWindow', (event, message) => {
         detail: 'If you close now, ongoing import or documents selection will be lost.',
         buttons: ['Cancel', 'Close'],
         defaultId: 0
-      }, (res) => {
-      if (res === 1){
-        store.commit('import/RESET_IMPORT_DATA');
-        ipcRenderer.sendSync('closeConfirmed');
-     }
+      }).then( ({response}) => {
+        if (response === 1){
+          store.commit('import/RESET_IMPORT_DATA');
+          ipcRenderer.sendSync('closeConfirmed');
+       }
     });
   } else {
     store.commit('import/RESET_IMPORT_DATA');
