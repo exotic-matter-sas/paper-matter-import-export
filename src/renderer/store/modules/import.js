@@ -33,7 +33,7 @@ const mutations = {
   RESET_IMPORT_DATA (state) {
     state.docsPathToImport = [];
     state.docsPathInError = [];
-    state.savedImportDestination = null;
+    state.savedImportDestination = {name:'Root', id: null};
   },
 };
 

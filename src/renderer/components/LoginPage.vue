@@ -121,9 +121,8 @@
     color: map_get($theme-colors, 'primary');
     font-style: italic;
 
-    input{
-      color: map_get($theme-colors, 'primary');
-      font-weight: bold;
+    label{
+      font-size: 0.9em;
     }
   }
 

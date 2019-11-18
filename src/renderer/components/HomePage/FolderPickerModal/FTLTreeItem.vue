@@ -94,6 +94,7 @@
 
   ul{
     list-style: none;
+    user-select: none;
   }
 
   .bold {
