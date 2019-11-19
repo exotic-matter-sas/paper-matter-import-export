@@ -220,9 +220,7 @@
               buttons: ['Ok', 'Display detailed report'],
               defaultId: 0
             }).then( ({response}) => {
-              log.silly('user valid dialog');
               if (response === 1){ // Second button clicked
-              log.silly('user display report');
                 this.displayImportErrorReport();
               }
               // Move docs in error in the import list to able to retry an import
@@ -257,8 +255,6 @@
         for (const folderName of folderPathList){
           currentPath += path.sep + folderName;
           // try to create folder only if it isn't cached in created folder yet
-          log.silly(currentPath);
-          log.silly(this.createdFoldersCache);
           if (!(currentPath in this.createdFoldersCache)) {
             await this.$api.createFolder(this.accessToken, folderName, parent)
             .then(response => {
@@ -284,11 +280,11 @@
           parent = this.createdFoldersCache[currentPath];
         }
 
-        log.silly(`finish createFolderPath returning ${this.createdFoldersCache[currentPath]}`);
         return Promise.resolve(this.createdFoldersCache[currentPath]);
       },
 
       async getFolderId(parent, name) {
+        log.debug(`Try to get folder id for folder ${name} inside parent ${parent}`);
         return await this.$api.listFolders(this.accessToken, parent)
         .then(response => {
           let folder;
@@ -297,7 +293,11 @@
                 break;
               }
           }
-          return Promise.resolve(folder.id);
+          if (folder !== undefined){
+            return Promise.resolve(folder.id);
+          } else {
+            return Promise.reject('Fail to get folder id');
+          }
         })
         .catch(error => {
           log.error('Unexpected error when getting folder id');
