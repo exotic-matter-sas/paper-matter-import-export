@@ -1,6 +1,6 @@
 <template>
-  <b-container>
-    <b-row class="align-items-center min-vh-100">
+  <b-container class="min-vh-100">
+    <b-row class="align-items-center">
       <b-col>
         <form v-if="!refreshPending" id="login-form">
           <img src="~@/assets/colors_logo.svg" alt="Paper Matter logo" class="d-block mx-auto my-3">
@@ -25,6 +25,11 @@
         <div v-else class="text-center">
           <b-spinner type="grow" variant="primary" label="Loading..." style="width:4em;height:4em;"></b-spinner>
         </div>
+      </b-col>
+    </b-row>
+    <b-row id="domain-footer">
+      <b-col class="text-center">
+          <label class="d-inline">Login to: <b>{{this.apiBaseUrl}}</b></label>
       </b-col>
     </b-row>
   </b-container>
@@ -53,7 +58,8 @@
         },
 
         computed: {
-          ...mapState('auth', ['accessToken', 'refreshToken'])
+          ...mapState('auth', ['accessToken', 'refreshToken']),
+          ...mapState('config', ['apiBaseUrl'])
         },
 
         methods: {
@@ -109,6 +115,16 @@
 
 <style lang="scss" scoped>
   @import '../customBootstrap.scss';
+
+  #domain-footer{
+    align-items: baseline;
+    color: map_get($theme-colors, 'primary');
+    font-style: italic;
+
+    label{
+      font-size: 0.9em;
+    }
+  }
 
   #login-form {
     .form-label-group {

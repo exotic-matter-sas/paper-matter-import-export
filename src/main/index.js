@@ -18,15 +18,18 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 350,
+    height: 375,
     useContentSize: true,
     width: 500,
     webPreferences: {
+      nodeIntegration: true, // not an issue as long as we do not display third party web page through the app
       webSecurity: process.env.NODE_ENV !== 'development' // to allow requesting API from localhost during development
     }
   });
 
   mainWindow.setMenuBarVisibility(false);
+  // workaround until setMenuBarVisibility is fixed, see https://github.com/electron/electron/pull/19557
+  mainWindow.setAutoHideMenuBar(true);
 
   mainWindow.loadURL(winURL);
 

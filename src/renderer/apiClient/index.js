@@ -19,6 +19,14 @@ export default class ApiCient {
     )
   }
 
+  listFolders(accessToken, parent=null){
+    let queryString = parent !== null ? `?level=${parent}` : '';
+    return this.http.get(
+      `/api/v1/folders${queryString}`,
+      {headers: {'Authorization': "Bearer " + accessToken}}
+    )
+  }
+
   createFolder(accessToken, name, parent=null){
     return this.http.post(
       '/api/v1/folders',

@@ -19,15 +19,18 @@
         <ImportTab
           :importInterrupted="importInterrupted"
           @event-import-start="displayImportProgress"
-          @event-import-end="hideImportProgress"/>
+          @event-import-end="hideImportProgress"
+          @event-pick-folder="pickingFolder = true"/>
       </div>
       <div class="tab-pane col" id="export" role="tabpanel" aria-labelledby="export-tab">
         <ExportTab/>
       </div>
     </div>
     <ProgressModal v-if="actionOnGoing" :action="actionType" :totalCount="totalCount"
+      @event-import-interrupt="interruptImport"/>
+    <FolderPickerModal id="folder-picker-modal" v-if="pickingFolder" :action="actionType"
       @event-import-interrupt="interruptImport"
-    />
+      @event-folder-picker-modal-hidden="pickingFolder = false"/>
   </b-container>
 </template>
 
@@ -36,6 +39,8 @@
   import ExportTab from "./HomePage/ExportTab";
   import ProgressModal from "./HomePage/ProgressModal";
   import {mapState} from "vuex";
+  import FolderPickerModal from "./HomePage/FolderPickerModal";
+  import FTLTreeFolders from "./HomePage/FolderPickerModal/FTLTreeFolders";
 
   const log = require('electron-log');
 
@@ -44,15 +49,18 @@
     components: {
         ImportTab,
         ExportTab,
-        ProgressModal
+        ProgressModal,
+        FolderPickerModal,
+        FTLTreeFolders
     },
 
     data() {
       return {
-          actionType: '',
+          actionType: 'import', // TODO make this value dynamic based on active tab
           actionOnGoing: false,
           totalCount: 0,
           importInterrupted: false,
+          pickingFolder: false
       }
     },
 
@@ -67,19 +75,16 @@
 
       displayImportProgress(totalCount) {
           this.actionOnGoing = true;
-          this.actionType = 'import';
           this.totalCount = totalCount;
       },
       interruptImport() {
           this.importInterrupted = true;
-          console.log('interrupt event received')
       },
       hideImportProgress() {
           this.actionOnGoing = false;
-          this.actionType = '';
           this.totalCount = 0;
           this.importInterrupted = false;
-      }
+      },
     }
   }
 </script>
