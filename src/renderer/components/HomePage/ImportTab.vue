@@ -244,16 +244,16 @@
         log.debug('checking if parent folders path need to be created');
         let parent = null;
         let currentPath = '';
-        let folderPathList = folderPath.split(path.sep);
+        let folderPathList = folderPath.split('/'); // webkitRelativePath always use /, including on Windows
 
-        // replace local folder name selected with input directory by selected destination folder name
+        // replace local folder name, selected with input directory, by selected destination folder name
         folderPathList[0] = this.savedImportDestination.name;
         this.createdFoldersCache[this.savedImportDestination.name] = this.savedImportDestination.id;
         // remove file name from path list
         folderPathList.pop();
 
         for (const folderName of folderPathList){
-          currentPath += path.sep + folderName;
+          currentPath += '/' + folderName;
           // try to create folder only if it isn't cached in created folder yet
           if (!(currentPath in this.createdFoldersCache)) {
             await this.$api.createFolder(this.accessToken, folderName, parent)
