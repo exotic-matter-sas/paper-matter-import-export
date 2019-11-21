@@ -170,7 +170,8 @@
             continue;
           }
           jsonData = {
-            ftl_folder: parentFolderId
+            ftl_folder: parentFolderId,
+            created: new Date(serializedDocument.lastModified).toISOString()
           };
 
           // generate doc thumbnail
