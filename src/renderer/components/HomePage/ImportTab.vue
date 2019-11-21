@@ -148,7 +148,6 @@
               await vi.createFolderPath(serializedDocument.webkitRelativePath)
                 .then(folderId => {
                   parentFolderId = folderId;
-                  log.silly(folderId);
                 })
                 .catch(error => {
                     log.error('skipping document because parent folder creation failed');
