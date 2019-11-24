@@ -139,6 +139,14 @@
         let serializedDocument;
         let file;
         while (vi.docsPathToImport.length > 0){
+          if(this.importInterrupted){
+            log.info('Import interrupt by user');
+            break;
+          } else if (vi.accessToken === '') {
+            log.info('User has been disconnected');
+            break;
+          }
+
           serializedDocument = vi.docsPathToImport[0];
 
           // Create parents folders if needed
@@ -182,6 +190,7 @@
           } catch (error) {
             log.warn('error during thumbnail generation', '\n', error)
           }
+
           // upload doc
           await vi.$api.uploadDocument(vi.accessToken, jsonData, file, thumbnail)
           .then((response) => {
@@ -192,11 +201,6 @@
             vi.$store.commit('import/MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR', 'Upload error (corrupt file, network error?)');
             log.error('error during upload!', file.path, '\n', error);
           });
-
-          if(this.importInterrupted){
-              log.info('Import interrupt by user');
-              break;
-          }
         }
         log.debug('importing end');
         vi.importing = false;
@@ -208,32 +212,45 @@
         const win = remote.getCurrentWindow();
         const export_interrupted_mention = this.importInterrupted ? ' (export has been interrupted)' : '';
 
-        if (errorCount) {
-          const s = vi.docsPathInError.length > 1 ? 's' : '';
-          log.error('theses files could not be imported:', vi.docsPathInError);
+        // Do not display success or error messages when user get disconnected
+        // (it will appears at the end of the resumed import after reconnection)
+        if(vi.accessToken){
+          if (errorCount) {
+            const s = vi.docsPathInError.length > 1 ? 's' : '';
+            log.error('theses files could not be imported:', vi.docsPathInError);
+            remote.dialog.showMessageBox(win,
+              {
+                type: 'error',
+                title: `Error${s} occurred during import`,
+                message: `${errorCount} document${s} couldn't be imported:`,
+                detail: `You can retry to import them by clicking the Import button${export_interrupted_mention}.`,
+                buttons: ['Ok', 'Display detailed report'],
+                defaultId: 0
+              }).then( ({response}) => {
+                if (response === 1){ // Second button clicked
+                  this.displayImportErrorReport();
+                }
+                // Move docs in error in the import list to able to retry an import
+                vi.$store.commit('import/MOVE_DOCS_FROM_ERROR_TO_IMPORT');
+              }
+            );
+          } else {
+            const s = vi.docsPathToImport.length > 1 ? 's' : '';
+            remote.dialog.showMessageBox(win,
+              {
+                type: 'info',
+                title: `Documents successfully imported`,
+                message: `${totalCount - this.docsPathToImport.length} document${s} imported without error${export_interrupted_mention}.`,
+                buttons: ['Ok'],
+                defaultId: 0
+              });
+          }
+        } else {
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: `Error${s} occurred during import`,
-              message: `${errorCount} document${s} couldn't be imported:`,
-              detail: `You can retry to import them by clicking the Import button${export_interrupted_mention}.`,
-              buttons: ['Ok', 'Display detailed report'],
-              defaultId: 0
-            }).then( ({response}) => {
-              if (response === 1){ // Second button clicked
-                this.displayImportErrorReport();
-              }
-              // Move docs in error in the import list to able to retry an import
-              vi.$store.commit('import/MOVE_DOCS_FROM_ERROR_TO_IMPORT');
-            }
-          );
-        } else {
-          const s = vi.docsPathToImport.length > 1 ? 's' : '';
-          remote.dialog.showMessageBox(win,
-            {
-              type: 'info',
-              title: `Documents successfully imported`,
-              message: `${totalCount - this.docsPathToImport.length} document${s} imported without error${export_interrupted_mention}.`,
+              title: 'You have been disconnected',
+              message: 'Your import has been interrupted, please log again to resume your import',
               buttons: ['Ok'],
               defaultId: 0
             });
