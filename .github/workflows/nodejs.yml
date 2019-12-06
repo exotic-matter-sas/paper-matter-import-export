@@ -23,4 +23,8 @@ jobs:
         uses: samuelmeuli/action-electron-builder@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+          windows_certs: ${{ secrets.windows_certs }}
+          windows_certs_password: ${{ secrests.windows_certs_password }}
+
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
