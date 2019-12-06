@@ -75,7 +75,8 @@
 
     mounted() {
       // if last import wasn't properly completed
-      let docsToImportCount = this.docsPathToImport.length;
+      const docsToImportCount = this.docsPathToImport.length;
+      const docsInErrorCount = this.docsPathInError.length;
       if (docsToImportCount > 0){
         log.info('last import wasn\'t fully completed, inform user that he can finish it');
         const win = remote.getCurrentWindow();
@@ -89,6 +90,8 @@
             buttons: ['Ok'],
             defaultId: 0
           });
+      } else if (docsInErrorCount > 0) {
+        this.displayImportErrorPrompt(docsInErrorCount)
       }
     },
 
@@ -138,15 +141,7 @@
 
         let serializedDocument;
         let file;
-        while (vi.docsPathToImport.length > 0){
-          if(this.importInterrupted){
-            log.info('Import interrupt by user');
-            break;
-          } else if (vi.accessToken === '') {
-            log.info('User has been disconnected');
-            break;
-          }
-
+        while (vi.docsPathToImport.length > 0 && !(vi.importInterrupted || vi.accessToken === '')){
           serializedDocument = vi.docsPathToImport[0];
 
           // Create parents folders if needed
@@ -202,6 +197,11 @@
             log.error('error during upload!', file.path, '\n', error);
           });
         }
+        if(vi.importInterrupted){
+          log.info('Import interrupt by user');
+        } else if (vi.accessToken === '') {
+          log.info('User has been disconnected');
+        }
         log.debug('importing end');
         vi.importing = false;
         vi.files = [];
@@ -216,24 +216,7 @@
         // (it will appears at the end of the resumed import after reconnection)
         if(vi.accessToken){
           if (errorCount) {
-            const s = vi.docsPathInError.length > 1 ? 's' : '';
-            log.error('theses files could not be imported:', vi.docsPathInError);
-            remote.dialog.showMessageBox(win,
-              {
-                type: 'error',
-                title: `Error${s} occurred during import`,
-                message: `${errorCount} document${s} couldn't be imported:`,
-                detail: `You can retry to import them by clicking the Import button${export_interrupted_mention}.`,
-                buttons: ['Ok', 'Display detailed report'],
-                defaultId: 0
-              }).then( ({response}) => {
-                if (response === 1){ // Second button clicked
-                  this.displayImportErrorReport();
-                }
-                // Move docs in error in the import list to able to retry an import
-                vi.$store.commit('import/MOVE_DOCS_FROM_ERROR_TO_IMPORT');
-              }
-            );
+            this.displayImportErrorPrompt(errorCount, export_interrupted_mention);
           } else {
             const s = vi.docsPathToImport.length > 1 ? 's' : '';
             remote.dialog.showMessageBox(win,
@@ -320,6 +303,29 @@
           log.error('Unexpected error when getting folder id');
           return Promise.reject(error);
         });
+      },
+
+      displayImportErrorPrompt(errorCount, export_interrupted_mention='') {
+        const win = remote.getCurrentWindow();
+
+        const s = this.docsPathInError.length > 1 ? 's' : '';
+        log.error('theses files could not be imported:', this.docsPathInError);
+        remote.dialog.showMessageBox(win,
+          {
+            type: 'error',
+            title: `Error${s} occurred during import`,
+            message: `${errorCount} document${s} couldn't be imported:`,
+            detail: `You can retry to import them by clicking the Import button${export_interrupted_mention}.`,
+            buttons: ['Ok', 'Display detailed report'],
+            defaultId: 0
+          }).then( ({response}) => {
+            if (response === 1){ // Second button clicked
+              this.displayImportErrorReport();
+            }
+            // Move docs in error in the import list to able to retry an import
+            this.$store.commit('import/MOVE_DOCS_FROM_ERROR_TO_IMPORT');
+          }
+        );
       },
 
       displayImportErrorReport() {
