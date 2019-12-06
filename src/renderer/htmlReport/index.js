@@ -31,7 +31,7 @@ export default class HtmlReport {
 
   save() {
     log.debug('saving report to disk');
-    const fileName = `error_report_${this.reportDate.toISOString()}.html`;
+    const fileName = `error_report_${this.reportDate.toISOString().replace(/\:/g, '-')}.html`;
     const filePath = path.join(remote.app.getPath('userData'), fileName);
 
     fs.writeFileSync(filePath, this.htmlReport);
