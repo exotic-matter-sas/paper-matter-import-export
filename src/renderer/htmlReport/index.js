@@ -16,6 +16,9 @@ export default class HtmlReport {
 
   render() {
     log.debug('start rendering html report');
+
+    const style = '<style>body{background: #f8f9fa} thead{ font-weight: bold} td{padding-right:10px}</style>';
+
     const tableHeader = `<tr>${this.columnsTitles.map(title => "<td>" + title + "</td>").join('')}</tr>`;
 
     let tableRows = '';
@@ -25,7 +28,7 @@ export default class HtmlReport {
 
     const table = `<table><thead><th>${tableHeader}</th></thead><tbody>${tableRows}</tbody></table>`;
 
-    this.htmlReport = `<!DOCTYPE html><html lang="en"><head><title>Error report ${this.reportDate.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})}</title><meta charset="utf-8"></head><body>${table}</body></html>`;
+    this.htmlReport = `<!DOCTYPE html><html lang="en"><head><title>Error report ${this.reportDate.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})}</title><meta charset="utf-8">${style}</head><body>${table}</body></html>`;
     log.debug('html report rendered');
   }
 
