@@ -249,8 +249,8 @@
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: 'You have been disconnected',
-              message: 'Your import has been interrupted, please log again to resume your import',
+              title: 'Export interrupted',
+              message: 'You have been disconnected, please log again to resume your import',
               buttons: ['Ok'],
               defaultId: 0
             });
