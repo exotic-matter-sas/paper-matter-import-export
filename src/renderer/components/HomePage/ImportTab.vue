@@ -248,7 +248,8 @@
 
         // replace local folder name, selected with input directory, by selected destination folder name
         folderPathList[0] = this.savedImportDestination.name;
-        this.createdFoldersCache[this.savedImportDestination.name] = this.savedImportDestination.id;
+        // Add destination folder to cache as it already exist
+        this.createdFoldersCache['/' + this.savedImportDestination.name] = this.savedImportDestination.id;
         // remove file name from path list
         folderPathList.pop();
 
