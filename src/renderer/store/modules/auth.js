@@ -30,10 +30,12 @@ const mutations = {
 };
 
 const actions = {
-  refreshAccessToken({commit, state}, apiClient) {
+  refreshAccessToken({commit, state, dispatch}, apiClient) {
     log.debug('trying to refresh accessToken if needed');
     const currentDate = new Date();
-    const tokenExpirationDate = new Date(jwt_decode(state.accessToken).exp * 1000);
+    let tokenExpirationDate = new Date(jwt_decode(state.accessToken).exp * 1000);
+    // subtracts 1 min to expiration date to be sure the token is valid long enough to be used
+    tokenExpirationDate = new Date( tokenExpirationDate.getTime() - 1000 * 60 );
     if (currentDate < tokenExpirationDate) {
       log.debug('access token is still valid, refresh should not be needed (unless it was revoked by server)');
       return Promise.resolve(state.accessToken);
@@ -47,7 +49,7 @@ const actions = {
         })
         .catch((error) => {
           log.error('refresh failed, user need to login to set a new access token\n' + error);
-          commit('CLEAR_AUTHENTICATION_DATA');
+          dispatch('disconnectUser');
           return Promise.reject('Access token refresh failed');
         });
     }

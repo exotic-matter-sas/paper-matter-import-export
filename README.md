@@ -31,6 +31,14 @@ To debug built app see https://simulatedgreg.gitbooks.io/electron-vue/content/en
     # Produce simple executable without full installer in /dist.
     npm run build:dir
 
+#### Release process and build on CI
+
+ 1. Update package.json `version` (eg. `1.0.0`)
+ 2. Create a draft release on Github
+   * tag should be on master and named with `version` prefixed with a `v` (eg. `v1.0.0`)
+   * name should be `version` (eg. `1.0.0`)
+ 3. Publish and tag release on Github 
+
 ---
 
 This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).

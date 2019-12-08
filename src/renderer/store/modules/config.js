@@ -1,7 +1,8 @@
 const namespaced = true;
 
 const state = {
-  apiBaseUrl: 'https://papermatter.app/app' // http://127.0.0.1:8000/app
+  apiBaseUrl: 'https://papermatter.app/app', // prod
+  // apiBaseUrl: 'http://127.0.0.1:8000/app', // local
 };
 
 const mutations = {
