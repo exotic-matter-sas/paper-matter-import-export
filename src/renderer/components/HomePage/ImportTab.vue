@@ -218,7 +218,7 @@
           if (errorCount) {
             this.displayImportErrorPrompt(errorCount, export_interrupted_mention);
           } else {
-            const s = vi.docsPathToImport.length > 1 ? 's' : '';
+            const s = (totalCount - this.docsPathToImport.length) > 1 ? 's' : '';
             remote.dialog.showMessageBox(win,
               {
                 type: 'info',
