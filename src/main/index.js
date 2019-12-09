@@ -23,6 +23,8 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
+    // When using run dev, electron version may be shown instead of packages.json version
+    title: 'Paper Matter import and export - ' + app.getVersion(),
     height: 375,
     useContentSize: true,
     width: 500,
@@ -77,9 +79,9 @@ import { autoUpdater } from 'electron-updater'
 
 autoUpdater.on('update-downloaded', () => {
   autoUpdater.quitAndInstall()
-})
+});
 
 app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
-})
+});
 
