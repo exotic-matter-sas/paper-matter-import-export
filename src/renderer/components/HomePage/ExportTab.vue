@@ -1,3 +1,8 @@
+<!--
+  - Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
+  - Licensed under the MIT License. See LICENSE in the project root for license information.
+  -->
+
 <template>
   <b-container class="h-100 d-flex align-content-evenly flex-wrap">
     <h2 class="text-muted text-center w-100 font-italic"> Coming soon </h2>

@@ -1,3 +1,8 @@
+<!--
+  - Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
+  - Licensed under the MIT License. See LICENSE in the project root for license information.
+  -->
+
 <template>
   <b-container fluid class="min-vh-100 d-flex flex-column">
     <ul class="nav nav-tabs row bg-dark align-items-center" role="tablist">
