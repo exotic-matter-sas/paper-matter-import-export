@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ */
+
 /**
  * This file is used specifically and only for development. It installs
  * `electron-debug` & `vue-devtools`. There shouldn't be any need to

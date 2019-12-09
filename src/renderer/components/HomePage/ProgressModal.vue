@@ -1,3 +1,8 @@
+<!--
+  - Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
+  - Licensed under the MIT License. See LICENSE in the project root for license information.
+  -->
+
 <template>
   <b-modal id="progress-modal" centered hide-header no-close-on-esc no-close-on-backdrop>
     <b-container fluid>

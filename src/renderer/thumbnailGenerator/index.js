@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
+ * Licensed under the MIT License. See LICENSE in the project root for license information.
+ */
+
 import pdfjsLib from 'pdfjs-dist/webpack'
 
 // pdfjsLib.disableWorker = true;
