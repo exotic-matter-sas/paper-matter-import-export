@@ -68,8 +68,11 @@ import {remote} from "electron";
         Cancel
       </b-button>
       <b-button id="start-import-button" variant="primary" @click.prevent="storeCsvData" class="w-100"
-                :disabled="!Boolean(csvFile)">
-        Start import
+                :disabled="!Boolean(csvFile) || storingCsvData">
+        <span v-if="storingCsvData">
+          <b-spinner small type="grow" ></b-spinner> Checking metadata...
+        </span>
+        <span v-else>Start import</span>
       </b-button>
     </template>
   </b-modal>
@@ -108,6 +111,7 @@ import {remote} from "electron";
         extractedCsvDataPreview: [
           {filePath: '', documentTitle: '', documentNotes: ''},
         ],
+        storingCsvData: false
       }
     },
 
@@ -229,6 +233,7 @@ import {remote} from "electron";
     storeCsvData() {
       log.debug('storeCsvData start');
       let vi = this;
+      vi.storingCsvData = true;
       vi.$store.commit('import/RESET_DOC_METADATA_TO_IMPORT');
       const win = remote.getCurrentWindow();
 
@@ -246,6 +251,7 @@ import {remote} from "electron";
               buttons: ['Ok'],
               defaultId: 0
             });
+            this.storingCsvData = false;
         }
       );
       csvStream
@@ -263,6 +269,7 @@ import {remote} from "electron";
                 buttons: ['Ok'],
                 defaultId: 0
               });
+            vi.storingCsvData = false;
           })
         .on('data',
           function (row) {
@@ -307,6 +314,7 @@ import {remote} from "electron";
             } else {
               vi.$emit('event-proceed-to-import');
             }
+            vi.storingCsvData = false;
             log.debug('storeCsvData end');
           });
     },
