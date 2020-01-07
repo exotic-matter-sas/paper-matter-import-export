@@ -131,9 +131,39 @@ import {remote} from "electron";
       preloadCsvData() {
         let vi = this;
         vi.fullCsvDataPreview = [];
-        fs.createReadStream(vi.csvFile.path)
+        const win = remote.getCurrentWindow();
+        const csvStream = fs.createReadStream(vi.csvFile.path);
+        // handle file I/O error here
+        csvStream.on('error',
+          function (error) {
+            log.error(`Error occurred trying to read csv file:\n${error}`);
+            remote.dialog.showMessageBox(win,
+              {
+                type: 'error',
+                title: 'Error during csv reading',
+                message: 'Can\'t read CSV file',
+                detail: 'Check you have permission to read this file and that it still exist.',
+                buttons: ['Ok'],
+                defaultId: 0
+              });
+          }
+        );
+        csvStream
           .pipe(csv.parse({ignoreEmpty: true, headers: true, maxRows: 100}))
-          .on('error', error => console.error(error)) // TODO show a message box here in case of corrupt csv file and reset UI to csv file selection
+          // handle csv parsing error here
+          .on('error',
+            function (error) {
+              log.error(`Error during csv reading:\n${error}`);
+              remote.dialog.showMessageBox(win,
+                {
+                  type: 'error',
+                  title: 'Error during csv parsing',
+                  message: 'Can\'t read CSV data',
+                  detail: 'CSV file seems corrupt or not properly formatted.',
+                  buttons: ['Ok'],
+                  defaultId: 0
+                });
+            })
           .on('data',
             function (row) {
               // concat headers name for every lines preloaded (most will be duplicates)
@@ -149,109 +179,138 @@ import {remote} from "electron";
               vi.guessMetadataAssociation(); // auto select <select> values
               vi.extractedCsvDataPreview = vi.extractCsvData(vi.fullCsvDataPreview); // display metadata preview for csv
             });
-      },
+    },
 
-      guessMetadataAssociation() {
-        const guessDict = {
-          'filePath': ['path'],
-          'documentTitle': ['title', 'name'],
-          'documentNotes': ['notes', 'note'],
-        };
+    guessMetadataAssociation() {
+      const guessDict = {
+        'filePath': ['path'],
+        'documentTitle': ['title', 'name'],
+        'documentNotes': ['notes', 'note'],
+      };
 
-        // Set a default selection if no guess succeed (put csv headers in select by left to right)
-        for (const [i, metadata] of this.previewTabHeaders.entries()) {
-          const metadataKey = metadata.key;
-          // set <select> v-model using computed attribute
-          this['selected' + metadataKey.charAt(0).toUpperCase() + metadataKey.slice(1) + 'Meta'] = this.csvHeaders[i];
-        }
+      // Set a default selection if no guess succeed (put csv headers in select by left to right)
+      for (const [i, metadata] of this.previewTabHeaders.entries()) {
+        const metadataKey = metadata.key;
+        // set <select> v-model using computed attribute
+        this['selected' + metadataKey.charAt(0).toUpperCase() + metadataKey.slice(1) + 'Meta'] = this.csvHeaders[i];
+      }
 
-        // For each metadata available
-        for (const metadata of this.previewTabHeaders) {
-          const metadataKey = metadata.key;
-          // Check if there is a match for each guess available
-          for (let guess of guessDict[metadata.key]) {
-            let guessedMetadataIndex = this.csvHeaders.indexOf(guess);
-            // If a match is found stop checking and set proper select value
-            if (guessedMetadataIndex !== -1) {
-              // set <select> v-model using computed attribute
-              this['selected' + metadataKey.charAt(0).toUpperCase() + metadataKey.slice(1) + 'Meta'] =
-                this.csvHeaders[guessedMetadataIndex];
-              break;
-            }
+      // For each metadata available
+      for (const metadata of this.previewTabHeaders) {
+        const metadataKey = metadata.key;
+        // Check if there is a match for each guess available
+        for (let guess of guessDict[metadata.key]) {
+          let guessedMetadataIndex = this.csvHeaders.indexOf(guess);
+          // If a match is found stop checking and set proper select value
+          if (guessedMetadataIndex !== -1) {
+            // set <select> v-model using computed attribute
+            this['selected' + metadataKey.charAt(0).toUpperCase() + metadataKey.slice(1) + 'Meta'] =
+              this.csvHeaders[guessedMetadataIndex];
+            break;
           }
         }
-      },
+      }
+    },
 
-      extractCsvData(csvData) {
-        // Using "Computed object property names and destructuring" to extract selected csv headers from csvData
-        // Used to display metadata preview
-        return csvData.map(
-          ({
-             [this.selectedFilePathMeta]: filePath,
-             [this.selectedDocumentTitleMeta]: documentTitle,
-             [this.selectedDocumentNotesMeta]: documentNotes
-           }) => (
-            {filePath, documentTitle, documentNotes}
-          )
+    extractCsvData(csvData) {
+      // Using "Computed object property names and destructuring" to extract selected csv headers from csvData
+      // Used to display metadata preview
+      return csvData.map(
+        ({
+           [this.selectedFilePathMeta]: filePath,
+           [this.selectedDocumentTitleMeta]: documentTitle,
+           [this.selectedDocumentNotesMeta]: documentNotes
+         }) => (
+          {filePath, documentTitle, documentNotes}
         )
-      },
+      )
+    },
 
-      storeCsvData() {
-        log.debug('storeCsvData start');
-        let vi = this;
+    storeCsvData() {
+      log.debug('storeCsvData start');
+      let vi = this;
+      vi.$store.commit('import/RESET_DOC_METADATA_TO_IMPORT');
+      const win = remote.getCurrentWindow();
 
-        vi.$store.commit('import/RESET_DOC_METADATA_TO_IMPORT');
-
-        fs.createReadStream(vi.csvFile.path)
-          .pipe(csv.parse({ignoreEmpty: true, headers: true}))
-          .on('error', error => console.error(error)) // TODO show a message box here in case of corrupt csv file and reset UI to csv file selection
-          .on('data',
-            function (row) {
-              vi.$store.commit(
-                'import/ADD_DOC_METADATA_TO_IMPORT',
-                vi.extractCsvData([row])[0]
-              );
-            })
-          .on('end',
-            function (rowCount) {
-              const docsToImportCount = vi.docsToImport.length;
-              const metadataToImportCount = Object.keys(vi.docsMetadataToImport).length;
-              const win = remote.getCurrentWindow();
-              if (metadataToImportCount === 0) {
-                log.warn('No metadata match documents to import');
-                remote.dialog.showMessageBox(win,
-                  {
-                    type: 'info',
-                    title: 'Fix metadata selection',
-                    message: 'No metadata match documents to import',
-                    detail: 'Check that File path is properly selected and formatted.',
-                    buttons: ['Ok'],
-                    defaultId: 0
-                  });
-              } else if (metadataToImportCount < docsToImportCount) {
-                const s = (docsToImportCount - metadataToImportCount) > 1 ? 's' : '';
-                log.warn('Some documents have no metadata associated');
-                remote.dialog.showMessageBox(win,
-                  {
-                    type: 'info',
-                    title: 'Confirm metadata selection',
-                    message: 'Some documents have no metadata associated',
-                    detail: `Metadata are missing for ${docsToImportCount - metadataToImportCount} document${s}, do you want to proceed anyway?`,
-                    buttons: ['Cancel', 'Continue'],
-                    defaultId: 1
-                  }).then(({response}) => {
-                    if (response === 1) { // Continue clicked
-                      vi.$emit('event-proceed-to-import');
-                    }
-                  }
-                );
-              } else {
-                vi.$emit('event-proceed-to-import');
-              }
-              log.debug('storeCsvData end');
+      const csvStream = fs.createReadStream(vi.csvFile.path);
+      // handle file I/O error here
+      csvStream.on('error',
+        function (error) {
+          log.error(`Error occurred trying to read csv file:\n${error}`);
+          remote.dialog.showMessageBox(win,
+            {
+              type: 'error',
+              title: 'Error during csv reading',
+              message: 'Can\'t read CSV file',
+              detail: 'Check you have permission to read this file and that it still exist.',
+              buttons: ['Ok'],
+              defaultId: 0
             });
-      },
-    }
+        }
+      );
+      csvStream
+        .pipe(csv.parse({ignoreEmpty: true, headers: true}))
+        // handle csv parsing error here
+        .on('error',
+          function (error) {
+            log.error(`Error during csv reading:\n${error}`);
+            remote.dialog.showMessageBox(win,
+              {
+                type: 'error',
+                title: 'Error during csv parsing',
+                message: 'Can\'t read CSV data',
+                detail: 'CSV file seems corrupt or not properly formatted.',
+                buttons: ['Ok'],
+                defaultId: 0
+              });
+          })
+        .on('data',
+          function (row) {
+            vi.$store.commit(
+              'import/ADD_DOC_METADATA_TO_IMPORT',
+              vi.extractCsvData([row])[0]
+            );
+          })
+        .on('end',
+          function (rowCount) {
+            const docsToImportCount = vi.docsToImport.length;
+            const metadataToImportCount = Object.keys(vi.docsMetadataToImport).length;
+            const win = remote.getCurrentWindow();
+            if (metadataToImportCount === 0) {
+              log.warn('No metadata match documents to import');
+              remote.dialog.showMessageBox(win,
+                {
+                  type: 'info',
+                  title: 'Fix metadata selection',
+                  message: 'No metadata match documents to import',
+                  detail: 'Check that File path is properly selected and formatted.',
+                  buttons: ['Ok'],
+                  defaultId: 0
+                });
+            } else if (metadataToImportCount < docsToImportCount) {
+              const s = (docsToImportCount - metadataToImportCount) > 1 ? 's' : '';
+              log.warn('Some documents have no metadata associated');
+              remote.dialog.showMessageBox(win,
+                {
+                  type: 'question',
+                  title: 'Confirm metadata selection',
+                  message: 'Some documents have no metadata associated',
+                  detail: `Metadata are missing for ${docsToImportCount - metadataToImportCount} document${s}, do you want to proceed anyway?`,
+                  buttons: ['Cancel', 'Continue'],
+                  defaultId: 1
+                }).then(({response}) => {
+                  if (response === 1) { // Continue clicked
+                    vi.$emit('event-proceed-to-import');
+                  }
+                }
+              );
+            } else {
+              vi.$emit('event-proceed-to-import');
+            }
+            log.debug('storeCsvData end');
+          });
+    },
+  }
   }
 </script>
 
