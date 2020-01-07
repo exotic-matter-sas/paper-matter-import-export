@@ -24,7 +24,6 @@ const mutations = {
 
   ADD_DOC_METADATA_TO_IMPORT(state, metadataKeyValuesPair) {
     state.docsMetadataToImport[metadataKeyValuesPair[0]] = metadataKeyValuesPair[1];
-    console.log('docsMetadataToImport', state.docsMetadataToImport)
   },
 
   SET_IMPORT_DESTINATION(state, folder) {
@@ -33,8 +32,10 @@ const mutations = {
 
   CONSUME_FIRST_DOC_TO_IMPORT(state) {
     const consumedDoc = state.docsToImport.splice(0, 1);
-    // Consume eventual doc metadata too
-    delete state.docsMetadataToImport[consumedDoc.path];
+  },
+
+  CONSUME_DOC_METADATA_TO_IMPORT(state, metadataKey) {
+    delete state.docsMetadataToImport[metadataKey];
   },
 
   MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR(state, reason = null) {
@@ -76,6 +77,17 @@ const actions = {
         }
       );
     }
+  },
+
+  consumeFirstDocToImport({commit, state, dispatch}){
+    const firstDocPath = state.docsToImport[0].path;
+    commit('CONSUME_FIRST_DOC_TO_IMPORT');
+    // consume eventual doc metadata too
+    dispatch('tools/hashString', {algorithm: 'SHA-1', string: firstDocPath}, {root:true}).then(
+      uniqueMetadataKey => {
+        commit('CONSUME_DOC_METADATA_TO_IMPORT', uniqueMetadataKey);
+      }
+    );
   }
 };
 

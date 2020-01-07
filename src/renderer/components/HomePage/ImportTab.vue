@@ -226,7 +226,6 @@
               }
             }
           }
-          console.log(jsonData);
 
           // generate doc thumbnail
           let thumbnail = null;
@@ -240,7 +239,7 @@
           // upload doc
           await vi.$api.uploadDocument(vi.accessToken, jsonData, file, thumbnail)
           .then((response) => {
-            vi.$store.commit('import/CONSUME_FIRST_DOC_TO_IMPORT');
+            vi.$store.dispatch('import/consumeFirstDocToImport');
             log.debug('file uploaded', '\n', file.path);
           })
           .catch((error) => {
