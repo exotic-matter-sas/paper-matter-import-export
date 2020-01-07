@@ -266,8 +266,8 @@ import {remote} from "electron";
           })
         .on('data',
           function (row) {
-            vi.$store.commit(
-              'import/ADD_DOC_METADATA_TO_IMPORT',
+            vi.$store.dispatch(
+              'import/addDocMetadataToImport',
               vi.extractCsvData([row])[0]
             );
           })

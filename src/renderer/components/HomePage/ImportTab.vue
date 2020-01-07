@@ -64,7 +64,7 @@
 </template>
 
 <script>
-  import {mapState} from "vuex";
+  import {mapActions, mapState} from "vuex";
   import {createThumbFromFile} from "../../thumbnailGenerator";
   import {remote} from "electron";
   import HtmlReport from "../../htmlReport";
@@ -131,7 +131,7 @@
         }
       },
       ...mapState('auth', ['accessToken']),
-      ...mapState('import', ['docsToImport', 'docsInError', 'savedImportDestination'])
+      ...mapState('import', ['docsToImport', 'docsInError', 'savedImportDestination', 'docsMetadataToImport'])
     },
 
     methods: {
@@ -213,6 +213,20 @@
             ftl_folder: parentFolderId,
             created: new Date(serializedDocument.lastModified).toISOString()
           };
+          // If documents metadata have been setup check if ones match current document and add them to jsonData
+          if (Object.keys(this.docsMetadataToImport).length) {
+            const uniqueMetadataKey = await this.hashString({algorithm: 'SHA-1', string: serializedDocument.path});
+            const docMetadata = this.docsMetadataToImport[uniqueMetadataKey];
+            if(docMetadata !== undefined){
+              if('documentTitle' in docMetadata){
+                jsonData['title'] = docMetadata['documentTitle']
+              }
+              if('documentNotes' in docMetadata){
+                jsonData['note'] = docMetadata['documentNotes']
+              }
+            }
+          }
+          console.log(jsonData);
 
           // generate doc thumbnail
           let thumbnail = null;
@@ -374,6 +388,8 @@
         );
         this.$electron.shell.openExternal('file:///'+ report.save());
       },
+
+      ...mapActions('tools', ['hashString'])
     }
   }
 </script>
