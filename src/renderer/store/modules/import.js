@@ -6,38 +6,56 @@
 const namespaced = true;
 
 const state = {
-  docsPathToImport: [],
-  docsPathInError: [],
+  docsToImport: [],
+  docsInError: [],
+  docsMetadataToImport: {},
   savedImportDestination: {name:'Root', id: null}
 };
 
 const mutations = {
   SET_DOCS_TO_IMPORT (state, serializedDocuments) {
-    // copy files path to state as File objects aren't serializable
-    state.docsPathToImport = serializedDocuments;
+    // store serialized version of File objects
+    state.docsToImport = serializedDocuments;
+  },
+
+  RESET_DOC_METADATA_TO_IMPORT (state) {
+    state.docsMetadataToImport = {};
+  },
+
+  ADD_DOC_METADATA_TO_IMPORT (state, docMetadataDict) {
+    // if metadata path match a path in docsToImport
+    if (state.docsToImport.some(({path}) => path === docMetadataDict['filePath'])){
+      console.log('match found !');
+      const metadataPath = docMetadataDict.path;
+      delete docMetadataDict.path;
+      state.docsMetadataToImport[metadataPath] = docMetadataDict;
+    }
   },
 
   SET_IMPORT_DESTINATION (state, folder) {
     state.savedImportDestination = folder
   },
 
-  REMOVE_FIRST_DOC_FROM_IMPORT (state) {
-    state.docsPathToImport.splice(0, 1);
+  CONSUME_FIRST_DOC_TO_IMPORT (state) {
+    const consumedDoc = state.docsToImport.splice(0, 1);
+    // Consume eventual doc metadata too
+    delete state.docsMetadataToImport[consumedDoc.path]
   },
 
   MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR (state, reason=null) {
-    let serializedDocument = state.docsPathToImport.splice(0, 1)[0];
+    let serializedDocument = state.docsToImport.splice(0, 1)[0];
     serializedDocument.reason = reason; // add error reason to serialized document
-    state.docsPathInError.push(serializedDocument);
+    state.docsInError.push(serializedDocument);
   },
 
   MOVE_DOCS_FROM_ERROR_TO_IMPORT(state) {
-    state.docsPathToImport = state.docsPathInError.splice(0);
+    state.docsToImport = state.docsInError.splice(0);
   },
 
   RESET_IMPORT_DATA (state) {
-    state.docsPathToImport = [];
-    state.docsPathInError = [];
+    state.docsToImport = [];
+    state.docsInError = [];
+    state.docsMetadataToImport = {};
     state.savedImportDestination = {name:'Root', id: null};
   },
 };

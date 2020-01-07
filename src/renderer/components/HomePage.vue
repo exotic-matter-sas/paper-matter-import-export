@@ -23,7 +23,7 @@
       <div class="tab-pane show active col" id="import" role="tabpanel" aria-labelledby="import-tab">
         <ImportTab
           :importInterrupted="importInterrupted"
-          @event-import-start="displayImportProgress"
+          @event-import-started="displayImportProgress"
           @event-import-end="hideImportProgress"
           @event-pick-folder="pickingFolder = true"/>
       </div>

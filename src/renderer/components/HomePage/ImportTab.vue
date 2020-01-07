@@ -40,13 +40,26 @@
     </b-row>
     <b-row>
       <b-col>
-        <b-button class="w-100" id="import-button" variant="primary"
-                  :disabled="(files.length === 0 && filesInsideFolder.length === 0 && docsPathToImport.length === 0) || importing"
-                  @click.prevent="importDocuments">
-          Import
-        </b-button>
+        <b-dropdown
+          id="import-button"
+          text="Import documents"
+          block
+          split
+          variant="primary"
+          class="w-100"
+          :disabled="(files.length === 0 && filesInsideFolder.length === 0 && docsToImport.length === 0) || importing"
+          @click.prevent="prepareImport(false)"
+          menu-class="w-100"
+        >
+          <b-dropdown-item variant="primary" @click.prevent="prepareImport(true)" class="text-center">
+            Import documents with metadata
+          </b-dropdown-item>
+        </b-dropdown>
       </b-col>
     </b-row>
+    <DocumentsMetadataModal v-if="settingDocumentsMetadata"
+                            @event-proceed-to-import="proceedToImport"
+                            @event-close-documents-metadata-modal="settingDocumentsMetadata = false"/>
   </b-container>
 </template>
 
@@ -55,6 +68,7 @@
   import {createThumbFromFile} from "../../thumbnailGenerator";
   import {remote} from "electron";
   import HtmlReport from "../../htmlReport";
+  import DocumentsMetadataModal from "./ImportTab/DocumentsMetadataModal";
 
   const log = require('electron-log');
   const fs = require('fs');
@@ -62,6 +76,9 @@
 
   export default {
     name: 'import-tab',
+    components: {
+        DocumentsMetadataModal
+    },
 
     props: {
       importInterrupted: {
@@ -74,14 +91,15 @@
         files: [],
         filesInsideFolder: [],
         importing: false,
-        createdFoldersCache: {}
+        createdFoldersCache: {},
+        settingDocumentsMetadata: false
       }
     },
 
     mounted() {
       // if last import wasn't properly completed
-      const docsToImportCount = this.docsPathToImport.length;
-      const docsInErrorCount = this.docsPathInError.length;
+      const docsToImportCount = this.docsToImport.length;
+      const docsInErrorCount = this.docsInError.length;
       if (docsToImportCount > 0){
         log.info('last import wasn\'t fully completed, inform user that he can finish it');
         const win = remote.getCurrentWindow();
@@ -106,24 +124,20 @@
       },
 
       filesInputPlaceholder () {
-        if (this.docsPathToImport.length) {
-          return this.docsPathToImport.map(file => file.name).join(', ')
+        if (this.docsToImport.length) {
+          return this.docsToImport.map(file => file.name).join(', ')
         } else {
           return 'Choose pdf documents to import...'
         }
       },
       ...mapState('auth', ['accessToken']),
-      ...mapState('import', ['docsPathToImport', 'docsPathInError', 'savedImportDestination'])
+      ...mapState('import', ['docsToImport', 'docsInError', 'savedImportDestination'])
     },
 
     methods: {
-      async importDocuments () {
+      prepareImport (importMetadata) {
         let vi = this;
-        let jsonData = {};
-        vi.createdFoldersCache = {};
-
-        log.debug('importing start');
-        vi.importing = true;
+        log.debug(importMetadata ? 'preparing import with metadata' : 'preparing import without metadata');
 
         // Store files to import in store if needed (not needed when documents are recover from a previous session)
         if (vi.files.length > 0 || vi.filesInsideFolder.length > 0){
@@ -141,13 +155,31 @@
           );
         }
 
-        const totalCount = this.docsPathToImport.length;
-        vi.$emit('event-import-start', totalCount); // display progressModal
+        if(importMetadata){
+          vi.settingDocumentsMetadata = true;
+        } else {
+          vi.proceedToImport();
+        }
+      },
+
+      async proceedToImport () {
+        let vi = this;
+        if (vi.settingDocumentsMetadata){
+          vi.settingDocumentsMetadata = false;
+        }
+        let jsonData = {};
+        vi.createdFoldersCache = {};
+
+        log.debug('importing start');
+        vi.importing = true;
+
+        const totalCount = this.docsToImport.length;
+        vi.$emit('event-import-started', totalCount); // display progressModal
 
         let serializedDocument;
         let file;
-        while (vi.docsPathToImport.length > 0 && !(vi.importInterrupted || vi.accessToken === '')){
-          serializedDocument = vi.docsPathToImport[0];
+        while (vi.docsToImport.length > 0 && !(vi.importInterrupted || vi.accessToken === '')){
+          serializedDocument = vi.docsToImport[0];
 
           // Create parents folders if needed
           let parentFolderId = this.savedImportDestination.id;
@@ -194,7 +226,7 @@
           // upload doc
           await vi.$api.uploadDocument(vi.accessToken, jsonData, file, thumbnail)
           .then((response) => {
-            vi.$store.commit('import/REMOVE_FIRST_DOC_FROM_IMPORT');
+            vi.$store.commit('import/CONSUME_FIRST_DOC_TO_IMPORT');
             log.debug('file uploaded', '\n', file.path);
           })
           .catch((error) => {
@@ -211,9 +243,9 @@
         vi.importing = false;
         vi.files = [];
         vi.filesInsideFolder = [];
-        vi.$emit('event-import-end', this.docsPathToImport.length); // close progressModal
+        vi.$emit('event-import-end', this.docsToImport.length); // close progressModal
 
-        const errorCount = vi.docsPathInError.length;
+        const errorCount = vi.docsInError.length;
         const win = remote.getCurrentWindow();
         const export_interrupted_mention = this.importInterrupted ? ' (export has been interrupted)' : '';
 
@@ -223,12 +255,12 @@
           if (errorCount) {
             this.displayImportErrorPrompt(errorCount, export_interrupted_mention);
           } else {
-            const s = (totalCount - this.docsPathToImport.length) > 1 ? 's' : '';
+            const s = (totalCount - this.docsToImport.length) > 1 ? 's' : '';
             remote.dialog.showMessageBox(win,
               {
                 type: 'info',
                 title: `Documents successfully imported`,
-                message: `${totalCount - this.docsPathToImport.length} document${s} imported without error${export_interrupted_mention}.`,
+                message: `${totalCount - this.docsToImport.length} document${s} imported without error${export_interrupted_mention}.`,
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -314,8 +346,8 @@
       displayImportErrorPrompt(errorCount, export_interrupted_mention='') {
         const win = remote.getCurrentWindow();
 
-        const s = this.docsPathInError.length > 1 ? 's' : '';
-        log.error('theses files could not be imported:', this.docsPathInError);
+        const s = this.docsInError.length > 1 ? 's' : '';
+        log.error('theses files could not be imported:', this.docsInError);
         remote.dialog.showMessageBox(win,
           {
             type: 'error',
@@ -338,7 +370,7 @@
         log.debug('displaying detailed report');
         const report = new HtmlReport(
             ['Name', 'Path', 'Error detail'],
-            this.docsPathInError.map(({name, path, reason}) => ([name, path, reason]))
+            this.docsInError.map(({name, path, reason}) => ([name, path, reason]))
         );
         this.$electron.shell.openExternal('file:///'+ report.save());
       },
@@ -379,5 +411,11 @@
       margin-right: 0.5em;
       vertical-align: -0.125em;
     }
+  }
+</style>
+
+<style lang="scss">
+  #import-button > button:first-child{
+    width:100%;
   }
 </style>
