@@ -6,39 +6,53 @@
 const namespaced = true;
 
 const state = {
-  docsPathToImport: [],
-  docsPathInError: [],
-  savedImportDestination: {name:'Root', id: null}
+  docsToImport: [],
+  docsInError: [],
+  docsMetadataToImport: {},
+  savedImportDestination: {name: 'Root', id: null}
 };
 
 const mutations = {
-  SET_DOCS_TO_IMPORT (state, serializedDocuments) {
-    // copy files path to state as File objects aren't serializable
-    state.docsPathToImport = serializedDocuments;
+  SET_DOCS_TO_IMPORT(state, serializedDocuments) {
+    // store serialized version of File objects
+    state.docsToImport = serializedDocuments;
   },
 
-  SET_IMPORT_DESTINATION (state, folder) {
-    state.savedImportDestination = folder
+  RESET_DOC_METADATA_TO_IMPORT(state) {
+    state.docsMetadataToImport = {};
   },
 
-  REMOVE_FIRST_DOC_FROM_IMPORT (state) {
-    state.docsPathToImport.splice(0, 1);
+  ADD_DOC_METADATA_TO_IMPORT(state, metadataKeyValuesPair) {
+    state.docsMetadataToImport[metadataKeyValuesPair[0]] = metadataKeyValuesPair[1];
   },
 
-  MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR (state, reason=null) {
-    let serializedDocument = state.docsPathToImport.splice(0, 1)[0];
+  SET_IMPORT_DESTINATION(state, folder) {
+    state.savedImportDestination = folder;
+  },
+
+  CONSUME_FIRST_DOC_TO_IMPORT(state) {
+    const consumedDoc = state.docsToImport.splice(0, 1);
+  },
+
+  CONSUME_DOC_METADATA_TO_IMPORT(state, metadataKey) {
+    delete state.docsMetadataToImport[metadataKey];
+  },
+
+  MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR(state, reason = null) {
+    let serializedDocument = state.docsToImport.splice(0, 1)[0];
     serializedDocument.reason = reason; // add error reason to serialized document
-    state.docsPathInError.push(serializedDocument);
+    state.docsInError.push(serializedDocument);
   },
 
   MOVE_DOCS_FROM_ERROR_TO_IMPORT(state) {
-    state.docsPathToImport = state.docsPathInError.splice(0);
+    state.docsToImport = state.docsInError.splice(0);
   },
 
-  RESET_IMPORT_DATA (state) {
-    state.docsPathToImport = [];
-    state.docsPathInError = [];
-    state.savedImportDestination = {name:'Root', id: null};
+  RESET_IMPORT_DATA(state) {
+    state.docsToImport = [];
+    state.docsInError = [];
+    state.docsMetadataToImport = {};
+    state.savedImportDestination = {name: 'Root', id: null};
   },
 };
 
@@ -50,9 +64,37 @@ const getters = {
   }
 };
 
+const actions = {
+  addDocMetadataToImport({commit, state, dispatch}, docMetadataDict) {
+    // if metadata path match a path in docsToImport
+    if (state.docsToImport.some(({path}) => path === docMetadataDict['filePath'])) {
+      const metadataDocPath = docMetadataDict.filePath;
+      delete docMetadataDict.filePath;
+      // generate a unique key to store meta in docsMetadataToImport by hashing metadataDocPath
+      dispatch('tools/hashString', {algorithm: 'SHA-1', string: metadataDocPath}, {root:true}).then(
+        uniqueMetadataKey => {
+          commit('ADD_DOC_METADATA_TO_IMPORT', [uniqueMetadataKey, docMetadataDict]);
+        }
+      );
+    }
+  },
+
+  consumeFirstDocToImport({commit, state, dispatch}){
+    const firstDocPath = state.docsToImport[0].path;
+    commit('CONSUME_FIRST_DOC_TO_IMPORT');
+    // consume eventual doc metadata too
+    dispatch('tools/hashString', {algorithm: 'SHA-1', string: firstDocPath}, {root:true}).then(
+      uniqueMetadataKey => {
+        commit('CONSUME_DOC_METADATA_TO_IMPORT', uniqueMetadataKey);
+      }
+    );
+  }
+};
+
 export default {
   namespaced,
   state,
   mutations,
-  getters
+  getters,
+  actions
 }

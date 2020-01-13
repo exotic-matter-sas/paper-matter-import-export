@@ -1,6 +1,6 @@
 {
     "name": "paper-matter-import-export",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "author": "fabien <fabien@exotic-matter.fr>",
     "description": "Local client to import/export your documents in/from Paper Matter",
     "homepage": "https://papermatter.app",
@@ -57,6 +57,7 @@
         }
     },
     "dependencies": {
+        "@fast-csv/parse": "^4.0.2",
         "@fortawesome/fontawesome-svg-core": "^1.2.25",
         "@fortawesome/free-solid-svg-icons": "^5.11.2",
         "@fortawesome/vue-fontawesome": "^0.1.8",
