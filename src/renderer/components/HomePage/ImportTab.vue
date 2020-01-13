@@ -124,7 +124,7 @@
     watch: {
       filesInsideFolder: function (newVal, oldVal) {
         if (newVal !== oldVal && newVal != null) {
-          // we try to auto detect the presence of a csv file with document metadata
+          // we try to detect the presence of a csv file with document metadata inside folder to import
           if (newVal.some(({name}) => this.guessMetadataFileName.includes(name))) {
             this.metadataFileDetected = true;
           } else {
@@ -230,7 +230,7 @@
             ftl_folder: parentFolderId,
             created: new Date(serializedDocument.lastModified).toISOString()
           };
-          // If documents metadata have been setup check if ones match current document and add them to jsonData
+          // If documents metadata have been setup check if some match current document and add them to jsonData
           if (Object.keys(this.docsMetadataToImport).length) {
             const uniqueMetadataKey = await this.hashString({algorithm: 'SHA-1', string: serializedDocument.path});
             const docMetadata = this.docsMetadataToImport[uniqueMetadataKey];
