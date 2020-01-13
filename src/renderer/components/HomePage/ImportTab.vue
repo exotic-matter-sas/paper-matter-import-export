@@ -50,6 +50,7 @@
           :disabled="(files.length === 0 && filesInsideFolder.length === 0 && docsToImport.length === 0) || importing"
           @click.prevent="prepareImport(false)"
           menu-class="w-100"
+          dropup
         >
           <b-dropdown-item variant="primary" @click.prevent="prepareImport(true)" class="text-center">
             Import documents with metadata
@@ -178,6 +179,7 @@
 
         let serializedDocument;
         let file;
+        let thumbnail;
         while (vi.docsToImport.length > 0 && !(vi.importInterrupted || vi.accessToken === '')){
           serializedDocument = vi.docsToImport[0];
 
@@ -219,21 +221,21 @@
             const docMetadata = this.docsMetadataToImport[uniqueMetadataKey];
             if(docMetadata !== undefined){
               if('documentTitle' in docMetadata){
-                jsonData['title'] = docMetadata['documentTitle']
+                jsonData['title'] = docMetadata['documentTitle'];
               }
               if('documentNotes' in docMetadata){
-                jsonData['note'] = docMetadata['documentNotes']
+                jsonData['note'] = docMetadata['documentNotes'];
               }
             }
           }
 
           // generate doc thumbnail
-          let thumbnail = null;
+          thumbnail = null;
           try {
             thumbnail = await createThumbFromFile(file);
-            log.debug('thumbnail generated')
+            log.debug('thumbnail generated');
           } catch (error) {
-            log.warn('error during thumbnail generation', '\n', error)
+            log.warn('error during thumbnail generation', '\n', error);
           }
 
           // upload doc

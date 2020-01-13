@@ -5,7 +5,6 @@
 
 import pdfjsLib from 'pdfjs-dist/webpack'
 
-// pdfjsLib.disableWorker = true;
 window.URL = window.URL || window.webkitURL;
 
 export const createThumbFromFile = function (file) {
@@ -14,32 +13,42 @@ export const createThumbFromFile = function (file) {
 };
 
 export const createThumbFromUrl = function (url) {
-  return new Promise((resolve, reject) => {
+  let loadingTask = pdfjsLib.getDocument(url);
+  let canvas;
+  let pdfFile;
+  return loadingTask.promise
+    .then(function (pdf) {
+      pdfFile = pdf;
+      return pdf.getPage(1);
+    })
+    .then(function (page) {
+      canvas = document.createElement("canvas");
+      const context = canvas.getContext('2d');
 
-    let loadingTask = pdfjsLib.getDocument(url);
-    loadingTask.promise.then(function (pdf) {
-      pdf.getPage(1).then(function (page) {
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext('2d');
+      let viewport = page.getViewport({scale: 0.5});
 
-        let viewport = page.getViewport({scale: 0.5});
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
 
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        let render = page.render({
-          canvasContext: context,
-          viewport: viewport
-        });
-
-        render.promise.then(function () {
-          resolve(canvas.toDataURL());
-        });
-      }).catch(function () {
-        reject("pdf thumb error: could not open page 1 of document " + url + ". Not a pdf ?");
+      let render = page.render({
+        canvasContext: context,
+        viewport: viewport
       });
-    }).catch(function () {
-      reject("pdf thumb error: could not find or open document " + url + ". Not a pdf ?");
-    });
-  });
+      return render.promise;
+    })
+    .then(function () {
+      return Promise.resolve(canvas.toDataURL());
+    })
+    .finally(function () {
+      // to limit memory leaks
+      if (pdfFile !== undefined) {
+        pdfFile.cleanup();
+        pdfFile.destroy();
+      }
+      loadingTask.destroy();
+
+      pdfFile = null;
+      loadingTask = null;
+      canvas = null;
+    })
 };

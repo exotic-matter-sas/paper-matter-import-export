@@ -45,7 +45,7 @@ export default class ApiCient {
     formData.append('json', JSON.stringify(jsonData));
     formData.append('file', file);
 
-    if (thumbnail != null){
+    if (thumbnail !== null){
       formData.append('thumbnail', thumbnail);
     }
 
