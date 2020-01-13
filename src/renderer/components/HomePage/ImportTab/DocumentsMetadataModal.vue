@@ -163,7 +163,7 @@ import {remote} from "electron";
                   type: 'error',
                   title: 'Error during csv parsing',
                   message: 'Can\'t read CSV data',
-                  detail: 'CSV file seems corrupt or not properly formatted.',
+                  detail: 'CSV file seems corrupt or not properly formatted. Try to open csv file in a text editor to check file format, first csv line must also define unique column names',
                   buttons: ['Ok'],
                   defaultId: 0
                 });
