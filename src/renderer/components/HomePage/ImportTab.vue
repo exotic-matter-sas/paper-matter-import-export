@@ -42,18 +42,18 @@
       <b-col>
         <b-dropdown
           id="import-button"
-          text="Import documents"
+          :text="metadataFileDetected ? 'Import documents with metadata' : 'Import documents'"
           block
           split
           variant="primary"
           class="w-100"
           :disabled="(files.length === 0 && filesInsideFolder.length === 0 && docsToImport.length === 0) || importing"
-          @click.prevent="prepareImport(false)"
+          @click.prevent="prepareImport(metadataFileDetected)"
           menu-class="w-100"
           dropup
         >
-          <b-dropdown-item variant="primary" @click.prevent="prepareImport(true)" class="text-center">
-            Import documents with metadata
+          <b-dropdown-item variant="primary" @click.prevent="prepareImport(!metadataFileDetected)" class="text-center">
+            {{!metadataFileDetected ? 'Import documents with metadata' : 'Import documents'}}
           </b-dropdown-item>
         </b-dropdown>
       </b-col>
@@ -93,7 +93,9 @@
         filesInsideFolder: [],
         importing: false,
         createdFoldersCache: {},
-        settingDocumentsMetadata: false
+        settingDocumentsMetadata: false,
+        guessMetadataFileName: ['data_documents_exported.csv', 'import.csv'],
+        metadataFileDetected: false
       }
     },
 
@@ -116,6 +118,19 @@
           });
       } else if (docsInErrorCount > 0) {
         this.displayImportErrorPrompt(docsInErrorCount)
+      }
+    },
+
+    watch: {
+      filesInsideFolder: function (newVal, oldVal) {
+        if (newVal !== oldVal && newVal != null) {
+          // we try to auto detect the presence of a csv file with document metadata
+          if (newVal.some(({name}) => this.guessMetadataFileName.includes(name))) {
+            this.metadataFileDetected = true;
+          } else {
+            this.metadataFileDetected = false;
+          }
+        }
       }
     },
 
