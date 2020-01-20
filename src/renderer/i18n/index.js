@@ -6,6 +6,7 @@
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import {remote} from "electron";
+import messages from "./messages";
 
 Vue.use(VueI18n);
 
@@ -13,9 +14,7 @@ Vue.use(VueI18n);
 const locale = 'fr';
 
 export default new VueI18n({
-  locale: locale,
+  locale,
   fallbackLocale: 'en',
-  // silentFallbackWarn: true,
-  // formatFallbackMessages: true,
-  // silentTranslationWarn: true,
+  messages
 })
