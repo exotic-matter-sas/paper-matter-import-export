@@ -142,7 +142,8 @@
 
     computed: {
       folderDestinationName () {
-          return this.savedImportDestination ? this.savedImportDestination.name : 'Root'
+          return this.savedImportDestination && this.savedImportDestination.name !== 'Root' ?
+            this.savedImportDestination.name : this.$t('rootFolderName')
       },
 
       filesInputPlaceholder () {

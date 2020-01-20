@@ -60,7 +60,7 @@
       // list folders at Root
       vi.$api.listFolders(vi.store.state.auth.accessToken)
         .then(response => {
-            let rootFolder = {id: null, name: vi.i18n.t('ftlTreeFolders.rootFolderName'), has_descendant: true};
+            let rootFolder = {id: null, name: vi.i18n.t('rootFolderName'), has_descendant: true};
             rootFolder.children = response.data
               .filter(function (e) {
                 return e.id !== vi.sourceFolder;

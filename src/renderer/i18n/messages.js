@@ -5,6 +5,7 @@
 
 export default {
   en: {
+    rootFolderName: 'Root',
     bFormFile: {
       BrowseLabel: 'Browse'
     },
@@ -48,12 +49,18 @@ export default {
       noFolderSelectedLabel: 'No folder selected',
     },
     ftlTreeFolders: {
-      rootFolderName: 'Root',
       noFolderCreatedLabel: 'No folder created yet',
       cantLoadFolderLabel: 'Folders can\'t be loaded'
+    },
+    progressModal: {
+      importTitle: 'Importing your documents...',
+      exportTitle: 'Exporting your documents...',
+      errorCountLabel: ' | one error | {n} errors',
+      stopButtonValue: 'Stop'
     }
   },
   fr: {
+    rootFolderName: 'Racine',
     bFormFile: {
       BrowseLabel: 'Parcourir'
     },
@@ -97,9 +104,14 @@ export default {
       noFolderSelectedLabel: 'Pas de dossier sélectionné',
     },
     ftlTreeFolders: {
-      rootFolderName: 'Racine',
       noFolderCreatedLabel: 'Vous n\'avez pas encore créé de dossier',
       cantLoadFolderLabel: 'Les dossiers n\'ont pu être chargés'
+    },
+    progressModal: {
+      importTitle: 'Import de vos documents...',
+      exportTitle: 'Export de vos documents...',
+      errorCountLabel: ' | une erreur | {n} erreurs',
+      stopButtonValue: 'Stop'
     }
   }
 }
