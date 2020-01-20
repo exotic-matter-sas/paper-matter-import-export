@@ -12,6 +12,12 @@ export default {
       submitInputValue: 'Login',
       loadingSpinnerLabel: 'Loading...',
       loginDomainLabel: 'Login to: '
+    },
+    homePage: {
+      importTabLabel: 'Import',
+      exportTabLabel: 'Export',
+      loggedAsLabel: 'Logged as: ',
+      disconnectTooltip: 'Disconnect'
     }
   },
   fr: {
@@ -22,6 +28,12 @@ export default {
       submitInputValue: 'Se connecter',
       loadingSpinnerLabel: 'Chargement...',
       loginDomainLabel: 'Connexion à : '
+    },
+    homePage: {
+      importTabLabel: 'Import',
+      exportTabLabel: 'Export',
+      loggedAsLabel: 'Connecté : ',
+      disconnectTooltip: 'Se déconnecter'
     }
   }
 }
