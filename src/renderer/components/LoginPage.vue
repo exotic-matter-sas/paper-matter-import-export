@@ -8,16 +8,16 @@
     <b-row class="align-items-center">
       <b-col>
         <form v-if="!refreshPending" id="login-form">
-          <img src="~@/assets/colors_logo.svg" alt="Paper Matter logo" class="d-block mx-auto my-3">
+          <img src="~@/assets/colors_logo.svg" :alt="$t('Paper Matter logo')" class="d-block mx-auto my-3">
           <div class="form-label-group">
             <input autofocus="" class="form-control" id="id_email" name="username" placeholder="Email" required=""
                    type="text" v-model="email">
-            <label for="id_email">Email</label>
+            <label for="id_email">{{ $t('Email' )}}</label>
           </div>
           <div class="form-label-group">
             <input class="form-control" id="id_password" name="password" placeholder="Password" required=""
                    type="password"  v-model="password">
-            <label for="id_password">Password</label>
+            <label for="id_password">{{ $t('Password' )}}</label>
             <a class="mt-1 d-block" href @click.prevent="open('https://papermatter.app/password_reset/')"
                     id="password-reset">Forgot password?
             </a>
@@ -39,6 +39,14 @@
     </b-row>
   </b-container>
 </template>
+
+<i18n>
+  {
+    "fr": {
+      "Password": "Mot de passe"
+    }
+  }
+</i18n>
 
 <script>
     import {mapState} from "vuex";

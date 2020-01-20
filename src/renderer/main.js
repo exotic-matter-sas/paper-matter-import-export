@@ -8,6 +8,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
+import i18n from './i18n'
 import BootstrapVue from "bootstrap-vue";
 import axios from "axios";
 import {ipcRenderer, remote} from 'electron';
@@ -38,6 +39,7 @@ Vue.use(BootstrapVue);
 /* eslint-disable no-new */
 const vi = new Vue({
   components: {App},
+  i18n,
   router,
   store,
   template: '<App/>'
