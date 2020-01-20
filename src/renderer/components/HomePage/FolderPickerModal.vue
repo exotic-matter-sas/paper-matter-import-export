@@ -8,28 +8,30 @@
            @hidden="$emit('event-folder-picker-modal-hidden')">
     <b-container fluid >
       <b-row v-if="action === 'import'">
-        <h1 class="text-primary">Select destination folder</h1>
+        <h1 class="text-primary">{{ $t('folderPickerModal.importTitle') }}</h1>
       </b-row>
       <b-row v-else>
-        <h1 class="text-primary">Select folder to export</h1>
+        <h1 class="text-primary">{{ $t('folderPickerModal.exportTitle') }}</h1>
       </b-row>
       <b-row>
         <b-col>
-          <FTLTreeFolders :store="this.$store" :un-saved-import-destination="unSavedImportDestination"
+          <FTLTreeFolders :store="$store" :i18n="$i18n" :un-saved-import-destination="unSavedImportDestination"
                           @event-folder-selected="(folder) => {unSavedImportDestination = folder}"/>
         </b-col>
       </b-row>
     </b-container>
     <template slot="modal-footer">
           <div class="text-muted w-100 text-left font-italic">
-            <span v-if="unSavedImportDestination">selected folder: {{unSavedImportDestination.name}}</span>
-            <span v-else>No folder selected</span>
+            <span v-if="unSavedImportDestination">
+              {{ $t('folderPickerModal.selectedFolderLabel') + unSavedImportDestination.name }}
+            </span>
+            <span v-else>{{ $t('folderPickerModal.noFolderSelectedLabel') }}</span>
           </div>
           <b-button variant="secondary" @click.prevent="$bvModal.hide('folder-picker-modal')">
-            Cancel
+            {{ $t('bModal.cancelButtonValue') }}
           </b-button>
           <b-button variant="primary" @click.prevent="saveFolderPick">
-            OK
+            {{ $t('bModal.okButtonValue') }}
           </b-button>
     </template>
   </b-modal>

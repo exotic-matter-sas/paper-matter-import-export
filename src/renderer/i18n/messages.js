@@ -8,6 +8,10 @@ export default {
     bFormFile: {
       BrowseLabel: 'Browse'
     },
+    bModal: {
+      okButtonValue: 'OK',
+      cancelButtonValue: 'Cancel'
+    },
     loginPage: {
       emailInputLabel: 'Email',
       passwordInputLabel: 'Password',
@@ -36,11 +40,26 @@ export default {
     exportTab: {
       comingSoonLabel: 'Coming soon',
       exportButtonValue: 'Export'
+    },
+    folderPickerModal: {
+      importTitle: 'Select destination folder',
+      exportTitle: 'Select folder to export',
+      selectedFolderLabel: 'selected folder: ',
+      noFolderSelectedLabel: 'No folder selected',
+    },
+    ftlTreeFolders: {
+      rootFolderName: 'Root',
+      noFolderCreatedLabel: 'No folder created yet',
+      cantLoadFolderLabel: 'Folders can\'t be loaded'
     }
   },
   fr: {
     bFormFile: {
       BrowseLabel: 'Parcourir'
+    },
+    bModal: {
+      okButtonValue: 'Valider',
+      cancelButtonValue: 'Annuler'
     },
     loginPage: {
       emailInputLabel: 'Email',
@@ -70,6 +89,17 @@ export default {
     exportTab: {
       comingSoonLabel: 'Bientôt disponible',
       exportButtonValue: 'Exporter'
+    },
+    folderPickerModal: {
+      importTitle: 'Sélectionnez le dossier de destination',
+      exportTitle: 'Sélectionnez le dossier à exporter',
+      selectedFolderLabel: 'sélection : ',
+      noFolderSelectedLabel: 'Pas de dossier sélectionné',
+    },
+    ftlTreeFolders: {
+      rootFolderName: 'Racine',
+      noFolderCreatedLabel: 'Vous n\'avez pas encore créé de dossier',
+      cantLoadFolderLabel: 'Les dossiers n\'ont pu être chargés'
     }
   }
 }

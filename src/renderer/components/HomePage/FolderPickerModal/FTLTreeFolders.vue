@@ -20,10 +20,10 @@
       </ul>
       <ul class="pl-3">
         <li class="text-muted" v-if="folders.length > 0 && folders[0].children.length === 0">
-          No folder created yet
+          {{ i18n.t('ftlTreeFolders.noFolderCreatedLabel') }}
         </li>
         <li class="text-danger" v-if="lastFolderListingFailed">
-          Folders can't be loaded
+          {{ i18n.t('ftlTreeFolders.cantLoadFolderLabel') }}
         </li>
       </ul>
     </b-col>
@@ -31,7 +31,6 @@
 </template>
 
 <script>
-  import {mapState} from "vuex";
   import FTLTreeItem from "./FTLTreeItem";
 
   export default {
@@ -43,7 +42,8 @@
       root: {type: Boolean, default: true},
       sourceFolder: {type: Number, default: -1},
       unSavedImportDestination: {type: Object},
-      store: {type: Object} // using props instead to get store reference instead of normal usage as a workaround
+      store: {type: Object}, // using props instead to get store reference instead of normal usage as a workaround
+      i18n: {type: Object} // using props instead to get t method reference instead of normal usage as a workaround
     },
 
     data() {
@@ -58,9 +58,9 @@
       vi.lastFolderListingFailed = false;
 
       // list folders at Root
-      this.$api.listFolders(this.store.state.auth.accessToken)
+      vi.$api.listFolders(vi.store.state.auth.accessToken)
         .then(response => {
-            let rootFolder = {id: null, name: 'Root', has_descendant: true};
+            let rootFolder = {id: null, name: vi.i18n.t('ftlTreeFolders.rootFolderName'), has_descendant: true};
             rootFolder.children = response.data
               .filter(function (e) {
                 return e.id !== vi.sourceFolder;

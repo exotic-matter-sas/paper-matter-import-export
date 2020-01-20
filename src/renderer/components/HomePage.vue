@@ -50,7 +50,6 @@
   import ProgressModal from "./HomePage/ProgressModal";
   import {mapState} from "vuex";
   import FolderPickerModal from "./HomePage/FolderPickerModal";
-  import FTLTreeFolders from "./HomePage/FolderPickerModal/FTLTreeFolders";
 
   const log = require('electron-log');
 
@@ -61,7 +60,6 @@
         ExportTab,
         ProgressModal,
         FolderPickerModal,
-        FTLTreeFolders
     },
 
     data() {
