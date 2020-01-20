@@ -7,14 +7,15 @@
   <b-container class="pt-2">
     <b-row>
       <b-col>
-        <b-form-group label="Sources" >
+        <b-form-group :label="$t('importTab.sourcesFormGroupLabel')" >
           <b-form-file
             multiple
             v-model="files"
             :state="Boolean(files)"
             :placeholder=this.filesInputPlaceholder
-            drop-placeholder="Drop pdf documents to import here..."
+            :drop-placeholder="$t('importTab.filesInputDropLabel')"
             accept=".pdf"
+            :browse-text="$t('bFormFile.BrowseLabel')"
           ></b-form-file>
 
           <b-form-file
@@ -23,17 +24,20 @@
             multiple
             v-model="filesInsideFolder"
             :state="Boolean(filesInsideFolder)"
-            placeholder="Choose a folder to import..."
-            drop-placeholder="Drop a folder to import here..."
+            :placeholder="$t('importTab.folderInputPlaceholder')"
+            :drop-placeholder="$t('importTab.folderInputDropLabel')"
+            :browse-text="$t('bFormFile.BrowseLabel')"
           ></b-form-file>
         </b-form-group>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
-        <b-form-group label="Destination" description="Files or content of selected folder will be imported into the destination">
+        <b-form-group :label="$t('importTab.destinationFormGroupLabel')"
+                      :description="$t('importTab.destinationFormGroupDescription')">
           <label class="d-block " id="update-destination" :title="folderDestinationName" @click.prevent="$emit('event-pick-folder')">
             <font-awesome-icon icon="folder"/>{{folderDestinationName}}
+            <div>{{ $t('bFormFile.BrowseLabel') }}</div>
           </label>
         </b-form-group>
       </b-col>
@@ -42,7 +46,8 @@
       <b-col>
         <b-dropdown
           id="import-button"
-          :text="metadataFileDetected ? 'Import documents with metadata' : 'Import documents'"
+          :text="metadataFileDetected ?
+          $t('importTab.importButtonValueWithMetadata') : $t('importTab.importButtonValueWithoutMetadata')"
           block
           split
           variant="primary"
@@ -53,7 +58,8 @@
           dropup
         >
           <b-dropdown-item variant="primary" @click.prevent="prepareImport(!metadataFileDetected)" class="text-center">
-            {{!metadataFileDetected ? 'Import documents with metadata' : 'Import documents'}}
+            {{!metadataFileDetected ?
+            $t('importTab.importButtonValueWithMetadata') : $t('importTab.importButtonValueWithoutMetadata')}}
           </b-dropdown-item>
         </b-dropdown>
       </b-col>
@@ -143,7 +149,7 @@
         if (this.docsToImport.length) {
           return this.docsToImport.map(file => file.name).join(', ')
         } else {
-          return 'Choose pdf documents to import...'
+          return this.$t('importTab.filesInputPlaceholder')
         }
       },
       ...mapState('auth', ['accessToken']),
@@ -422,7 +428,7 @@
     overflow: hidden;
     white-space: nowrap;
 
-    &::after{
+    div{
       position: absolute;
       top: 0;
       right: 0;
