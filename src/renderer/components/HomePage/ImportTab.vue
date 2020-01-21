@@ -7,14 +7,15 @@
   <b-container class="pt-2">
     <b-row>
       <b-col>
-        <b-form-group label="Sources" >
+        <b-form-group :label="$t('importTab.sourcesFormGroupLabel')" >
           <b-form-file
             multiple
             v-model="files"
             :state="Boolean(files)"
             :placeholder=this.filesInputPlaceholder
-            drop-placeholder="Drop pdf documents to import here..."
+            :drop-placeholder="$t('importTab.filesInputDropLabel')"
             accept=".pdf"
+            :browse-text="$t('bFormFile.BrowseLabel')"
           ></b-form-file>
 
           <b-form-file
@@ -23,17 +24,20 @@
             multiple
             v-model="filesInsideFolder"
             :state="Boolean(filesInsideFolder)"
-            placeholder="Choose a folder to import..."
-            drop-placeholder="Drop a folder to import here..."
+            :placeholder="$t('importTab.folderInputPlaceholder')"
+            :drop-placeholder="$t('importTab.folderInputDropLabel')"
+            :browse-text="$t('bFormFile.BrowseLabel')"
           ></b-form-file>
         </b-form-group>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
-        <b-form-group label="Destination" description="Files or content of selected folder will be imported into the destination">
+        <b-form-group :label="$t('importTab.destinationFormGroupLabel')"
+                      :description="$t('importTab.destinationFormGroupDescription')">
           <label class="d-block " id="update-destination" :title="folderDestinationName" @click.prevent="$emit('event-pick-folder')">
             <font-awesome-icon icon="folder"/>{{folderDestinationName}}
+            <div>{{ $t('bFormFile.BrowseLabel') }}</div>
           </label>
         </b-form-group>
       </b-col>
@@ -42,7 +46,8 @@
       <b-col>
         <b-dropdown
           id="import-button"
-          :text="metadataFileDetected ? 'Import documents with metadata' : 'Import documents'"
+          :text="metadataFileDetected ?
+          $t('importTab.importButtonWithMetadataValue') : $t('importTab.importButtonWithoutMetadataValue')"
           block
           split
           variant="primary"
@@ -53,7 +58,8 @@
           dropup
         >
           <b-dropdown-item variant="primary" @click.prevent="prepareImport(!metadataFileDetected)" class="text-center">
-            {{!metadataFileDetected ? 'Import documents with metadata' : 'Import documents'}}
+            {{!metadataFileDetected ?
+            $t('importTab.importButtonWithMetadataValue') : $t('importTab.importButtonWithoutMetadataValue')}}
           </b-dropdown-item>
         </b-dropdown>
       </b-col>
@@ -109,10 +115,9 @@
         remote.dialog.showMessageBox(win,
           {
             type: 'info',
-            title: 'You can resume last import',
-            message: 'Last import wasn\'t fully completed.',
-            detail: `There is ${docsToImportCount} files left to import, you can finish the import by clicking ` +
-                'the Import button.',
+            title: this.$t('importTab.warningResumeLastImportTitle'),
+            message: this.$t('importTab.warningResumeLastImportMessage'),
+            detail: this.$tc('importTab.warningResumeLastImportDetail', docsToImportCount),
             buttons: ['Ok'],
             defaultId: 0
           });
@@ -136,14 +141,15 @@
 
     computed: {
       folderDestinationName () {
-          return this.savedImportDestination ? this.savedImportDestination.name : 'Root'
+          return this.savedImportDestination && this.savedImportDestination.name !== 'Root' ?
+            this.savedImportDestination.name : this.$t('rootFolderName')
       },
 
       filesInputPlaceholder () {
         if (this.docsToImport.length) {
           return this.docsToImport.map(file => file.name).join(', ')
         } else {
-          return 'Choose pdf documents to import...'
+          return this.$t('importTab.filesInputPlaceholder')
         }
       },
       ...mapState('auth', ['accessToken']),
@@ -277,7 +283,7 @@
 
         const errorCount = vi.docsInError.length;
         const win = remote.getCurrentWindow();
-        const export_interrupted_mention = this.importInterrupted ? ' (export has been interrupted)' : '';
+        const export_interrupted_mention = this.importInterrupted ? this.$t('importTab.exportInterruptedMention') : '';
 
         // Do not display success or error messages when user get disconnected
         // (it will appears at the end of the resumed import after reconnection)
@@ -285,12 +291,12 @@
           if (errorCount) {
             this.displayImportErrorPrompt(errorCount, export_interrupted_mention);
           } else {
-            const s = (totalCount - this.docsToImport.length) > 1 ? 's' : '';
             remote.dialog.showMessageBox(win,
               {
                 type: 'info',
-                title: `Documents successfully imported`,
-                message: `${totalCount - this.docsToImport.length} document${s} imported without error${export_interrupted_mention}.`,
+                title: this.$t('importTab.successImportTitle'),
+                message: this.$tc('importTab.successImportMessage',
+                  totalCount - this.docsToImport.length, {export_interrupted_mention}),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -299,8 +305,8 @@
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: 'Export interrupted',
-              message: 'You have been disconnected, please log again to resume your import',
+              title: this.$t('importTab.warningExportInterruptedTitle'),
+              message: this.$t('importTab.warningExportInterruptedMessage'),
               buttons: ['Ok'],
               defaultId: 0
             });
@@ -376,15 +382,14 @@
       displayImportErrorPrompt(errorCount, export_interrupted_mention='') {
         const win = remote.getCurrentWindow();
 
-        const s = this.docsInError.length > 1 ? 's' : '';
         log.error('theses files could not be imported:', this.docsInError);
         remote.dialog.showMessageBox(win,
           {
             type: 'error',
-            title: `Error${s} occurred during import`,
-            message: `${errorCount} document${s} couldn't be imported:`,
-            detail: `You can retry to import them by clicking the Import button${export_interrupted_mention}.`,
-            buttons: ['Ok', 'Display detailed report'],
+            title: this.$tc('importTab.errorImportTitle', this.docsInError.length),
+            message: this.$tc('importTab.errorImportMessage', this.docsInError.length),
+            detail: this.$tc('importTab.errorImportDetail', this.docsInError.length, {export_interrupted_mention}),
+            buttons: ['Ok', this.$t('importTab.displayErrorReportButtonValue')],
             defaultId: 0
           }).then( ({response}) => {
             if (response === 1){ // Second button clicked
@@ -422,7 +427,7 @@
     overflow: hidden;
     white-space: nowrap;
 
-    &::after{
+    div{
       position: absolute;
       top: 0;
       right: 0;

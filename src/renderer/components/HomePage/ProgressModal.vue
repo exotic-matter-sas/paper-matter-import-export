@@ -9,10 +9,10 @@
       <b-row class="align-items-center">
         <b-col>
           <b-row v-if="action === 'import'">
-            <h1 class="text-primary">Importing your documents...</h1>
+            <h1 class="text-primary">{{ $t('progressModal.importTitle') }}</h1>
           </b-row>
           <b-row v-else>
-            <h1 class="text-primary">Exporting your documents...</h1>
+            <h1 class="text-primary">{{ $t('progressModal.exportTitle') }}</h1>
           </b-row>
           <b-row class="align-items-end">
             <b-col cols="12">
@@ -21,7 +21,7 @@
             </b-col>
             <b-col cols="6" id="error-count" class="text-left text-danger">
               <span v-if="docsInError.length">
-                {{docsInError.length}} error{{docsInError.length > 1 ? 's' : ''}}
+                {{ $tc('progressModal.errorCountLabel', docsInError.length) }}
               </span>
             </b-col>
             <b-col cols="6" id="progression-count" class="text-right text-muted">
@@ -33,7 +33,7 @@
     </b-container>
     <template slot="modal-footer">
       <b-button id="stop-button" variant="outline-danger" @click.prevent="interruptImport" class="w-100">
-        Stop
+        {{ $t('progressModal.stopButtonValue') }}
       </b-button>
     </template>
   </b-modal>

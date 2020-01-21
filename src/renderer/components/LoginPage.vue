@@ -8,37 +8,40 @@
     <b-row class="align-items-center">
       <b-col>
         <form v-if="!refreshPending" id="login-form">
-          <img src="~@/assets/colors_logo.svg" alt="Paper Matter logo" class="d-block mx-auto my-3">
+          <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="d-block mx-auto my-3">
           <div class="form-label-group">
-            <input autofocus="" class="form-control" id="id_email" name="username" placeholder="Email" required=""
-                   type="text" v-model="email">
-            <label for="id_email">Email</label>
+            <input autofocus="" class="form-control" id="id_email" name="username"
+                   :placeholder="$t('loginPage.emailInputLabel')" required="" type="text" v-model="email">
+            <label for="id_email">{{ $t('loginPage.emailInputLabel')}}</label>
           </div>
           <div class="form-label-group">
-            <input class="form-control" id="id_password" name="password" placeholder="Password" required=""
+            <input class="form-control" id="id_password" name="password"
+                   :placeholder="$t('loginPage.passwordInputLabel' )" required=""
                    type="password"  v-model="password">
-            <label for="id_password">Password</label>
+            <label for="id_password">{{ $t('loginPage.passwordInputLabel')}}</label>
             <a class="mt-1 d-block" href @click.prevent="open('https://papermatter.app/password_reset/')"
-                    id="password-reset">Forgot password?
+                    id="password-reset">{{ $t('loginPage.forgotPasswordLink')}}
             </a>
           </div>
           <div v-if="lastError" class="alert alert-danger">{{lastError}}</div>
-          <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" value="Login" @click.prevent="login"
-          :disabled="loginPending || !(login && password)">
+          <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" :value="$t('loginPage.submitInputValue')"
+                 @click.prevent="login" :disabled="loginPending || !(login && password)">
         </form>
 
         <div v-else class="text-center">
-          <b-spinner type="grow" variant="primary" label="Loading..." style="width:4em;height:4em;"></b-spinner>
+          <b-spinner type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"
+                     style="width:4em;height:4em;"></b-spinner>
         </div>
       </b-col>
     </b-row>
     <b-row id="domain-footer">
       <b-col class="text-center">
-          <label class="d-inline">Login to: <b>{{this.apiBaseUrl}}</b></label>
+          <label class="d-inline">{{ $t('loginPage.loginDomainLabel') }}<b>{{this.apiBaseUrl}}</b></label>
       </b-col>
     </b-row>
   </b-container>
 </template>
+
 
 <script>
     import {mapState} from "vuex";
@@ -139,6 +142,9 @@
       input, label {
         height: 3.125rem;
         padding: .75rem;
+        &::placeholder{
+          color: transparent;
+        }
       }
 
       input:not(:placeholder-shown) {

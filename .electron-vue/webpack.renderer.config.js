@@ -3,14 +3,14 @@
 process.env.BABEL_ENV = 'renderer';
 
 const path = require('path');
-const { dependencies } = require('../package.json');
+const {dependencies} = require('../package.json');
 const webpack = require('webpack');
 
 const BabiliWebpackPlugin = require('babili-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { VueLoaderPlugin } = require('vue-loader');
+const {VueLoaderPlugin} = require('vue-loader');
 
 /**
  * List of node_modules to include in webpack bundle
@@ -69,7 +69,7 @@ let rendererConfig = {
             loaders: {
               sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
               scss: 'vue-style-loader!css-loader!sass-loader',
-              less: 'vue-style-loader!css-loader!less-loader'
+              less: 'vue-style-loader!css-loader!less-loader',
             }
           }
         }
