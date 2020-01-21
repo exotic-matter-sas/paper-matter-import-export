@@ -5,7 +5,7 @@
 
 <template>
   <b-container class="h-100 d-flex align-content-evenly flex-wrap">
-    <h2 class="text-muted text-center w-100 font-italic my-5"> Coming soon </h2>
+    <h2 class="text-muted text-center w-100 font-italic my-5">{{ $t('exportTab.comingSoonLabel')}}</h2>
 
     <!--
     <b-form-file
@@ -19,7 +19,7 @@
     <b-button class="w-100" id="export-button" variant="primary"
               :disabled="!folder"
               @click.prevent="exportDocuments">
-      Export
+      {{ $t('exportTab.exportButtonValue')}}
     </b-button>
   </b-container>
 </template>
