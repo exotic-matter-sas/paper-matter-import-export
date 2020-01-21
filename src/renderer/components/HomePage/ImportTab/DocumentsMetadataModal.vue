@@ -1,4 +1,3 @@
-import {remote} from "electron";
 <!--
   - Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
   - Licensed under the MIT License. See LICENSE in the project root for license information.
@@ -10,16 +9,16 @@ import {remote} from "electron";
       <b-row class="align-items-center">
         <b-col>
           <b-row>
-            <h1 class="text-primary">Documents metadata</h1>
+            <h1 class="text-primary">{{ $t('documentsMetadataModal.title') }}</h1>
           </b-row>
           <b-row>
             <b-col>
-              <b-form-group label="Source">
+              <b-form-group :label="$t('documentsMetadataModal.sourceFormGroupLabel')">
                 <b-form-file
                   v-model="csvFile"
                   :state="Boolean(csvFile)"
-                  placeholder="Choose csv file to use"
-                  drop-placeholder="Drop csv file to use here..."
+                  :placeholder="$t('documentsMetadataModal.csvInputPlaceholder')"
+                  :drop-placeholder="$t('documentsMetadataModal.csvInputDropLabel')"
                   accept=".csv"
                 ></b-form-file>
               </b-form-group>
@@ -27,7 +26,7 @@ import {remote} from "electron";
           </b-row>
           <b-row>
             <b-col>
-              <b-form-group label="First 100 lines preview" v-if="Boolean(csvFile)">
+              <b-form-group :label="$t('documentsMetadataModal. previewFormGroupLabel')" v-if="Boolean(csvFile)">
                 <b-table :fields="previewTabHeaders" :items="extractedCsvDataPreview" striped small
                          sticky-header="200px"
                          head-variant="light">
@@ -65,14 +64,14 @@ import {remote} from "electron";
     <template slot="modal-footer">
       <b-button id="cancel-button" variant="secondary" @click.prevent="$emit('event-close-documents-metadata-modal')"
                 class="w-100">
-        Cancel
+        {{ $t('bModal.cancelButtonValue') }}
       </b-button>
       <b-button id="start-import-button" variant="primary" @click.prevent="storeCsvData" class="w-100"
                 :disabled="!Boolean(csvFile) || storingCsvData">
         <span v-if="storingCsvData">
-          <b-spinner small type="grow" ></b-spinner> Checking metadata...
+          <b-spinner small type="grow" ></b-spinner>{{ $t('documentsMetadataModal.startImportLoadingButton') }}
         </span>
-        <span v-else>Start import</span>
+        <span v-else>{{ $t('documentsMetadataModal.startImportButton') }}</span>
       </b-button>
     </template>
   </b-modal>
@@ -96,14 +95,16 @@ import {remote} from "electron";
         selectedDocumentTitleMeta: null,
         selectedDocumentNotesMeta: null,
         previewTabHeaders: [
-          {key: 'filePath', label: 'File Path*', headerTitle: 'Full path of pdf files to import (required)'},
           {
-            key: 'documentTitle', label: 'Doc. Title', headerTitle:
-              'Document title will be used in document list or preview and make document search easier'
+            key: 'filePath', label: this.$t('documentsMetadataModal.filePathLabel'),
+            headerTitle: this.$t('documentsMetadataModal.filePathTooltip')},
+          {
+            key: 'documentTitle', label: this.$t('documentsMetadataModal.documentTitleLabel'),
+            headerTitle: this.$t('documentsMetadataModal.documentTitleTooltip')
           },
           {
-            key: 'documentNotes', label: 'Doc. Notes', headerTitle:
-              'Document notes will be displayed in document preview and make document search easier'
+            key: 'documentNotes', label: this.$t('documentsMetadataModal.documentNotesLabel'),
+            headerTitle: this.$t('documentsMetadataModal.documentNotesTooltip')
           },
         ],
         csvHeaders: [],
@@ -144,9 +145,9 @@ import {remote} from "electron";
             remote.dialog.showMessageBox(win,
               {
                 type: 'error',
-                title: 'Error during csv reading',
-                message: 'Can\'t read CSV file',
-                detail: 'Check you have permission to read this file and that it still exist.',
+                title: this.$t('documentsMetadataModal.errorReadingCsvTitle'),
+                message: this.$t('documentsMetadataModal.errorReadingCsvMessage'),
+                detail: this.$t('documentsMetadataModal.errorReadingCsvDetail'),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -157,13 +158,13 @@ import {remote} from "electron";
           // handle csv parsing error here
           .on('error',
             function (error) {
-              log.error(`Error during csv reading:\n${error}`);
+              log.error(`Error during csv parsing:\n${error}`);
               remote.dialog.showMessageBox(win,
                 {
                   type: 'error',
-                  title: 'Error during csv parsing',
-                  message: 'Can\'t read CSV data',
-                  detail: 'CSV file seems corrupt or not properly formatted. Try to open csv file in a text editor to check file format, first csv line must also define unique column names',
+                  title: this.$t('documentsMetadataModal.errorParsingCsvTitle'),
+                  message: this.$t('documentsMetadataModal.errorParsingCsvMessage'),
+                  detail: this.$t('documentsMetadataModal.errorParsingCsvDetail'),
                   buttons: ['Ok'],
                   defaultId: 0
                 });
@@ -245,9 +246,9 @@ import {remote} from "electron";
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: 'Error during csv reading',
-              message: 'Can\'t read CSV file',
-              detail: 'Check you have permission to read this file and that it still exist.',
+              title: this.$t('documentsMetadataModal.errorReadingCsvTitle'),
+              message: this.$t('documentsMetadataModal.errorReadingCsvMessage'),
+              detail: this.$t('documentsMetadataModal.errorReadingCsvDetail'),
               buttons: ['Ok'],
               defaultId: 0
             });
@@ -259,13 +260,13 @@ import {remote} from "electron";
         // handle csv parsing error here
         .on('error',
           function (error) {
-            log.error(`Error during csv reading:\n${error}`);
+            log.error(`Error during csv parsing:\n${error}`);
             remote.dialog.showMessageBox(win,
               {
                 type: 'error',
-                title: 'Error during csv parsing',
-                message: 'Can\'t read CSV data',
-                detail: 'CSV file seems corrupt or not properly formatted.',
+                title: this.$t('documentsMetadataModal.errorParsingCsvTitle'),
+                message: this.$t('documentsMetadataModal.errorParsingCsvMessage'),
+                detail: this.$t('documentsMetadataModal.errorParsingCsvDetail'),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -288,22 +289,22 @@ import {remote} from "electron";
               remote.dialog.showMessageBox(win,
                 {
                   type: 'info',
-                  title: 'Fix metadata selection',
-                  message: 'No metadata match documents to import',
-                  detail: 'Check that File path is properly selected and formatted.',
+                  title: this.$t('documentsMetadataModal.warningMetadataNoMatchTitle'),
+                  message: this.$t('documentsMetadataModal.warningMetadataNoMatchMessage'),
+                  detail: this.$t('documentsMetadataModal.warningMetadataNoMatchDetail'),
                   buttons: ['Ok'],
                   defaultId: 0
                 });
             } else if (metadataToImportCount < docsToImportCount) {
-              const s = (docsToImportCount - metadataToImportCount) > 1 ? 's' : '';
               log.warn('Some documents have no metadata associated');
               remote.dialog.showMessageBox(win,
                 {
                   type: 'question',
-                  title: 'Confirm metadata selection',
-                  message: 'Some documents have no metadata associated',
-                  detail: `Metadata are missing for ${docsToImportCount - metadataToImportCount} document${s}, do you want to proceed anyway?`,
-                  buttons: ['Cancel', 'Continue'],
+                  title: this.$t('documentsMetadataModal.warningDocumentsMissingMetadataTitle'),
+                  message: this.$t('documentsMetadataModal.warningDocumentsMissingMetadataMessage'),
+                  detail: this.$tc('documentsMetadataModal.warningDocumentsMissingMetadataDetail',
+                    docsToImportCount - metadataToImportCount),
+                  buttons: [this.$t('bModal.cancelButtonValue'), this.$t('bModal.continueButtonValue')],
                   defaultId: 1
                 }).then(({response}) => {
                   if (response === 1) { // Continue clicked
