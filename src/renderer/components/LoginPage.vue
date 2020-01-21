@@ -1,10 +1,11 @@
+import {ipcRenderer} from "electron";
 <!--
   - Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
   - Licensed under the MIT License. See LICENSE in the project root for license information.
   -->
 
 <template>
-  <b-container class="min-vh-100">
+  <b-container>
     <b-row class="align-items-center">
       <b-col>
         <form v-if="!refreshPending" id="login-form">
@@ -41,6 +42,7 @@
 </template>
 
 <script>
+    import {ipcRenderer} from "electron";
     import {mapState} from "vuex";
     const log = require('electron-log');
 
@@ -58,6 +60,8 @@
         },
 
         mounted () {
+            // to resize window to content
+            this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
             // redirect to home if user access token is set (and still valid or can be refresh)
             this.skipLoginIfAuthenticated();
         },

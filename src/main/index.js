@@ -18,6 +18,17 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`;
 
+function fitWindowSizeToContent (window) {
+    window.webContents.executeJavaScript(
+      'function getContentSize() {' +
+        'return {width: document.querySelector(\'.container,.container-fluid\').scrollWidth,' +
+        'height: document.querySelector(\'.container,.container-fluid\').scrollHeight}' +
+      '};getContentSize();'
+    ).then((result) => {
+      window.setSize(result.width, result.height);
+    });
+}
+
 function createWindow () {
   /**
    * Initial window options
@@ -39,6 +50,11 @@ function createWindow () {
   mainWindow.setAutoHideMenuBar(true);
 
   mainWindow.loadURL(winURL);
+
+  // On Vue load
+  ipcMain.on('vue-did-finish-load', (event, message) => {
+    fitWindowSizeToContent(mainWindow);
+  });
 
   mainWindow.on('close', (event) => {
     event.preventDefault();

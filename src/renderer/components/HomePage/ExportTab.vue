@@ -5,7 +5,7 @@
 
 <template>
   <b-container class="h-100 d-flex align-content-evenly flex-wrap">
-    <h2 class="text-muted text-center w-100 font-italic"> Coming soon </h2>
+    <h2 class="text-muted text-center w-100 font-italic my-5"> Coming soon </h2>
 
     <!--
     <b-form-file
