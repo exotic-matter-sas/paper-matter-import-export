@@ -26,7 +26,7 @@
           </b-row>
           <b-row>
             <b-col>
-              <b-form-group :label="$t('documentsMetadataModal. previewFormGroupLabel')" v-if="Boolean(csvFile)">
+              <b-form-group :label="$t('documentsMetadataModal.previewFormGroupLabel')" v-if="Boolean(csvFile)">
                 <b-table :fields="previewTabHeaders" :items="extractedCsvDataPreview" striped small
                          sticky-header="200px"
                          head-variant="light">

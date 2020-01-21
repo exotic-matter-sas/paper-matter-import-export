@@ -8,7 +8,7 @@
     <b-row class="align-items-center">
       <b-col>
         <form v-if="!refreshPending" id="login-form">
-          <img src="~@/assets/colors_logo.svg" :alt="$t('Paper Matter logo')" class="d-block mx-auto my-3">
+          <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="d-block mx-auto my-3">
           <div class="form-label-group">
             <input autofocus="" class="form-control" id="id_email" name="username"
                    :placeholder="$t('loginPage.emailInputLabel')" required="" type="text" v-model="email">

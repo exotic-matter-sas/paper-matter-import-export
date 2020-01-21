@@ -10,8 +10,8 @@ import messages from "./messages";
 
 Vue.use(VueI18n);
 
-// const locale = remote.app.getLocale();
-const locale = 'fr';
+const locale = remote.app.getLocale(); // language detected by electron
+// const locale = 'fr'; // force language for test purpose
 
 export default new VueI18n({
   locale,

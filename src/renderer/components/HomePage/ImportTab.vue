@@ -47,7 +47,7 @@
         <b-dropdown
           id="import-button"
           :text="metadataFileDetected ?
-          $t('importTab.importButtonValueWithMetadata') : $t('importTab.importButtonValueWithoutMetadata')"
+          $t('importTab.importButtonWithMetadataValue') : $t('importTab.importButtonWithoutMetadataValue')"
           block
           split
           variant="primary"
@@ -59,7 +59,7 @@
         >
           <b-dropdown-item variant="primary" @click.prevent="prepareImport(!metadataFileDetected)" class="text-center">
             {{!metadataFileDetected ?
-            $t('importTab.importButtonValueWithMetadata') : $t('importTab.importButtonValueWithoutMetadata')}}
+            $t('importTab.importButtonWithMetadataValue') : $t('importTab.importButtonWithoutMetadataValue')}}
           </b-dropdown-item>
         </b-dropdown>
       </b-col>
@@ -283,7 +283,7 @@
 
         const errorCount = vi.docsInError.length;
         const win = remote.getCurrentWindow();
-        const export_interrupted_mention = this.importInterrupted ? this.$t('importTab.exportInterruptMention') : '';
+        const export_interrupted_mention = this.importInterrupted ? this.$t('importTab.exportInterruptedMention') : '';
 
         // Do not display success or error messages when user get disconnected
         // (it will appears at the end of the resumed import after reconnection)

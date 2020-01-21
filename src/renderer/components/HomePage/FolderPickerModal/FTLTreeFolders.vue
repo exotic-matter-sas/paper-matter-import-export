@@ -42,8 +42,8 @@
       root: {type: Boolean, default: true},
       sourceFolder: {type: Number, default: -1},
       unSavedImportDestination: {type: Object},
-      store: {type: Object}, // using props instead to get store reference instead of normal usage as a workaround
-      i18n: {type: Object} // using props instead to get t method reference instead of normal usage as a workaround
+      store: {type: Object}, // using props to get store reference instead of normal usage as a workaround
+      i18n: {type: Object} // using props to get t method reference instead of normal usage as a workaround
     },
 
     data() {
