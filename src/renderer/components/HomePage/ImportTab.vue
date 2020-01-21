@@ -115,10 +115,9 @@
         remote.dialog.showMessageBox(win,
           {
             type: 'info',
-            title: 'You can resume last import',
-            message: 'Last import wasn\'t fully completed.',
-            detail: `There is ${docsToImportCount} files left to import, you can finish the import by clicking ` +
-                'the Import button.',
+            title: this.$t('importTab.warningResumeLastImportTitle'),
+            message: this.$t('importTab.warningResumeLastImportMessage'),
+            detail: this.$tc('importTab.warningResumeLastImportDetail', docsToImportCount),
             buttons: ['Ok'],
             defaultId: 0
           });
@@ -284,7 +283,7 @@
 
         const errorCount = vi.docsInError.length;
         const win = remote.getCurrentWindow();
-        const export_interrupted_mention = this.importInterrupted ? ' (export has been interrupted)' : '';
+        const export_interrupted_mention = this.importInterrupted ? this.$t('importTab.exportInterruptMention') : '';
 
         // Do not display success or error messages when user get disconnected
         // (it will appears at the end of the resumed import after reconnection)
@@ -292,12 +291,12 @@
           if (errorCount) {
             this.displayImportErrorPrompt(errorCount, export_interrupted_mention);
           } else {
-            const s = (totalCount - this.docsToImport.length) > 1 ? 's' : '';
             remote.dialog.showMessageBox(win,
               {
                 type: 'info',
-                title: `Documents successfully imported`,
-                message: `${totalCount - this.docsToImport.length} document${s} imported without error${export_interrupted_mention}.`,
+                title: this.$t('importTab.successImportTitle'),
+                message: this.$tc('importTab.successImportMessage',
+                  totalCount - this.docsToImport.length, {export_interrupted_mention}),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -306,8 +305,8 @@
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: 'Export interrupted',
-              message: 'You have been disconnected, please log again to resume your import',
+              title: this.$t('importTab.warningExportInterruptedTitle'),
+              message: this.$t('importTab.warningExportInterruptedMessage'),
               buttons: ['Ok'],
               defaultId: 0
             });
@@ -383,15 +382,14 @@
       displayImportErrorPrompt(errorCount, export_interrupted_mention='') {
         const win = remote.getCurrentWindow();
 
-        const s = this.docsInError.length > 1 ? 's' : '';
         log.error('theses files could not be imported:', this.docsInError);
         remote.dialog.showMessageBox(win,
           {
             type: 'error',
-            title: `Error${s} occurred during import`,
-            message: `${errorCount} document${s} couldn't be imported:`,
-            detail: `You can retry to import them by clicking the Import button${export_interrupted_mention}.`,
-            buttons: ['Ok', 'Display detailed report'],
+            title: this.$tc('importTab.errorImportTitle', this.docsInError.length),
+            message: this.$tc('importTab.errorImportMessage', this.docsInError.length),
+            detail: this.$tc('importTab.errorImportDetail', this.docsInError.length, {export_interrupted_mention}),
+            buttons: ['Ok', this.$t('importTab.displayErrorReportButtonValue')],
             defaultId: 0
           }).then( ({response}) => {
             if (response === 1){ // Second button clicked

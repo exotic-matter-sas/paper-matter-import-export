@@ -12,7 +12,13 @@ export default {
     bModal: {
       okButtonValue: 'OK',
       continueButtonValue: 'Continue',
+      closeButtonValue: 'Close',
       cancelButtonValue: 'Cancel'
+    },
+    main: {
+      warningExitingImportIncompleteTitle: 'Are you sure you want to quit?',
+      warningExitingImportIncompleteMessage: 'There are some documents which remain to be imported.',
+      warningExitingImportIncompleteDetail: 'If you close now, ongoing import or documents selection will be lost.',
     },
     loginPage: {
       emailInputLabel: 'Email',
@@ -38,6 +44,18 @@ export default {
       destinationFormGroupDescription: 'Selected files and/or content of selected folder will be imported into the destination',
       importButtonValueWithoutMetadata: 'Import documents',
       importButtonValueWithMetadata: 'Import documents with metadata',
+      warningResumeLastImportTitle: 'You can resume last import',
+      warningResumeLastImportMessage: 'Last import wasn\'t fully completed.',
+      warningResumeLastImportDetail: '| There is one file left to import, you can finish the import by clicking the Import button. | There is {n} files left to import, you can finish the import by clicking the Import button.',
+      exportInterruptMention: ' (export has been interrupted)',
+      successImportTitle: 'Documents successfully imported',
+      successImportMessage: '|  one document imported without error{export_interrupted_mention}. | {n} documents imported without errors{export_interrupted_mention}.',
+      warningExportInterruptedTitle: 'Export interrupted',
+      warningExportInterruptedMessage: 'You have been disconnected, please log again to resume your import',
+      errorImportTitle: '| One error occurred during import | Errors occurred during import',
+      errorImportMessage: '| One document couldn\'t be imported: | {n} documents couldn\'t be imported:',
+      errorImportDetail: '| You can retry to import it by clicking the Import button{export_interrupted_mention}. | You can retry to import them by clicking the Import button{export_interrupted_mention}.',
+      displayErrorReportButtonValue: 'Display detailed report'
     },
     exportTab: {
       comingSoonLabel: 'Coming soon',
@@ -95,7 +113,13 @@ export default {
     bModal: {
       okButtonValue: 'Valider',
       continueButtonValue: 'Continuer',
+      closeButtonValue: 'Quitter',
       cancelButtonValue: 'Annuler'
+    },
+    main: {
+      warningExitingImportIncompleteTitle: 'Êtes-vous sûr de vouloir quitter ?',
+      warningExitingImportIncompleteMessage: 'Certains documents restent à importer.',
+      warningExitingImportIncompleteDetail: 'Si vous quittez maintenant, l\'import en cours ou la sélection des documents seront perdus.',
     },
     loginPage: {
       emailInputLabel: 'Email',
@@ -121,6 +145,18 @@ export default {
       destinationFormGroupDescription: 'Les fichiers sélectionnés et/ou le contenu du dossier sélectionné seront importés dans la destination',
       importButtonValueWithoutMetadata: 'Importer les documents',
       importButtonValueWithMetadata: 'Importer les documents avec des métadonnées',
+      warningResumeLastImportTitle: 'Vous pouvez reprendre le dernier import',
+      warningResumeLastImportMessage: 'Le dernier import n\'a pas éte terminé.',
+      warningResumeLastImportDetail: '| Il y a un fichier restant à importer, vous pouvez terminer l\'import en cliquant sur le bouton Importer. | Il y a {n} fichiers restant à importer, vous pouvez terminer l\'import en cliquant sur le bouton Importer.',
+      exportInterruptMention: ' (l\'export a été imterrompu)',
+      successImportTitle: 'Documents importés avec succès',
+      successImportMessage: '|  un document importé sans erreur{export_interrupted_mention}. | {n} documents importé sans erreurs{export_interrupted_mention}.',
+      warningExportInterruptedTitle: 'Export interrompu',
+      warningExportInterruptedMessage: 'Vous avez été déconnecté, veuillez vous reconnecter pour poursuivre l\'import',
+      errorImportTitle: '| Une erreur s\'est produite durant l\'import | Des erreurs se sont produites durant l\'import',
+      errorImportMessage: '| Un document n\'a pu être importé : | {n} documents n\'ont pu être importés :',
+      errorImportDetail: '| Vous pouvez retenter de l\'importer en cliquant sur le bouton Importer{export_interrupted_mention}. | Vous pouvez retenter de les importer en cliquant sur le bouton Importer{export_interrupted_mention}.',
+      displayErrorReportButtonValue: 'Display detailed report'
     },
     exportTab: {
       comingSoonLabel: 'Bientôt disponible',

@@ -51,10 +51,10 @@ ipcRenderer.on('closeMainWindow', (event, message) => {
     remote.dialog.showMessageBox(null,
       {
         type: 'question',
-        title: 'Are you sure you want to quit?',
-        message: 'There are some documents which remain to be imported.',
-        detail: 'If you close now, ongoing import or documents selection will be lost.',
-        buttons: ['Cancel', 'Close'],
+        title: i18n.t('main.warningExitingImportIncompleteTitle'),
+        message: i18n.t('main.warningExitingImportIncompleteMessage'),
+        detail: i18n.t('main.warningExitingImportIncompleteDetail'),
+        buttons: [i18n.t('bModal.cancelButtonValue'), i18n.t('bModal.closeButtonValue')],
         defaultId: 0
       }).then( ({response}) => {
         if (response === 1){
