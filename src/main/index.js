@@ -18,6 +18,20 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`;
 
+function fitWindowHeightToContent (window) {
+    window.webContents.executeJavaScript(
+      'function getContentHeight() {' +
+        'if (document.readyState === "complete"){' +
+          'return document.querySelector(\'.container,.container-fluid\').scrollHeight;' +
+        '} else {' +
+          'setTimeout(getContentHeight, 500);' +
+        '}' +
+      '};getContentHeight();'
+    ).then((contentHeight) => {
+      window.setContentSize(window.getContentSize()[0], contentHeight); // keep same width
+    });
+}
+
 function createWindow () {
   /**
    * Initial window options
@@ -25,9 +39,9 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     // When using run dev, electron version may be shown instead of packages.json version
     title: 'Paper Matter import and export - ' + app.getVersion(),
-    height: 375,
-    useContentSize: true,
     width: 500,
+    height: 375,
+    useContentSize: false, // width and height set webview content instead of windows size (with borders and title bar)
     webPreferences: {
       nodeIntegration: true, // not an issue as long as we do not display third party web page through the app
       webSecurity: process.env.NODE_ENV !== 'development' // to allow requesting API from localhost during development
@@ -39,6 +53,11 @@ function createWindow () {
   mainWindow.setAutoHideMenuBar(true);
 
   mainWindow.loadURL(winURL);
+
+  // On Vue load
+  ipcMain.on('vue-did-finish-load', (event, message) => {
+    fitWindowHeightToContent(mainWindow);
+  });
 
   mainWindow.on('close', (event) => {
     event.preventDefault();

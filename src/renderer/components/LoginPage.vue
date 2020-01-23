@@ -4,7 +4,7 @@
   -->
 
 <template>
-  <b-container class="min-vh-100">
+  <b-container>
     <b-row class="align-items-center">
       <b-col>
         <form v-if="!refreshPending" id="login-form">
@@ -34,7 +34,7 @@
         </div>
       </b-col>
     </b-row>
-    <b-row id="domain-footer">
+    <b-row id="domain-footer" class="mb-3">
       <b-col class="text-center">
           <label class="d-inline">{{ $t('loginPage.loginDomainLabel') }}<b>{{this.apiBaseUrl}}</b></label>
       </b-col>
@@ -44,6 +44,7 @@
 
 
 <script>
+    import {ipcRenderer} from "electron";
     import {mapState} from "vuex";
     const log = require('electron-log');
 
@@ -61,6 +62,8 @@
         },
 
         mounted () {
+            // to resize window to content
+            this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
             // redirect to home if user access token is set (and still valid or can be refresh)
             this.skipLoginIfAuthenticated();
         },
@@ -112,6 +115,8 @@
                         } else if (error.request) {
                          vi.lastError = 'The Paper Matter server seems unreachable, please check your connection.'
                         }
+                        // to resize window to content when error message appears
+                        this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
                     });
 
                 vi.loginPending = false;

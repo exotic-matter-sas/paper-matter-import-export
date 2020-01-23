@@ -9,8 +9,12 @@ import {remote} from "electron";
 import messages from "./messages";
 
 Vue.use(VueI18n);
+const log = require('electron-log');
 
-const locale = remote.app.getLocale(); // language detected by electron
+// language detection by electron
+// strip eventual lang variant to avoid vuei18n falling always falling back to en when a lang variant is set (eg. fr-CA)
+const locale = remote.app.getLocale().split('-')[0];
+log.debug(`Detected locale: ${locale}`);
 // const locale = 'fr'; // force language for test purpose
 
 export default new VueI18n({

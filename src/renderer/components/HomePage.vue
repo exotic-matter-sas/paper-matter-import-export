@@ -4,7 +4,7 @@
   -->
 
 <template>
-  <b-container fluid class="min-vh-100 d-flex flex-column">
+  <b-container fluid class="d-flex flex-column">
     <ul class="nav nav-tabs row bg-dark align-items-center" role="tablist">
       <li class="nav-item col">
         <a class="nav-link active text-center" id="import-tab" data-toggle="tab" href="#import" role="tab" aria-controls="home" aria-selected="true">
@@ -24,7 +24,7 @@
         {{$t('homePage.loggedAsLabel')}}<span :title="accountName">{{accountName}}</span>
       </li>
     </ul>
-    <div class="tab-content row flex-grow-1">
+    <div class="tab-content row flex-grow-1 mb-3">
       <div class="tab-pane show active col" id="import" role="tabpanel" aria-labelledby="import-tab">
         <ImportTab
           :importInterrupted="importInterrupted"
@@ -45,6 +45,7 @@
 </template>
 
 <script>
+  import {ipcRenderer} from "electron";
   import ImportTab from "./HomePage/ImportTab";
   import ExportTab from "./HomePage/ExportTab";
   import ProgressModal from "./HomePage/ProgressModal";
@@ -70,6 +71,11 @@
           importInterrupted: false,
           pickingFolder: false
       }
+    },
+
+    mounted() {
+      // to resize window to content
+      this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
     },
 
     computed: {
