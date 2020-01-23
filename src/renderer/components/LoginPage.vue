@@ -1,4 +1,3 @@
-import {ipcRenderer} from "electron";
 <!--
   - Copyright (c) 2019 Exotic Matter SAS. All rights reserved.
   - Licensed under the MIT License. See LICENSE in the project root for license information.
@@ -116,6 +115,8 @@ import {ipcRenderer} from "electron";
                         } else if (error.request) {
                          vi.lastError = 'The Paper Matter server seems unreachable, please check your connection.'
                         }
+                        // to resize window to content when error message appears
+                        this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
                     });
 
                 vi.loginPending = false;
