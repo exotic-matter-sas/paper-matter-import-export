@@ -18,14 +18,17 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`;
 
-function fitWindowSizeToContent (window) {
+function fitWindowHeightToContent (window) {
     window.webContents.executeJavaScript(
-      'function getContentSize() {' +
-        'return {width: document.querySelector(\'.container,.container-fluid\').scrollWidth,' +
-        'height: document.querySelector(\'.container,.container-fluid\').scrollHeight}' +
-      '};getContentSize();'
-    ).then((result) => {
-      window.setSize(result.width, result.height);
+      'function getContentHeight() {' +
+        'if (document.readyState === "complete"){' +
+          'return document.querySelector(\'.container,.container-fluid\').scrollHeight;' +
+        '} else {' +
+          'setTimeout(getContentHeight, 500);' +
+        '}' +
+      '};getContentHeight();'
+    ).then((contentHeight) => {
+      window.setSize(window.getSize()[0], contentHeight); // keep same width
     });
 }
 
@@ -53,7 +56,7 @@ function createWindow () {
 
   // On Vue load
   ipcMain.on('vue-did-finish-load', (event, message) => {
-    fitWindowSizeToContent(mainWindow);
+    fitWindowHeightToContent(mainWindow);
   });
 
   mainWindow.on('close', (event) => {
