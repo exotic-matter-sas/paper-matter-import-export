@@ -28,7 +28,7 @@ function fitWindowHeightToContent (window) {
         '}' +
       '};getContentHeight();'
     ).then((contentHeight) => {
-      window.setSize(window.getSize()[0], contentHeight); // keep same width
+      window.setContentSize(window.getSize()[0], contentHeight); // keep same width
     });
 }
 
@@ -39,9 +39,9 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     // When using run dev, electron version may be shown instead of packages.json version
     title: 'Paper Matter import and export - ' + app.getVersion(),
-    height: 375,
-    useContentSize: false,
     width: 500,
+    height: 375,
+    useContentSize: false, // width and height set webview content instead of windows size (with borders and title bar)
     webPreferences: {
       nodeIntegration: true, // not an issue as long as we do not display third party web page through the app
       webSecurity: process.env.NODE_ENV !== 'development' // to allow requesting API from localhost during development
