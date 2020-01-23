@@ -28,7 +28,7 @@ function fitWindowHeightToContent (window) {
         '}' +
       '};getContentHeight();'
     ).then((contentHeight) => {
-      window.setContentSize(window.getSize()[0], contentHeight); // keep same width
+      window.setContentSize(window.getContentSize()[0], contentHeight); // keep same width
     });
 }
 
