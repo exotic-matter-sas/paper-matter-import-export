@@ -43,15 +43,15 @@
             ]
         },
         "mac": {
-            "icon": "build/icons/icon.icns",
+            "icon": "build/icons/icon.png",
             "target": "dmg"
         },
         "win": {
-            "icon": "build/icons/icon.ico",
+            "icon": "build/icons/icon.png",
             "target": "nsis"
         },
         "linux": {
-            "icon": "build/icons",
+            "icon": "build/icons/icon.png",
             "category": "Utility",
             "target": "deb"
         }
