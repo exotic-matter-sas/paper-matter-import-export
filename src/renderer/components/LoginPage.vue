@@ -34,7 +34,7 @@
         </div>
       </b-col>
     </b-row>
-    <b-row id="domain-footer">
+    <b-row id="domain-footer" class="mb-3">
       <b-col class="text-center">
           <label class="d-inline">{{ $t('loginPage.loginDomainLabel') }}<b>{{this.apiBaseUrl}}</b></label>
       </b-col>
