@@ -1,6 +1,6 @@
 {
     "name": "paper-matter-import-export",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "author": "fabien <fabien@exotic-matter.fr>",
     "description": "Local client to import/export your documents in/from Paper Matter",
     "homepage": "https://papermatter.app",
@@ -47,7 +47,7 @@
             "target": "dmg"
         },
         "win": {
-            "icon": "build/icons/icon.png",
+            "icon": "build/icons/icon.ico",
             "target": "nsis"
         },
         "linux": {
