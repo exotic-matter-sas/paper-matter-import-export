@@ -21,7 +21,6 @@ const winURL = process.env.NODE_ENV === 'development'
 function fitWindowHeightToContent (window) {
     window.webContents.executeJavaScript(
       'function getContentHeight() {' +
-        'console.log("readyState: ", document.readyState);' +
         'if (document.readyState === "complete"){' +
           'return document.querySelector(\'.container,.container-fluid\').scrollHeight;' +
         '} else {' +
