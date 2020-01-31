@@ -172,7 +172,7 @@
           .on('data',
             function (row) {
               // concat headers name for every lines preloaded (most will be duplicates)
-              vi.csvHeaders = vi.csvHeaders.concat(Object.keys(row).map(item => (item)));
+              vi.csvHeaders = vi.csvHeaders.concat(Object.getOwnPropertyNames(row).map(item => (item)));
               // concat csv data for preloaded lines
               vi.fullCsvDataPreview = vi.fullCsvDataPreview.concat(row);
             })
@@ -282,7 +282,7 @@
         .on('end',
           function (rowCount) {
             const docsToImportCount = vi.docsToImport.length;
-            const metadataToImportCount = Object.keys(vi.docsMetadataToImport).length;
+            const metadataToImportCount = Object.getOwnPropertyNames(vi.docsMetadataToImport).length;
             const win = remote.getCurrentWindow();
             if (metadataToImportCount === 0) {
               log.warn('No metadata match documents to import');

@@ -237,7 +237,7 @@
             created: new Date(serializedDocument.lastModified).toISOString()
           };
           // If documents metadata have been setup check if some match current document and add them to jsonData
-          if (Object.keys(this.docsMetadataToImport).length) {
+          if (Object.getOwnPropertyNames(this.docsMetadataToImport).length) {
             const uniqueMetadataKey = await this.hashString({algorithm: 'SHA-1', string: serializedDocument.path});
             const docMetadata = this.docsMetadataToImport[uniqueMetadataKey];
             if(docMetadata !== undefined){
