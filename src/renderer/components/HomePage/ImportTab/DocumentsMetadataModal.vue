@@ -255,6 +255,7 @@
             vi.storingCsvData = false;
         }
       );
+      let addDocMetadataToImportPromises = [];
       csvStream
         .pipe(csv.parse({ignoreEmpty: true, headers: true}))
         // handle csv parsing error here
@@ -274,50 +275,60 @@
           })
         .on('data',
           function (row) {
-            vi.$store.dispatch(
-              'import/addDocMetadataToImport',
-              vi.extractCsvData([row])[0]
+            addDocMetadataToImportPromises.push(
+              vi.$store.dispatch(
+                'import/addDocMetadataToImport',
+                vi.extractCsvData([row])[0]
+              )
             );
           })
         .on('end',
           function (rowCount) {
-            const docsToImportCount = vi.docsToImport.length;
-            const metadataToImportCount = Object.getOwnPropertyNames(vi.docsMetadataToImport).length;
-            const win = remote.getCurrentWindow();
-            if (metadataToImportCount === 0) {
-              log.warn('No metadata match documents to import');
-              remote.dialog.showMessageBox(win,
-                {
-                  type: 'info',
-                  title: vi.$t('documentsMetadataModal.warningMetadataNoMatchTitle'),
-                  message: vi.$t('documentsMetadataModal.warningMetadataNoMatchMessage'),
-                  detail: vi.$t('documentsMetadataModal.warningMetadataNoMatchDetail'),
-                  buttons: ['Ok'],
-                  defaultId: 0
-                });
-            } else if (metadataToImportCount < docsToImportCount) {
-              log.warn('Some documents have no metadata associated');
-              remote.dialog.showMessageBox(win,
-                {
-                  type: 'question',
-                  title: vi.$t('documentsMetadataModal.warningDocumentsMissingMetadataTitle'),
-                  message: vi.$t('documentsMetadataModal.warningDocumentsMissingMetadataMessage'),
-                  detail: vi.$tc('documentsMetadataModal.warningDocumentsMissingMetadataDetail',
-                    docsToImportCount - metadataToImportCount),
-                  buttons: [vi.$t('bModal.cancelButtonValue'), vi.$t('bModal.continueButtonValue')],
-                  defaultId: 1
-                }).then(({response}) => {
-                  if (response === 1) { // Continue clicked
-                    vi.$emit('event-proceed-to-import');
+
+          // FIXME remove usage of Promise.allsettled polyfill package when electron@stable get Node >=12.9.0
+          const allSettled = require('promise.allsettled');
+
+          allSettled(addDocMetadataToImportPromises)
+            .then(() => {
+              const docsToImportCount = vi.docsToImport.length;
+              const metadataToImportCount = Object.getOwnPropertyNames(vi.docsMetadataToImport).length;
+              const win = remote.getCurrentWindow();
+              if (metadataToImportCount === 0) {
+                log.warn('No metadata match documents to import');
+                remote.dialog.showMessageBox(win,
+                  {
+                    type: 'info',
+                    title: vi.$t('documentsMetadataModal.warningMetadataNoMatchTitle'),
+                    message: vi.$t('documentsMetadataModal.warningMetadataNoMatchMessage'),
+                    detail: vi.$t('documentsMetadataModal.warningMetadataNoMatchDetail'),
+                    buttons: ['Ok'],
+                    defaultId: 0
+                  });
+              } else if (metadataToImportCount < docsToImportCount) {
+                log.warn('Some documents have no metadata associated');
+                remote.dialog.showMessageBox(win,
+                  {
+                    type: 'question',
+                    title: vi.$t('documentsMetadataModal.warningDocumentsMissingMetadataTitle'),
+                    message: vi.$t('documentsMetadataModal.warningDocumentsMissingMetadataMessage'),
+                    detail: vi.$tc('documentsMetadataModal.warningDocumentsMissingMetadataDetail',
+                      docsToImportCount - metadataToImportCount),
+                    buttons: [vi.$t('bModal.cancelButtonValue'), vi.$t('bModal.continueButtonValue')],
+                    defaultId: 1
+                  }).then(({response}) => {
+                    if (response === 1) { // Continue clicked
+                      vi.$emit('event-proceed-to-import');
+                    }
                   }
-                }
-              );
-            } else {
-              vi.$emit('event-proceed-to-import');
-            }
-            vi.storingCsvData = false;
-            log.debug('storeCsvData end');
-          });
+                );
+              } else {
+                vi.$emit('event-proceed-to-import');
+              }
+              vi.storingCsvData = false;
+              log.debug('storeCsvData end');
+            });
+          }
+        );
     },
   }
   }
