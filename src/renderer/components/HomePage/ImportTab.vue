@@ -237,7 +237,7 @@
             created: new Date(serializedDocument.lastModified).toISOString()
           };
           // If documents metadata have been setup check if some match current document and add them to jsonData
-          if (Object.keys(this.docsMetadataToImport).length) {
+          if (Object.getOwnPropertyNames(this.docsMetadataToImport).length) {
             const uniqueMetadataKey = await this.hashString({algorithm: 'SHA-1', string: serializedDocument.path});
             const docMetadata = this.docsMetadataToImport[uniqueMetadataKey];
             if(docMetadata !== undefined){
@@ -283,20 +283,20 @@
 
         const errorCount = vi.docsInError.length;
         const win = remote.getCurrentWindow();
-        const export_interrupted_mention = this.importInterrupted ? this.$t('importTab.exportInterruptedMention') : '';
+        const export_interrupted_mention = vi.importInterrupted ? vi.$t('importTab.exportInterruptedMention') : '';
 
         // Do not display success or error messages when user get disconnected
         // (it will appears at the end of the resumed import after reconnection)
         if(vi.accessToken){
           if (errorCount) {
-            this.displayImportErrorPrompt(errorCount, export_interrupted_mention);
+            vi.displayImportErrorPrompt(errorCount, export_interrupted_mention);
           } else {
             remote.dialog.showMessageBox(win,
               {
                 type: 'info',
-                title: this.$t('importTab.successImportTitle'),
-                message: this.$tc('importTab.successImportMessage',
-                  totalCount - this.docsToImport.length, {export_interrupted_mention}),
+                title: vi.$t('importTab.successImportTitle'),
+                message: vi.$tc('importTab.successImportMessage',
+                  totalCount - vi.docsToImport.length, {export_interrupted_mention}),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -305,8 +305,8 @@
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: this.$t('importTab.warningExportInterruptedTitle'),
-              message: this.$t('importTab.warningExportInterruptedMessage'),
+              title: vi.$t('importTab.warningExportInterruptedTitle'),
+              message: vi.$t('importTab.warningExportInterruptedMessage'),
               buttons: ['Ok'],
               defaultId: 0
             });

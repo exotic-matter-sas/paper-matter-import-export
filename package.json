@@ -1,6 +1,6 @@
 {
     "name": "paper-matter-import-export",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "author": "fabien <fabien@exotic-matter.fr>",
     "description": "Local client to import/export your documents in/from Paper Matter",
     "homepage": "https://papermatter.app",
@@ -68,6 +68,7 @@
         "jquery": "^3.4.1",
         "jwt-decode": "^2.2.0",
         "pdfjs-dist": "^2.2.228",
+        "promise.allsettled": "^1.0.2",
         "vue": "^2.5.16",
         "vue-electron": "1.0.6",
         "vue-i18n": "^8.15.3",

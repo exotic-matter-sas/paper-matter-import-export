@@ -145,9 +145,9 @@
             remote.dialog.showMessageBox(win,
               {
                 type: 'error',
-                title: this.$t('documentsMetadataModal.errorReadingCsvTitle'),
-                message: this.$t('documentsMetadataModal.errorReadingCsvMessage'),
-                detail: this.$t('documentsMetadataModal.errorReadingCsvDetail'),
+                title: vi.$t('documentsMetadataModal.errorReadingCsvTitle'),
+                message: vi.$t('documentsMetadataModal.errorReadingCsvMessage'),
+                detail: vi.$t('documentsMetadataModal.errorReadingCsvDetail'),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -162,9 +162,9 @@
               remote.dialog.showMessageBox(win,
                 {
                   type: 'error',
-                  title: this.$t('documentsMetadataModal.errorParsingCsvTitle'),
-                  message: this.$t('documentsMetadataModal.errorParsingCsvMessage'),
-                  detail: this.$t('documentsMetadataModal.errorParsingCsvDetail'),
+                  title: vi.$t('documentsMetadataModal.errorParsingCsvTitle'),
+                  message: vi.$t('documentsMetadataModal.errorParsingCsvMessage'),
+                  detail: vi.$t('documentsMetadataModal.errorParsingCsvDetail'),
                   buttons: ['Ok'],
                   defaultId: 0
                 });
@@ -172,7 +172,7 @@
           .on('data',
             function (row) {
               // concat headers name for every lines preloaded (most will be duplicates)
-              vi.csvHeaders = vi.csvHeaders.concat(Object.keys(row).map(item => (item)));
+              vi.csvHeaders = vi.csvHeaders.concat(Object.getOwnPropertyNames(row).map(item => (item)));
               // concat csv data for preloaded lines
               vi.fullCsvDataPreview = vi.fullCsvDataPreview.concat(row);
             })
@@ -246,15 +246,16 @@
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: this.$t('documentsMetadataModal.errorReadingCsvTitle'),
-              message: this.$t('documentsMetadataModal.errorReadingCsvMessage'),
-              detail: this.$t('documentsMetadataModal.errorReadingCsvDetail'),
+              title: vi.$t('documentsMetadataModal.errorReadingCsvTitle'),
+              message: vi.$t('documentsMetadataModal.errorReadingCsvMessage'),
+              detail: vi.$t('documentsMetadataModal.errorReadingCsvDetail'),
               buttons: ['Ok'],
               defaultId: 0
             });
-            this.storingCsvData = false;
+            vi.storingCsvData = false;
         }
       );
+      let addDocMetadataToImportPromises = [];
       csvStream
         .pipe(csv.parse({ignoreEmpty: true, headers: true}))
         // handle csv parsing error here
@@ -264,9 +265,9 @@
             remote.dialog.showMessageBox(win,
               {
                 type: 'error',
-                title: this.$t('documentsMetadataModal.errorParsingCsvTitle'),
-                message: this.$t('documentsMetadataModal.errorParsingCsvMessage'),
-                detail: this.$t('documentsMetadataModal.errorParsingCsvDetail'),
+                title: vi.$t('documentsMetadataModal.errorParsingCsvTitle'),
+                message: vi.$t('documentsMetadataModal.errorParsingCsvMessage'),
+                detail: vi.$t('documentsMetadataModal.errorParsingCsvDetail'),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -274,50 +275,60 @@
           })
         .on('data',
           function (row) {
-            vi.$store.dispatch(
-              'import/addDocMetadataToImport',
-              vi.extractCsvData([row])[0]
+            addDocMetadataToImportPromises.push(
+              vi.$store.dispatch(
+                'import/addDocMetadataToImport',
+                vi.extractCsvData([row])[0]
+              )
             );
           })
         .on('end',
           function (rowCount) {
-            const docsToImportCount = vi.docsToImport.length;
-            const metadataToImportCount = Object.keys(vi.docsMetadataToImport).length;
-            const win = remote.getCurrentWindow();
-            if (metadataToImportCount === 0) {
-              log.warn('No metadata match documents to import');
-              remote.dialog.showMessageBox(win,
-                {
-                  type: 'info',
-                  title: this.$t('documentsMetadataModal.warningMetadataNoMatchTitle'),
-                  message: this.$t('documentsMetadataModal.warningMetadataNoMatchMessage'),
-                  detail: this.$t('documentsMetadataModal.warningMetadataNoMatchDetail'),
-                  buttons: ['Ok'],
-                  defaultId: 0
-                });
-            } else if (metadataToImportCount < docsToImportCount) {
-              log.warn('Some documents have no metadata associated');
-              remote.dialog.showMessageBox(win,
-                {
-                  type: 'question',
-                  title: this.$t('documentsMetadataModal.warningDocumentsMissingMetadataTitle'),
-                  message: this.$t('documentsMetadataModal.warningDocumentsMissingMetadataMessage'),
-                  detail: this.$tc('documentsMetadataModal.warningDocumentsMissingMetadataDetail',
-                    docsToImportCount - metadataToImportCount),
-                  buttons: [this.$t('bModal.cancelButtonValue'), this.$t('bModal.continueButtonValue')],
-                  defaultId: 1
-                }).then(({response}) => {
-                  if (response === 1) { // Continue clicked
-                    vi.$emit('event-proceed-to-import');
+
+          // FIXME remove usage of Promise.allsettled polyfill package when electron@stable get Node >=12.9.0
+          const allSettled = require('promise.allsettled');
+
+          allSettled(addDocMetadataToImportPromises)
+            .then(() => {
+              const docsToImportCount = vi.docsToImport.length;
+              const metadataToImportCount = Object.getOwnPropertyNames(vi.docsMetadataToImport).length;
+              const win = remote.getCurrentWindow();
+              if (metadataToImportCount === 0) {
+                log.warn('No metadata match documents to import');
+                remote.dialog.showMessageBox(win,
+                  {
+                    type: 'info',
+                    title: vi.$t('documentsMetadataModal.warningMetadataNoMatchTitle'),
+                    message: vi.$t('documentsMetadataModal.warningMetadataNoMatchMessage'),
+                    detail: vi.$t('documentsMetadataModal.warningMetadataNoMatchDetail'),
+                    buttons: ['Ok'],
+                    defaultId: 0
+                  });
+              } else if (metadataToImportCount < docsToImportCount) {
+                log.warn('Some documents have no metadata associated');
+                remote.dialog.showMessageBox(win,
+                  {
+                    type: 'question',
+                    title: vi.$t('documentsMetadataModal.warningDocumentsMissingMetadataTitle'),
+                    message: vi.$t('documentsMetadataModal.warningDocumentsMissingMetadataMessage'),
+                    detail: vi.$tc('documentsMetadataModal.warningDocumentsMissingMetadataDetail',
+                      docsToImportCount - metadataToImportCount),
+                    buttons: [vi.$t('bModal.cancelButtonValue'), vi.$t('bModal.continueButtonValue')],
+                    defaultId: 1
+                  }).then(({response}) => {
+                    if (response === 1) { // Continue clicked
+                      vi.$emit('event-proceed-to-import');
+                    }
                   }
-                }
-              );
-            } else {
-              vi.$emit('event-proceed-to-import');
-            }
-            vi.storingCsvData = false;
-            log.debug('storeCsvData end');
-          });
+                );
+              } else {
+                vi.$emit('event-proceed-to-import');
+              }
+              vi.storingCsvData = false;
+              log.debug('storeCsvData end');
+            });
+          }
+        );
     },
   }
   }
