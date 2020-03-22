@@ -5,19 +5,18 @@
 
 <template>
   <li class="folder-tree-item">
-    <span @click.prevent="folderSelected" @dblclick.prevent="toggle"
-      class="px-1"
-      :class="{'font-weight-bold': item.has_descendant, selected: unSavedImportDestination && unSavedImportDestination.id === item.id}">
-      <span class="target-folder-name">
+    <b-link class="expand-folder-child" v-if="item.has_descendant && !item.is_root" @click="toggle">
+      <b-spinner v-if="loading" small></b-spinner>
+      <font-awesome-icon v-else :icon="isOpen ? ['far', 'minus-square'] : ['far', 'plus-square']"/>
+    </b-link>
+    <b-link @click.prevent="folderSelected" @dblclick.prevent="toggle" class="d-block"
+            :class="{'font-weight-bold': item.has_descendant, selected: unSavedImportDestination && unSavedImportDestination.id === item.id}">
+      <span class="target-folder-name mx-2" :title="item.name">
         <font-awesome-icon :icon="isOpen || item.is_root ? 'folder-open' : 'folder'"/>
         &nbsp;{{ item.name }}&nbsp;
       </span>
-      <b-spinner :class="{'d-none': !loading}" small></b-spinner>
-    </span>
-    <span class="expand-folder-child" v-if="item.has_descendant && !loading && !item.is_root" @click.prevent="toggle">
-      [{{ isOpen ? '-' : '+' }}]
-    </span>
-    <ul class="pl-3" v-show="isOpen || item.is_root" v-if="item.children.length > 0">
+    </b-link>
+    <ul class="pl-4" v-show="isOpen || item.is_root" v-if="'children' in item && item.children.length > 0">
       <FTLTreeItem
         class="item"
         v-for="folder in item.children"
@@ -29,7 +28,7 @@
         @event-folder-selected="(folder) => {$emit('event-folder-selected', folder)}">
       </FTLTreeItem>
     </ul>
-    <ul class="pl-3" v-else-if="lastFolderListingFailed">
+    <ul class="pl-4" v-else-if="lastFolderListingFailed">
       <li class="text-danger">
         {{ i18n.t('ftlTreeFolders.cantLoadFolderLabel') }}
       </li>
@@ -112,11 +111,29 @@
     cursor: pointer;
   }
 
+  .expand-folder-child{
+    position: absolute;
+    margin-left: -1rem;
+  }
+
   .selected {
     background: map_get($theme-colors, 'active');
+    color:white;
+
+    &:hover{
+      color:white;
+    }
   }
 
   svg {
     vertical-align: -0.125em;
+  }
+
+  .target-folder-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    color: map_get($theme-colors, 'dark-grey');
   }
 </style>
