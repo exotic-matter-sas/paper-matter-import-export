@@ -5,28 +5,33 @@
 
 <template>
   <li class="folder-tree-item">
-    <span
-      :class="{bold: item.has_descendant, selected: unSavedImportDestination && unSavedImportDestination.id === item.id}">
-      <span class="target-folder-name" @click.prevent="folderSelected">
-        <font-awesome-icon :icon="isOpen || item.id==null ? 'folder-open' : 'folder'"/>
-        &nbsp;{{ item.name }}&nbsp;
+    <b-link class="expand-folder-child" v-if="item.has_descendant && !item.is_root" @click="toggle">
+      <b-spinner v-if="loading" small></b-spinner>
+      <font-awesome-icon v-else :icon="isOpen ? ['far', 'minus-square'] : ['far', 'plus-square']"/>
+    </b-link>
+    <b-link @click.prevent="folderSelected" @dblclick.prevent="toggle" class="d-block"
+            :class="{'font-weight-bold': item.has_descendant, selected: unSavedImportDestination && unSavedImportDestination.id === item.id}">
+      <span class="target-folder-name mx-2" :title="item.name">
+        <font-awesome-icon :icon="isOpen || item.is_root ? 'folder-open' : 'folder'"/>
+        {{ item.name }}
       </span>
-      <span class="expand-folder-child" v-if="item.has_descendant && !loading && item.id !== null"
-            @click.prevent="toggle">[{{ isOpen ? '-' : '+' }}]</span>
-      <b-spinner :class="{'d-none': !loading}" small></b-spinner>
-    </span>
-
-    <ul class="pl-3" v-show="isOpen || item.id === null" v-if="item.has_descendant">
+    </b-link>
+    <ul class="pl-4" v-show="isOpen || item.is_root" v-if="'children' in item && item.children.length > 0">
       <FTLTreeItem
         class="item"
         v-for="folder in item.children"
         :key="folder.id"
         :item="folder"
-        :source-folder="sourceFolder"
         :unSavedImportDestination="unSavedImportDestination"
         :store="store"
+        :i18n="i18n"
         @event-folder-selected="(folder) => {$emit('event-folder-selected', folder)}">
       </FTLTreeItem>
+    </ul>
+    <ul class="pl-4" v-else-if="lastFolderListingFailed">
+      <li class="text-danger">
+        {{ i18n.t('ftlTreeFolders.cantLoadFolderLabel') }}
+      </li>
     </ul>
   </li>
 </template>
@@ -40,31 +45,32 @@
         type: Object,
         required: true
       },
-      sourceFolder: {
-        type: Number,
-        required: true
-      },
       unSavedImportDestination: {type: Object},
-      store: {type: Object} // using props to get store reference instead of normal usage as a workaround
+      store: {type: Object}, // using props to get store reference instead of normal usage as a workaround
+      i18n: {type: Object} // using props to get t method reference instead of normal usage as a workaround
     },
 
     data() {
       return {
         loading: false,
-        isOpen: false
+        isOpen: false,
+        lastFolderListingFailed: false,
       }
     },
 
     methods: {
       toggle: function () {
-        this.isOpen = !this.isOpen;
+        if (this.item.has_descendant && !this.loading && !this.item.is_root){
+          this.isOpen = !this.isOpen;
+          this.lastFolderListingFailed = false;
 
-        if (this.item.has_descendant && this.isOpen) {
-          this.updateMovingFolder(this.item.id);
-        }
+          if (this.item.has_descendant && this.isOpen) {
+            this.listItemChildren(this.item.id);
+          }
 
-        if (!this.isOpen) {
-          this.item.children = [];
+          if (!this.isOpen) {
+            this.item.children = [];
+          }
         }
       },
 
@@ -72,22 +78,21 @@
         this.$emit('event-folder-selected', this.item);
       },
 
-      updateMovingFolder: function (level = null) {
+      listItemChildren: function (level = null) {
         const vi = this;
+        vi.lastFolderListingFailed = false;
 
-        this.loading = true;
-        this.$api.listFolders(this.accessToken, level)
+        vi.loading = true;
+        vi.$api.listFolders(this.accessToken, level)
           .then(response => {
               vi.item.children = response.data
-                .filter(function (e) {
-                  return e.id !== vi.sourceFolder;
-                })
                 .map(function (e) {
                   return {id: e.id, name: e.name, has_descendant: e.has_descendant, children: []}
                 })
             }
           )
-          .finally(() => this.loading = false);
+          .catch(error => vi.lastFolderListingFailed = true )
+          .finally(() => vi.loading = false);
       }
     }
   }
@@ -102,19 +107,33 @@
     user-select: none;
   }
 
-  .bold {
-    font-weight: bold;
-  }
-
   .item {
     cursor: pointer;
   }
 
+  .expand-folder-child{
+    position: absolute;
+    margin-left: -1rem;
+  }
+
   .selected {
     background: map_get($theme-colors, 'active');
+    color:white;
+
+    &:hover{
+      color:white;
+    }
   }
 
   svg {
     vertical-align: -0.125em;
+  }
+
+  .target-folder-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    color: map_get($theme-colors, 'dark-grey');
   }
 </style>

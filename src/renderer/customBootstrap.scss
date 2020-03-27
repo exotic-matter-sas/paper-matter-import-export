@@ -44,3 +44,12 @@ button svg {
 .modal-backdrop {
 opacity: .5;
 }
+
+a.disabled{
+    color: map_get($theme-colors, 'light-gray');
+    cursor: default;
+
+    &:hover{
+        text-decoration: none;
+    }
+}

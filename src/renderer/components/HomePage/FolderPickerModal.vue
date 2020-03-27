@@ -21,18 +21,19 @@
       </b-row>
     </b-container>
     <template slot="modal-footer">
-          <div class="text-muted w-100 text-left font-italic">
-            <span v-if="unSavedImportDestination">
-              {{ $t('folderPickerModal.selectedFolderLabel') + unSavedImportDestination.name }}
-            </span>
-            <span v-else>{{ $t('folderPickerModal.noFolderSelectedLabel') }}</span>
-          </div>
-          <b-button variant="secondary" @click.prevent="$bvModal.hide('folder-picker-modal')">
-            {{ $t('bModal.cancelButtonValue') }}
-          </b-button>
-          <b-button variant="primary" @click.prevent="saveFolderPick">
-            {{ $t('bModal.okButtonValue') }}
-          </b-button>
+      <div id="selected-folder-label" class="flex-grow-1 text-muted text-left font-italic">
+        <span v-if="unSavedImportDestination" :title="unSavedImportDestination.name">
+            {{ $t('folderPickerModal.selectedFolderLabel') + unSavedImportDestination.name }}
+        </span>
+        <span v-else>{{ $t('folderPickerModal.noFolderSelectedLabel') }}</span>
+      </div>
+
+      <b-button variant="secondary" @click.prevent="$bvModal.hide('folder-picker-modal')">
+        {{ $t('bModal.cancelButtonValue') }}
+      </b-button>
+      <b-button variant="primary" @click.prevent="saveFolderPick">
+        {{ $t('bModal.okButtonValue') }}
+      </b-button>
     </template>
   </b-modal>
 </template>
@@ -86,5 +87,12 @@
     font-size: 2rem;
     width: 100%;
     text-align: center;
+  }
+
+  #selected-folder-label{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
   }
 </style>

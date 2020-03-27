@@ -18,6 +18,10 @@ import {
   faFolderOpen,
   faFolderPlus,
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  faPlusSquare,
+  faMinusSquare,
+} from '@fortawesome/free-regular-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
 import './customBootstrap.scss'
@@ -31,7 +35,7 @@ Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiBaseUrl);
 Vue.config.productionTip = false;
 
 // Font Awesome icons definition
-library.add(faFolder, faFolderOpen, faFolderPlus);
+library.add(faFolder, faFolderOpen, faFolderPlus, faPlusSquare, faMinusSquare);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 // register Bootstrap vue components
 Vue.use(BootstrapVue);
