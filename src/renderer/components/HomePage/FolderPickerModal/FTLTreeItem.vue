@@ -13,7 +13,7 @@
             :class="{'font-weight-bold': item.has_descendant, selected: unSavedImportDestination && unSavedImportDestination.id === item.id}">
       <span class="target-folder-name mx-2" :title="item.name">
         <font-awesome-icon :icon="isOpen || item.is_root ? 'folder-open' : 'folder'"/>
-        &nbsp;{{ item.name }}&nbsp;
+        {{ item.name }}
       </span>
     </b-link>
     <ul class="pl-4" v-show="isOpen || item.is_root" v-if="'children' in item && item.children.length > 0">
