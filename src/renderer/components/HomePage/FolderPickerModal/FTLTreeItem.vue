@@ -83,7 +83,7 @@
         vi.lastFolderListingFailed = false;
 
         vi.loading = true;
-        vi.$api.listFolders(this.accessToken, level)
+        vi.$api.listFolders(this.store.state.auth.accessToken, level)
           .then(response => {
               vi.item.children = response.data
                 .map(function (e) {
