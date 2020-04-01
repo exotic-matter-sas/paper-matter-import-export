@@ -29,6 +29,12 @@ export default {
       loadingSpinnerLabel: 'Loading...',
       serverAddressLabel: 'Login to: ',
       loginDomainLinkTitle: 'If you are using a self-hosted Paper Matter, click to set your server address',
+      errorLogin: 'Please enter a correct email address and password.',
+      errorUnexpected: 'Unexpected error ({0}).',
+      errorUnknown: 'Unknown error, please retry later.',
+      errorUnknownCustomBaseUrl: 'Unknown error, please double check the server address set.',
+      errorServerUnreachable: 'The Paper Matter server seems unreachable, please check your internet connection.',
+
     },
     editServerAddressModal: {
       title: 'Set your server address',
@@ -137,6 +143,11 @@ export default {
       loadingSpinnerLabel: 'Chargement...',
       serverAddressLabel: 'Connexion à : ',
       loginDomainLinkTitle: 'Si vous utilisez une version auto-hébergée de Paper Matter, cliquez pour saisir l\'adresse de votre serveur',
+      errorLogin: 'Veuillez saisir une adresse électronique et un mot de passe valides.',
+      errorUnexpected: 'Erreur imprévue ({0})',
+      errorUnknown: 'Erreur inconnue, veuillez réessayer plus tard.',
+      errorUnknownCustomBaseUrl: 'Erreur inconnue, vérifiez l\'adresse du serveur que vous avez défini.',
+      errorServerUnreachable: 'Le serveur Paper Matter semble injoignable, veuillez vérifier votre connexion internet.',
     },
     editServerAddressModal: {
       title: 'Saisissez l\'adresse de votre serveur',

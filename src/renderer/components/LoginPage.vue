@@ -115,16 +115,20 @@
                     .catch((error) => {
                         if (error.response) {
                             if (error.response.data.detail) {
-                                vi.lastError = error.response.data.detail
+                                if (error.response.status === 401){
+                                  vi.lastError = this.$t('loginPage.errorLogin')
+                                } else {
+                                  vi.lastError = this.$t('loginPage.errorUnexpected', [error.response.data.detail])
+                                }
                             } else {
                                 if(this.baseUrl !== defaultApiBaseUrl) {
-                                  vi.lastError = 'Unknown error, please double check the server address set.'
+                                  vi.lastError = this.$t('loginPage.errorUnknownCustomBaseUrl')
                                 } else {
-                                  vi.lastError = 'Unknown error, please retry later.'
+                                  vi.lastError = this.$t('loginPage.errorUnknown')
                                 }
                             }
                         } else if (error.request) {
-                         vi.lastError = 'The Paper Matter server seems unreachable, please check your connection.'
+                         vi.lastError = this.$t('loginPage.errorServerUnreachable')
                         }
                         // to resize window to content when error message appears
                         this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
