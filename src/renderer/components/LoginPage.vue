@@ -36,9 +36,13 @@
     </b-row>
     <b-row id="domain-footer" class="mb-3">
       <b-col class="text-center">
-          <label class="d-inline">{{ $t('loginPage.loginDomainLabel') }}<b>{{this.apiBaseUrl}}</b></label>
+          <label class="d-inline">{{ $t('loginPage.serverAddressLabel') }}</label>
+        <a href="#" :title="$t('loginPage.loginDomainLinkTitle')"
+           @click.prevent="updatingServerAddress = true">{{ apiBaseUrl }}</a>
       </b-col>
     </b-row>
+    <EditServerAddressModal v-if="updatingServerAddress"
+                            @event-hidden="updatingServerAddress = false"/>
   </b-container>
 </template>
 
@@ -46,18 +50,21 @@
 <script>
     import {ipcRenderer} from "electron";
     import {mapState} from "vuex";
+    import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
+    import {defaultApiBaseUrl} from "./../store/modules/config";
     const log = require('electron-log');
 
     export default {
-        name: 'login',
-
-        data(){
+      name: 'login',
+      components: {EditServerAddressModal},
+      data(){
             return{
                 email: '',
                 password: '',
                 loginPending: false,
                 refreshPending: false,
-                lastError: ''
+                lastError: '',
+                updatingServerAddress: false
             }
         },
 
@@ -110,7 +117,11 @@
                             if (error.response.data.detail) {
                                 vi.lastError = error.response.data.detail
                             } else {
-                                vi.lastError = 'Unknown error, please retry later.'
+                                if(this.baseUrl !== defaultApiBaseUrl) {
+                                  vi.lastError = 'Unknown error, please double check the server address set.'
+                                } else {
+                                  vi.lastError = 'Unknown error, please retry later.'
+                                }
                             }
                         } else if (error.request) {
                          vi.lastError = 'The Paper Matter server seems unreachable, please check your connection.'

@@ -27,7 +27,13 @@ export default {
       forgotPasswordLink: 'Forgot password?',
       submitInputValue: 'Login',
       loadingSpinnerLabel: 'Loading...',
-      loginDomainLabel: 'Login to: '
+      serverAddressLabel: 'Login to: ',
+      loginDomainLinkTitle: 'If you are using a self-hosted Paper Matter, click to set your server address',
+    },
+    editServerAddressModal: {
+      title: 'Set your server address',
+      inputLabel: 'Server address',
+      inputDescription: 'Copy url displayed in your browser just after login in your Paper Matter account or leave blank to reset default value.',
     },
     homePage: {
       importTabLabel: 'Import',
@@ -129,7 +135,13 @@ export default {
       forgotPasswordLink: 'Mot de passe oublié ?',
       submitInputValue: 'Se connecter',
       loadingSpinnerLabel: 'Chargement...',
-      loginDomainLabel: 'Connexion à : '
+      serverAddressLabel: 'Connexion à : ',
+      loginDomainLinkTitle: 'Si vous utilisez une version auto-hébergée de Paper Matter, cliquez pour saisir l\'adresse de votre serveur',
+    },
+    editServerAddressModal: {
+      title: 'Saisissez l\'adresse de votre serveur',
+      inputLabel: 'Adresse du serveur',
+      inputDescription: 'Copiez l\'adresse affichée dans votre navigateur juste après vous être connecté à votre compte Paper Matter ou laissez vide pour restaurer la valeur par défaut.',
     },
     homePage: {
       importTabLabel: 'Import',
