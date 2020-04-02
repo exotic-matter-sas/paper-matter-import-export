@@ -71,7 +71,7 @@ const actions = {
       const metadataDocPath = docMetadataDict.filePath;
       delete docMetadataDict.filePath;
       // generate a unique key to store meta in docsMetadataToImport by hashing metadataDocPath
-      dispatch('tools/hashString', {algorithm: 'SHA-1', string: metadataDocPath}, {root:true}).then(
+      return dispatch('tools/hashString', {algorithm: 'SHA-1', string: metadataDocPath}, {root:true}).then(
         uniqueMetadataKey => {
           commit('ADD_DOC_METADATA_TO_IMPORT', [uniqueMetadataKey, docMetadataDict]);
         }
