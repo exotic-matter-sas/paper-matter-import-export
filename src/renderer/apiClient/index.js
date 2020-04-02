@@ -6,20 +6,20 @@
 import axios from "axios";
 
 export default class ApiCient {
-  constructor(baseUrl) {
-    this.http = axios.create({baseURL: baseUrl})
+  constructor(hostName) {
+    this.http = axios.create({baseURL: hostName + '/app/api'})
   }
 
   getAccessToken(email, password){
     return this.http.post(
-      '/api/token',
+      '/token',
       {email, password}
     )
   }
 
   refreshAccessToken(refreshToken){
     return this.http.post(
-      '/api/token/refresh',
+      '/token/refresh',
       {refresh: refreshToken}
     )
   }
@@ -27,14 +27,14 @@ export default class ApiCient {
   listFolders(accessToken, parent=null){
     let queryString = parent !== null ? `?level=${parent}` : '';
     return this.http.get(
-      `/api/v1/folders${queryString}`,
+      `/v1/folders${queryString}`,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
   }
 
   createFolder(accessToken, name, parent=null){
     return this.http.post(
-      '/api/v1/folders',
+      '/v1/folders',
       {name, parent},
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
@@ -50,7 +50,7 @@ export default class ApiCient {
     }
 
     return this.http.post(
-      '/api/v1/documents/upload',
+      '/v1/documents/upload',
       formData,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )

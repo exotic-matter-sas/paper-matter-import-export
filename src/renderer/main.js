@@ -31,7 +31,7 @@ import ApiClient from './apiClient'
 const log = require('electron-log');
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
-Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiBaseUrl);
+Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiHostName);
 Vue.config.productionTip = false;
 
 // Font Awesome icons definition

@@ -4,25 +4,21 @@
  */
 
 const namespaced = true;
-const defaultApiBaseUrl = 'https://papermatter.app/app'; // prod
-// const defaultApiBaseUrl = 'http://127.0.0.1:8000/app'; // local
+const defaultApiHostName = 'https://papermatter.app'; // prod
+// const defaultApiHostName = 'http://127.0.0.1:8000'; // local
 
 const state = {
-  apiBaseUrl: defaultApiBaseUrl
+  apiHostName: defaultApiHostName
 };
 
 const mutations = {
-  UPDATE_API_BASE_URL (state, apiBaseUrl) {
-    if (apiBaseUrl === ''){
-      state.apiBaseUrl = defaultApiBaseUrl;
-    } else {
-      state.apiBaseUrl = apiBaseUrl.split('#')[0]; // get ride of eventual anchor
-    }
+  UPDATE_API_HOST_NAME (state, apiHostName) {
+    state.apiHostName = apiHostName
   },
 };
 
 export {
-  defaultApiBaseUrl
+  defaultApiHostName
 };
 
 export default {

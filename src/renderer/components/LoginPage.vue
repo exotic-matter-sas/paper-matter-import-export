@@ -38,7 +38,7 @@
       <b-col class="text-center">
           <label class="d-inline">{{ $t('loginPage.serverAddressLabel') }}</label>
         <a href="#" :title="$t('loginPage.loginDomainLinkTitle')"
-           @click.prevent="updatingServerAddress = true">{{ apiBaseUrl }}</a>
+           @click.prevent="updatingServerAddress = true">{{ apiHostName }}</a>
       </b-col>
     </b-row>
     <EditServerAddressModal v-if="updatingServerAddress"
@@ -51,7 +51,7 @@
     import {ipcRenderer} from "electron";
     import {mapState} from "vuex";
     import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
-    import {defaultApiBaseUrl} from "./../store/modules/config";
+    import {defaultApiHostName} from "./../store/modules/config";
     const log = require('electron-log');
 
     export default {
@@ -77,7 +77,7 @@
 
         computed: {
           ...mapState('auth', ['accessToken', 'refreshToken']),
-          ...mapState('config', ['apiBaseUrl'])
+          ...mapState('config', ['apiHostName'])
         },
 
         methods: {
@@ -121,8 +121,8 @@
                                   vi.lastError = this.$t('loginPage.errorUnexpected', [error.response.data.detail])
                                 }
                             } else {
-                                if(this.baseUrl !== defaultApiBaseUrl) {
-                                  vi.lastError = this.$t('loginPage.errorUnknownCustomBaseUrl')
+                                if(this.apiHostName !== defaultApiHostName) {
+                                  vi.lastError = this.$t('loginPage.errorUnknownCustomHostName')
                                 } else {
                                   vi.lastError = this.$t('loginPage.errorUnknown')
                                 }

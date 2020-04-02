@@ -32,14 +32,15 @@ export default {
       errorLogin: 'Please enter a correct email address and password.',
       errorUnexpected: 'Unexpected error ({0}).',
       errorUnknown: 'Unknown error, please retry later.',
-      errorUnknownCustomBaseUrl: 'Unknown error, please double check the server address set.',
+      errorUnknownCustomHostName: 'Unknown error, please double check the server address set.',
       errorServerUnreachable: 'The Paper Matter server seems unreachable, please check your internet connection.',
 
     },
     editServerAddressModal: {
       title: 'Set your server address',
       inputLabel: 'Server address',
-      inputDescription: 'Copy url displayed in your browser just after login in your Paper Matter account or leave blank to reset default value.',
+      inputDescription: 'Copy url displayed in your browser when you are logged into your Paper Matter account (or leave blank to reset default value).',
+      errorParseServerAddress: 'Url is not properly formatted (it should be something like https://example.com)',
     },
     homePage: {
       importTabLabel: 'Import',
@@ -146,13 +147,14 @@ export default {
       errorLogin: 'Veuillez saisir une adresse électronique et un mot de passe valides.',
       errorUnexpected: 'Erreur imprévue ({0})',
       errorUnknown: 'Erreur inconnue, veuillez réessayer plus tard.',
-      errorUnknownCustomBaseUrl: 'Erreur inconnue, vérifiez l\'adresse du serveur que vous avez défini.',
+      errorUnknownCustomHostName: 'Erreur inconnue, vérifiez l\'adresse du serveur que vous avez défini.',
       errorServerUnreachable: 'Le serveur Paper Matter semble injoignable, veuillez vérifier votre connexion internet.',
     },
     editServerAddressModal: {
       title: 'Saisissez l\'adresse de votre serveur',
       inputLabel: 'Adresse du serveur',
-      inputDescription: 'Copiez l\'adresse affichée dans votre navigateur juste après vous être connecté à votre compte Paper Matter ou laissez vide pour restaurer la valeur par défaut.',
+      inputDescription: 'Copiez l\'adresse affichée dans votre navigateur quand vous êtes connecté à votre compte Paper Matter (ou laissez vide pour restaurer la valeur par défaut).',
+      errorParseServerAddress: 'L\'adresse n\'est pas correctement formatée (elle devrait ressembler à https://exemple.com)',
     },
     homePage: {
       importTabLabel: 'Import',

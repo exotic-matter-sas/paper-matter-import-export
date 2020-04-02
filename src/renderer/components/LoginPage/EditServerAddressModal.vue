@@ -16,6 +16,10 @@
                         :description="$t('editServerAddressModal.inputDescription')" >
             <b-form-input v-model="serverAddress"
                           onfocus="this.select()"
+                          :placeholder="inputPlaceholder"
+                          :class="{'text-danger': updateError}"
+                          :title="updateError ? $t('editServerAddressModal.errorParseServerAddress') : ''"
+                          @update="updateError = false"
                           trim autofocus></b-form-input>
           </b-form-group>
         </b-col>
@@ -26,6 +30,7 @@
 
 <script>
   import {mapState} from "vuex";
+  import {defaultApiHostName} from "../../store/modules/config";
 
   const log = require('electron-log');
 
@@ -34,25 +39,45 @@
 
     data(){
       return {
-        serverAddress: ''
+        serverAddress: '',
+        inputPlaceholder: '',
+        updateError: false
       }
     },
 
     computed: {
-      ...mapState('config', ['apiBaseUrl'])
+      ...mapState('config', ['apiHostName'])
     },
 
     mounted() {
       this.$bvModal.show('edit-server-address-modal');
-      this.serverAddress = this.apiBaseUrl;
+      this.serverAddress = this.apiHostName;
+      this.inputPlaceholder = defaultApiHostName;
     },
 
     methods: {
-      save () {
-        this.$store.commit('config/UPDATE_API_BASE_URL', this.serverAddress);
-        // re-instantiate api http client with new base url
-        this.$api.constructor(this.apiBaseUrl);
-        log.info('user update api baseUrl');
+      save (bvModalEvt) {
+        if (this.serverAddress === ''){
+          this.serverAddress = defaultApiHostName;
+        }
+
+        try {
+          const parsedAddress = new URL(this.serverAddress);
+
+          this.$store.commit(
+            'config/UPDATE_API_HOST_NAME',
+            `${parsedAddress.protocol}//${parsedAddress.host}`
+          );
+
+          // re-instantiate api http client with new base url
+          this.$api.constructor(this.apiHostName);
+          log.info('user update api hostName');
+        }
+        catch (e) {
+          log.error('fail to parse new hostname');
+          this.updateError = true;
+          bvModalEvt.preventDefault()
+        }
       },
     }
   }
