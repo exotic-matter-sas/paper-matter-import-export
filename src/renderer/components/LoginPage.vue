@@ -30,17 +30,19 @@
                      @click.prevent="login" :disabled="loginPending || !(login && password)">
             </form>
 
-        <div v-else class="text-center">
-          <b-spinner type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"
-                     style="width:4em;height:4em;"></b-spinner>
-        </div>
-      </b-col>
-    </b-row>
-    <b-row id="domain-footer" class="mb-3">
-      <b-col class="text-center">
-          <label class="d-inline">{{ $t('loginPage.serverAddressLabel') }}</label>
-        <a href="#" :title="$t('loginPage.loginDomainLinkTitle')"
-           @click.prevent="updatingServerAddress = true">{{ apiHostName }}</a>
+            <div v-else class="text-center">
+              <b-spinner type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"
+                         style="width:4em;height:4em;"></b-spinner>
+            </div>
+          </b-col>
+        </b-row>
+        <b-row id="domain-footer">
+          <b-col class="text-center">
+            <label class="d-inline">{{ $t('loginPage.serverAddressLabel') }}</label>
+            <a href="#" :title="$t('loginPage.loginDomainLinkTitle')"
+               @click.prevent="updatingServerAddress = true">{{ apiHostName }}</a>
+          </b-col>
+        </b-row>
       </b-col>
     </b-row>
     <EditServerAddressModal v-if="updatingServerAddress"
