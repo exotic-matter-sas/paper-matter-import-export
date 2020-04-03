@@ -5,28 +5,30 @@
 
 <template>
   <b-container>
-    <b-row class="align-items-center">
+    <b-row class="align-items-center min-vh-100">
       <b-col>
-        <form v-if="!refreshPending" id="login-form">
-          <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="d-block mx-auto my-3">
-          <div class="form-label-group">
-            <input autofocus="" class="form-control" id="id_email" name="username"
-                   :placeholder="$t('loginPage.emailInputLabel')" required="" type="text" v-model="email">
-            <label for="id_email">{{ $t('loginPage.emailInputLabel')}}</label>
-          </div>
-          <div class="form-label-group">
-            <input class="form-control" id="id_password" name="password"
-                   :placeholder="$t('loginPage.passwordInputLabel' )" required=""
-                   type="password"  v-model="password">
-            <label for="id_password">{{ $t('loginPage.passwordInputLabel')}}</label>
-            <a class="mt-1 d-block" href @click.prevent="open('https://papermatter.app/password_reset/')"
-                    id="password-reset">{{ $t('loginPage.forgotPasswordLink')}}
-            </a>
-          </div>
-          <div v-if="lastError" class="alert alert-danger">{{lastError}}</div>
-          <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" :value="$t('loginPage.submitInputValue')"
-                 @click.prevent="login" :disabled="loginPending || !(login && password)">
-        </form>
+        <b-row>
+          <b-col>
+            <form v-if="!refreshPending" id="login-form">
+              <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="d-block mx-auto my-3">
+              <div class="form-label-group">
+                <input autofocus="" class="form-control" id="id_email" name="username"
+                       :placeholder="$t('loginPage.emailInputLabel')" required="" type="text" v-model="email">
+                <label for="id_email">{{ $t('loginPage.emailInputLabel')}}</label>
+              </div>
+              <div class="form-label-group">
+                <input class="form-control" id="id_password" name="password"
+                       :placeholder="$t('loginPage.passwordInputLabel' )" required=""
+                       type="password"  v-model="password">
+                <label for="id_password">{{ $t('loginPage.passwordInputLabel')}}</label>
+                <a class="mt-1 d-block" href @click.prevent="open('https://papermatter.app/password_reset/')"
+                   id="password-reset">{{ $t('loginPage.forgotPasswordLink')}}
+                </a>
+              </div>
+              <div v-if="lastError" class="alert alert-danger">{{lastError}}</div>
+              <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" :value="$t('loginPage.submitInputValue')"
+                     @click.prevent="login" :disabled="loginPending || !(login && password)">
+            </form>
 
         <div v-else class="text-center">
           <b-spinner type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"
@@ -48,7 +50,7 @@
 
 
 <script>
-    import {ipcRenderer} from "electron";
+    import {ipcRenderer, remote} from "electron";
     import {mapState} from "vuex";
     import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
     import {defaultApiHostName} from "./../store/modules/config";
@@ -59,6 +61,7 @@
       components: {EditServerAddressModal},
       data(){
             return{
+                windowHeight: 438,
                 email: '',
                 password: '',
                 loginPending: false,
@@ -69,10 +72,9 @@
         },
 
         mounted () {
-            // to resize window to content
-            this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
-            // redirect to home if user access token is set (and still valid or can be refresh)
-            this.skipLoginIfAuthenticated();
+          // to resize window to page content
+          const window = remote.getCurrentWindow();
+          window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
         },
 
         computed: {
@@ -130,8 +132,6 @@
                         } else if (error.request) {
                          vi.lastError = this.$t('loginPage.errorServerUnreachable')
                         }
-                        // to resize window to content when error message appears
-                        this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
                     });
 
                 vi.loginPending = false;

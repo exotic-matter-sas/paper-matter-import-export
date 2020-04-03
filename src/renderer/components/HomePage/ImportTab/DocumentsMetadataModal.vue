@@ -285,8 +285,21 @@
         .on('end',
           function (rowCount) {
 
-          // FIXME remove usage of Promise.allsettled polyfill package when electron@stable get Node >=12.9.0
-          const allSettled = require('promise.allsettled');
+          // FIXME remove usage of this polyfill when Promise.allSettled will be available in Dev env
+          let allSettled = promises =>
+            Promise.all(
+              promises.map((promise, i) =>
+                promise
+                  .then(value => ({
+                    status: "fulfilled",
+                    value,
+                  }))
+                  .catch(reason => ({
+                    status: "rejected",
+                    reason,
+                  }))
+              )
+            );
 
           allSettled(addDocMetadataToImportPromises)
             .then(() => {

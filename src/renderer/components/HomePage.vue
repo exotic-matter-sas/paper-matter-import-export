@@ -45,7 +45,7 @@
 </template>
 
 <script>
-  import {ipcRenderer} from "electron";
+  import {remote} from "electron";
   import ImportTab from "./HomePage/ImportTab";
   import ExportTab from "./HomePage/ExportTab";
   import ProgressModal from "./HomePage/ProgressModal";
@@ -65,17 +65,19 @@
 
     data() {
       return {
-          actionType: 'import', // TODO make this value dynamic based on active tab
-          actionOnGoing: false,
-          totalCount: 0,
-          importInterrupted: false,
-          pickingFolder: false
+        windowHeight: 386,
+        actionType: 'import', // TODO make this value dynamic based on active tab
+        actionOnGoing: false,
+        totalCount: 0,
+        importInterrupted: false,
+        pickingFolder: false
       }
     },
 
     mounted() {
-      // to resize window to content
-      this.$nextTick().then(() => ipcRenderer.send('vue-did-finish-load'));
+      // to resize window to page content
+      const window = remote.getCurrentWindow();
+      window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
     },
 
     computed: {
