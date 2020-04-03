@@ -35,8 +35,6 @@ function createWindow () {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  // workaround until setMenuBarVisibility is fixed, see https://github.com/electron/electron/pull/19557
-  mainWindow.setAutoHideMenuBar(true);
 
   mainWindow.loadURL(winURL);
 

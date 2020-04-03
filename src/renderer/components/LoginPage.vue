@@ -38,11 +38,15 @@
         </b-row>
         <b-row id="domain-footer">
           <b-col class="text-center">
-            <label class="d-inline">{{ $t('loginPage.loginDomainLabel') }}<b>{{this.apiBaseUrl}}</b></label>
+            <label class="d-inline">{{ $t('loginPage.serverAddressLabel') }}</label>
+            <a href="#" :title="$t('loginPage.loginDomainLinkTitle')"
+               @click.prevent="updatingServerAddress = true">{{ apiHostName }}</a>
           </b-col>
         </b-row>
       </b-col>
     </b-row>
+    <EditServerAddressModal v-if="updatingServerAddress"
+                            @event-hidden="updatingServerAddress = false"/>
   </b-container>
 </template>
 
@@ -50,20 +54,23 @@
 <script>
     import {ipcRenderer, remote} from "electron";
     import {mapState} from "vuex";
+    import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
+    import {defaultApiHostName} from "./../store/modules/config";
     const log = require('electron-log');
 
     export default {
-        name: 'login',
-
-        data(){
-          return{
-            windowHeight: 438,
-            email: '',
-            password: '',
-            loginPending: false,
-            refreshPending: false,
-            lastError: ''
-          }
+      name: 'login',
+      components: {EditServerAddressModal},
+      data(){
+            return{
+                windowHeight: 438,
+                email: '',
+                password: '',
+                loginPending: false,
+                refreshPending: false,
+                lastError: '',
+                updatingServerAddress: false
+            }
         },
 
         mounted () {
@@ -74,7 +81,7 @@
 
         computed: {
           ...mapState('auth', ['accessToken', 'refreshToken']),
-          ...mapState('config', ['apiBaseUrl'])
+          ...mapState('config', ['apiHostName'])
         },
 
         methods: {
@@ -112,12 +119,20 @@
                     .catch((error) => {
                         if (error.response) {
                             if (error.response.data.detail) {
-                                vi.lastError = error.response.data.detail
+                                if (error.response.status === 401){
+                                  vi.lastError = this.$t('loginPage.errorLogin')
+                                } else {
+                                  vi.lastError = this.$t('loginPage.errorUnexpected', [error.response.data.detail])
+                                }
                             } else {
-                                vi.lastError = 'Unknown error, please retry later.'
+                                if(this.apiHostName !== defaultApiHostName) {
+                                  vi.lastError = this.$t('loginPage.errorUnknownCustomHostName')
+                                } else {
+                                  vi.lastError = this.$t('loginPage.errorUnknown')
+                                }
                             }
                         } else if (error.request) {
-                         vi.lastError = 'The Paper Matter server seems unreachable, please check your connection.'
+                         vi.lastError = this.$t('loginPage.errorServerUnreachable')
                         }
                     });
 
