@@ -80,6 +80,7 @@ autoUpdater.on('update-downloaded', () => {
 });
 
 app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+  // will auto download update and install it when the app quits
+  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdatesAndNotify()
 });
 
