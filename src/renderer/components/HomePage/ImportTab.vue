@@ -79,7 +79,6 @@
 
   const log = require('electron-log');
   const fs = require('fs');
-  const path = require('path');
 
   export default {
     name: 'import-tab',
@@ -221,8 +220,11 @@
           }
 
           // Get file blob from serialized document
+          let nodeFileBuffer;
           try {
-            file = new File([fs.readFileSync(serializedDocument.path)], serializedDocument.name, {
+            nodeFileBuffer = fs.readFileSync(serializedDocument.path);
+            const fileArrayBuffer = nodeFileBuffer.buffer;
+            file = new File([fileArrayBuffer], serializedDocument.name, {
               type: serializedDocument.type,
               lastModified: serializedDocument.lastModified,
               lastModifiedDate: new Date(serializedDocument.lastModified)
@@ -234,11 +236,12 @@
           }
           jsonData = {
             ftl_folder: parentFolderId,
-            created: new Date(serializedDocument.lastModified).toISOString()
+            created: new Date(serializedDocument.lastModified).toISOString(),
+            md5: this.hashFile({algorithm: 'md5', file: nodeFileBuffer}),
           };
           // If documents metadata have been setup check if some match current document and add them to jsonData
           if (Object.getOwnPropertyNames(this.docsMetadataToImport).length) {
-            const uniqueMetadataKey = await this.hashString({algorithm: 'SHA-1', string: serializedDocument.path});
+            const uniqueMetadataKey = this.hashString({algorithm: 'md5', string: serializedDocument.path});
             const docMetadata = this.docsMetadataToImport[uniqueMetadataKey];
             if(docMetadata !== undefined){
               if('documentTitle' in docMetadata){
@@ -410,7 +413,7 @@
         this.$electron.shell.openExternal('file:///'+ report.save());
       },
 
-      ...mapActions('tools', ['hashString'])
+      ...mapActions('tools', ['hashString', 'hashFile'])
     }
   }
 </script>
