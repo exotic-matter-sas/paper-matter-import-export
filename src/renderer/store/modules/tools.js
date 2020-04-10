@@ -4,18 +4,25 @@
  */
 
 const namespaced = true;
+const crypto = require('crypto');
+const log = require('electron-log');
 
 const actions = {
-  // source: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#Converting_a_digest_to_a_hex_string
+  /**
+   * @param {Object} payload
+   * @param {String} payload.algorithm - algorithm to use, to display supported list: console.log(crypto.getHashes())
+   * @param {String} payload.string - string to hash.
+   */
   hashString({}, payload) {
-      const encodedString = new TextEncoder().encode(payload.string); // encode as (utf-8) Uint8Array
-      return crypto.subtle.digest(payload.algorithm, encodedString).then(
-        hashBuffer => {
-        const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
-        const hashHexString = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
-        return Promise.resolve(hashHexString)
-        }
-      );
+    return Promise.resolve(crypto.createHash(payload.algorithm).update(payload.string).digest("hex"));
+  },
+  /**
+   * @param {Object} payload
+   * @param {String} payload.algorithm - Algorithm to use for the hash, to list available hash: console.log(crypto.getHashes())
+   * @param {Object} payload.file - Node file Buffer object to hash.
+   */
+  hashFile({}, payload) {
+    return Promise.resolve(crypto.createHash(payload.algorithm).update(payload.file).digest("hex"));
   }
 };
 
