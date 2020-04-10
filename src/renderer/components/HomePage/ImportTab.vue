@@ -237,11 +237,11 @@
           jsonData = {
             ftl_folder: parentFolderId,
             created: new Date(serializedDocument.lastModified).toISOString(),
-            md5: this.hashFile({algorithm: 'md5', file: nodeFileBuffer}),
+            md5: await this.hashFile({algorithm: 'md5', file: nodeFileBuffer}),
           };
           // If documents metadata have been setup check if some match current document and add them to jsonData
           if (Object.getOwnPropertyNames(this.docsMetadataToImport).length) {
-            const uniqueMetadataKey = this.hashString({algorithm: 'md5', string: serializedDocument.path});
+            const uniqueMetadataKey = await this.hashString({algorithm: 'md5', string: serializedDocument.path});
             const docMetadata = this.docsMetadataToImport[uniqueMetadataKey];
             if(docMetadata !== undefined){
               if('documentTitle' in docMetadata){
