@@ -68,7 +68,9 @@ _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/de
   - PDF document thumbnail generation: [PDF.js](https://mozilla.github.io/pdf.js/)
 
 - UI:
-  - CSS framework : [Bootstrap](https://getbootstrap.com/)
+  - CSS framework :
+    - [Sass](https://sass-lang.com/)
+    - [Bootstrap](https://getbootstrap.com/)
   - Logo police: [Quicksand](https://github.com/andrew-paglinawan/QuicksandFamily)
   - App Icons: [Font Awesome](https://fontawesome.com/)
 
