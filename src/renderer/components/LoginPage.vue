@@ -52,7 +52,7 @@
 
 
 <script>
-    import {ipcRenderer, remote} from "electron";
+    import {remote} from "electron";
     import {mapState} from "vuex";
     import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
     import {defaultApiHostName} from "./../store/modules/config";
@@ -77,6 +77,8 @@
           // to resize window to page content
           const window = remote.getCurrentWindow();
           window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
+          // redirect to home if user access token is set (and still valid or can be refresh)
+          this.skipLoginIfAuthenticated();
         },
 
         computed: {
