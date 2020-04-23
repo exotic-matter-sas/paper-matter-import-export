@@ -38,6 +38,8 @@ _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/de
 
 #### Unit tests
 
+_With [Karma](https://karma-runner.github.io/latest/index.html) test runner, [Mocha](https://mochajs.org/) test framework, [Chai](https://www.chaijs.com/) assertion library and [simple-mock](https://github.com/jupiter/simple-mock) mocking library_
+
     npm run unit
 
 ### Release and build process on CI
