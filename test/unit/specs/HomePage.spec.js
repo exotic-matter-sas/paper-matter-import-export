@@ -20,12 +20,6 @@ import {USER_PROPS} from "../../tools/testValues";
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
 
-// Mock BootstrapVue prototypes here (eg. localVue.prototype.$bvModal = {msgBoxConfirm: jest.fn()}; )
-localVue.use(BootstrapVue); // avoid bootstrap vue warnings
-localVue.use(Vuex);
-localVue.component("font-awesome-icon", ); // avoid font awesome warnings
-
-
 // Mock prototype and mixin bellow
 localVue.prototype.$t = (text, args = "") => {
   return text + args;
@@ -33,6 +27,11 @@ localVue.prototype.$t = (text, args = "") => {
 localVue.prototype.$tc = (text, args = "") => {
   return text + args;
 }; // i18n mock
+
+// Attach Vue plugins here (after mocking prototypes)
+localVue.use(Vuex);
+localVue.use(BootstrapVue); // avoid bootstrap vue warnings
+localVue.component("font-awesome-icon", ); // avoid font awesome warnings
 
 describe("HomePage template", () => {
   let wrapper;
