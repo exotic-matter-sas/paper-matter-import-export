@@ -40,7 +40,7 @@ localVue.prototype.$electron = {
 }; // electron prototype mock
 let getAccessTokenMock = sm.mock();
 let apiMock = {getAccessToken: getAccessTokenMock};
-localVue.prototype.$api = apiMock; // electron prototype mock
+localVue.prototype.$api = apiMock; // api prototype mock
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
 
@@ -56,14 +56,18 @@ const mockedGetAccessTokenResponse = {
 };
 
 describe("LoginPage template", () => {
+  // define all var needed for the test here
   let wrapper;
   let storeConfigCopy;
   let store;
-  const mockedApiHostName = "https://example.com";
+  let mockedApiHostName;
+  let apiHostNameMock;
 
   beforeEach(() => {
+    // set vars here: vue wrapper args, fake values, mock
+    mockedApiHostName = "https://example.com";
     storeConfigCopy = cloneDeep(storeConfig);
-    const apiHostNameMock = sm.mock().returnWith("https://example.com");
+    apiHostNameMock = sm.mock().returnWith("https://example.com");
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
@@ -92,17 +96,22 @@ describe("LoginPage template", () => {
 describe("LoginPage mounted", () => {
   let wrapper;
   let store;
-
-  // define mock and fake values here
-  const fakeWidth = 100;
-  const setContentSizeMock = sm.mock();
-  const getContentSizeMock = sm.mock().returnWith([fakeWidth, 0]);
-  const getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
-    {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
-    );
+  let storeConfigCopy;
+  let fakeWidth;
+  let setContentSizeMock;
+  let getContentSizeMock;
+  let getCurrentWindowMock;
 
   beforeEach(() => {
-    store = new Vuex.Store(storeConfig);
+    fakeWidth = 100;
+    setContentSizeMock = sm.mock();
+    getContentSizeMock = sm.mock().returnWith([fakeWidth, 0]);
+    getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
+      {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
+    );
+
+    storeConfigCopy = cloneDeep(storeConfig);
+    store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
       store,
@@ -117,14 +126,14 @@ describe("LoginPage mounted", () => {
     skipLoginIfAuthenticatedMock.reset();
   });
 
-  it("electron remote.setContentSize is called to set window size", async () => {
+  it("electron remote.setContentSize is called to set window size", () => {
     expect(getCurrentWindowMock.callCount).to.equal(1);
     expect(setContentSizeMock.callCount).to.equal(1);
     expect(setContentSizeMock.lastCall.args[0]).to.equal(fakeWidth); // come from getContentSize return, first item
     expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
   });
 
-  it("skipLoginIfAuthenticated is called", async () => {
+  it("skipLoginIfAuthenticated is called", () => {
     expect(skipLoginIfAuthenticatedMock.callCount).to.equal(1);
   });
 });
@@ -133,10 +142,14 @@ describe("LoginPage methods", () => {
   let wrapper;
   let storeConfigCopy;
   let store;
-  const refreshAccessTokenMock = sm.mock();
-  const accessTokenMock = sm.mock();
-  const saveAuthenticationDataMock = sm.mock();
+  let refreshAccessTokenMock;
+  let accessTokenMock;
+  let saveAuthenticationDataMock;
+
   beforeEach(() => {
+    refreshAccessTokenMock = sm.mock();
+    accessTokenMock = sm.mock();
+    saveAuthenticationDataMock = sm.mock();
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.refreshAccessToken = refreshAccessTokenMock;
     storeConfigCopy.modules.auth.mutations.SAVE_AUTHENTICATION_DATA = saveAuthenticationDataMock;
