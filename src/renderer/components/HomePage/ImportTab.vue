@@ -4,7 +4,7 @@
   -->
 
 <template>
-  <b-container class="pt-2">
+  <b-container class="pt-2" id="import-tab">
     <b-row>
       <b-col>
         <b-form-group :label="$t('importTab.sourcesFormGroupLabel')" >
@@ -106,9 +106,7 @@
 
     mounted() {
       // if last import wasn't properly completed
-      const docsToImportCount = this.docsToImport.length;
-      const docsInErrorCount = this.docsInError.length;
-      if (docsToImportCount > 0){
+      if (this.docsToImport.length > 0){
         log.info('last import wasn\'t fully completed, inform user that he can finish it');
         const win = remote.getCurrentWindow();
         remote.dialog.showMessageBox(win,
@@ -116,12 +114,12 @@
             type: 'info',
             title: this.$t('importTab.warningResumeLastImportTitle'),
             message: this.$t('importTab.warningResumeLastImportMessage'),
-            detail: this.$tc('importTab.warningResumeLastImportDetail', docsToImportCount),
+            detail: this.$tc('importTab.warningResumeLastImportDetail', this.docsToImport.length),
             buttons: ['Ok'],
             defaultId: 0
           });
-      } else if (docsInErrorCount > 0) {
-        this.displayImportErrorPrompt(docsInErrorCount)
+      } else if (this.docsInError.length > 0) {
+        this.displayImportErrorPrompt(this.docsInError.length)
       }
     },
 
