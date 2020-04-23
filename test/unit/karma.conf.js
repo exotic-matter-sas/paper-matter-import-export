@@ -31,7 +31,7 @@ webpackConfig.module.rules
 
 module.exports = config => {
   config.set({
-    browsers: ['visibleElectron'],
+    browsers: ['customElectron'],
     client: {
       useIframe: false,
       loadScriptsViaRequire: true,
@@ -44,10 +44,10 @@ module.exports = config => {
       ]
     },
     customLaunchers: {
-      visibleElectron: {
+      customElectron: {
         base: 'Electron',
         browserWindowOptions: {
-          show: true,
+          show: false,
           webPreferences: {
             contextIsolation: false,
             nodeIntegration: true
