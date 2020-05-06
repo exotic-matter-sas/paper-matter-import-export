@@ -10,6 +10,38 @@ export const USER_PROPS = {
   password: "p@ssw0rd"
 };
 
+export const FILES_PROPS = {
+  name: 'test.pdf',
+  path: 'absolute/path/test.pdf',
+  webkitRelativePath: 'relative/path/test.pdf',
+  type: 'application/pdf',
+  lastModified: 1567521895187,
+};
+
+export const FILES_PROPS_VARIANT = {
+  name: 'test2.pdf',
+  path: 'absolute/path/test2.pdf',
+  webkitRelativePath: 'relative/path/test2.pdf',
+  type: 'application/pdf',
+  lastModified: 1567521895188,
+};
+
+export const FILES_PROPS_TYPE_KO = {
+  name: 'test.avi',
+  path: 'absolute/path/test.avi',
+  webkitRelativePath: 'relative/path/test.avi',
+  type: 'video/avi',
+  lastModified: 1567521895189,
+};
+
+export const FILES_PROPS_NO_RELATIVE_PATH = {
+  name: 'test3.pdf',
+  path: 'absolute/path/test3.pdf',
+  webkitRelativePath: '',
+  type: 'application/pdf',
+  lastModified: 1567521895190,
+};
+
 export const FOLDER_PROPS = {
   id: 1234,
   name: "Folder title",
