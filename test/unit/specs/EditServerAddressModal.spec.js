@@ -36,7 +36,7 @@ localVue.prototype.$bvModal = { show: showModalMock }; // bvModal mock
 // Attach Vue plugins here (after mocking prototypes)
 localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
-localVue.component("font-awesome-icon", ); // avoid font awesome warnings
+localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
 
 describe("EditServerAddressModal template", () => {

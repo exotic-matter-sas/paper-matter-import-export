@@ -41,10 +41,7 @@ localVue.prototype.$router = { push: routerPushMock }; // router mock
 // Attach Vue plugins here (after mocking prototypes)
 localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
-localVue.component("font-awesome-icon", ); // avoid font awesome warnings
-
-// Global mocks
-const skipLoginIfAuthenticatedMock = sm.mock();
+localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
 // Api response mock
 const mockedGetAccessTokenResponse = {
@@ -66,7 +63,7 @@ describe("LoginPage template", () => {
     // set vars here: vue wrapper args, fake values, mock
     mockedApiHostName = "https://example.com";
     storeConfigCopy = cloneDeep(storeConfig);
-    apiHostNameMock = sm.mock().returnWith("https://example.com");
+    apiHostNameMock = sm.mock().returnWith(mockedApiHostName);
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
@@ -100,6 +97,7 @@ describe("LoginPage mounted", () => {
   let setContentSizeMock;
   let getContentSizeMock;
   let getCurrentWindowMock;
+  let skipLoginIfAuthenticatedMock;
 
   beforeEach(() => {
     fakeWidth = 100;
@@ -108,6 +106,7 @@ describe("LoginPage mounted", () => {
     getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
       {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
     );
+    skipLoginIfAuthenticatedMock = sm.mock();
 
     storeConfigCopy = cloneDeep(storeConfig);
     store = new Vuex.Store(storeConfigCopy);
@@ -144,11 +143,14 @@ describe("LoginPage methods", () => {
   let refreshAccessTokenMock;
   let accessTokenMock;
   let saveAuthenticationDataMock;
+  let skipLoginIfAuthenticatedMock;
 
   beforeEach(() => {
     refreshAccessTokenMock = sm.mock();
     accessTokenMock = sm.mock();
     saveAuthenticationDataMock = sm.mock();
+    skipLoginIfAuthenticatedMock = sm.mock();
+
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.refreshAccessToken = refreshAccessTokenMock;
     storeConfigCopy.modules.auth.mutations.SAVE_AUTHENTICATION_DATA = saveAuthenticationDataMock;
@@ -188,7 +190,7 @@ describe("LoginPage methods", () => {
 
     wrapper.vm.skipLoginIfAuthenticated();
 
-    // no auto relogin is attempted
+    // NO auto relogin is attempted
     expect(refreshAccessTokenMock.callCount).to.equal(0);
     expect(wrapper.vm.refreshPending).to.equal(false);
   });

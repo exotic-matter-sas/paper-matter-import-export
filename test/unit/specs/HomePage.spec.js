@@ -31,7 +31,7 @@ localVue.prototype.$tc = (text, args = "") => {
 // Attach Vue plugins here (after mocking prototypes)
 localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
-localVue.component("font-awesome-icon", ); // avoid font awesome warnings
+localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
 describe("HomePage template", () => {
   let wrapper;
