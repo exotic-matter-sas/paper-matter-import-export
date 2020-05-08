@@ -67,7 +67,6 @@
 
     computed: {
       ...mapState('import', ['savedImportDestination']),
-      ...mapState('auth', ['accessToken'])
     },
 
     methods: {
