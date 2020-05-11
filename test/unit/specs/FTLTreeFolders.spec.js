@@ -32,9 +32,7 @@ describe("FTLTreeFolders template", () => {
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
     listFoldersMock.resolveWith({
-      response: {
-        data: [tv.FOLDER_TREE_ITEM, tv.FOLDER_TREE_ITEM_WITH_DESCENDANT]
-      }
+      data: [tv.FOLDER_TREE_ITEM, tv.FOLDER_TREE_ITEM_WITH_DESCENDANT]
     });
     wrapper = shallowMount(FTLTreeFolders, {
       localVue,
