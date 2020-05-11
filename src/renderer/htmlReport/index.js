@@ -23,7 +23,7 @@ export const reportTools = {
     render() {
       log.debug('start rendering html report');
 
-      const style = '<style>body{background: #f8f9fa} thead{ font-weight: bold} td{padding-right:10px}</style>';
+      const style = '<style>body{background: #f8f9fa} thead{font-weight: bold} td{padding-right: 10px}</style>';
 
       const tableHeader = `<tr>${this.columnsTitles.map(title => "<td>" + title + "</td>").join('')}</tr>`;
 
@@ -39,12 +39,12 @@ export const reportTools = {
     }
 
     save() {
-      log.debug('saving report to disk');
+      log.debug('saving error report to disk');
       const fileName = `error_report_${this.reportDate.toISOString().replace(/\:/g, '-')}.html`;
       const filePath = path.join(remote.app.getPath('userData'), fileName);
 
       fs.writeFileSync(filePath, this.htmlReport);
-      log.debug('error report save in: ' + filePath);
+      log.debug('report save in: ' + filePath);
       return filePath;
     }
   }
