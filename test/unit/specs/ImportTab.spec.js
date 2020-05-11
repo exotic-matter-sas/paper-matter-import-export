@@ -76,7 +76,7 @@ describe("ImportTab template", () => {
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
-      props:{
+      propsData:{
         importInterrupted: false
       }
     });
@@ -193,7 +193,7 @@ describe("ImportTab watchers", () => {
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
-      props:{
+      propsData:{
         importInterrupted: false
       }
     });
@@ -245,7 +245,7 @@ describe("ImportTab computed", () => {
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
-      props:{
+      propsData:{
         importInterrupted: false
       },
       computed: {
@@ -267,7 +267,7 @@ describe("ImportTab computed", () => {
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
-      props:{
+      propsData:{
         importInterrupted: false
       },
       computed: {
@@ -288,7 +288,7 @@ describe("ImportTab computed", () => {
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
-      props:{
+      propsData:{
         importInterrupted: false
       },
       computed: {
@@ -308,7 +308,7 @@ describe("ImportTab computed", () => {
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
-      props:{
+      propsData:{
         importInterrupted: false
       },
       computed: {
@@ -403,7 +403,7 @@ describe("ImportTab methods", () => {
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
-      props: {
+      propsData: {
         importInterrupted: false
       },
       computed: {

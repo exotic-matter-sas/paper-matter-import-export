@@ -50,7 +50,7 @@ describe("ProgressModal template", () => {
         docsToImport: docsToImportMock,
         docsInError: docsInErrorMock,
       },
-      props: {
+      propsData: {
         totalCount: 0,
         action: 'import'
       }
@@ -84,7 +84,7 @@ describe("ProgressModal mounted", () => {
         docsToImport: docsToImportMock,
         docsInError: docsInErrorMock,
       },
-      props: {
+      propsData: {
         totalCount: 0,
         action: 'import'
       }
@@ -117,7 +117,7 @@ describe("ProgressModal methods", () => {
         docsToImport: docsToImportMock,
         docsInError: docsInErrorMock,
       },
-      props: {
+      propsData: {
         totalCount: 0,
         action: 'import'
       }

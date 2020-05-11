@@ -44,7 +44,7 @@ describe("FolderPickerModal template", () => {
     wrapper = shallowMount(FolderPickerModal, {
       localVue,
       store,
-      props: {
+      propsData: {
         action: 'import'
       }
     });
@@ -77,7 +77,7 @@ describe("FolderPickerModal mounted", () => {
     wrapper = shallowMount(FolderPickerModal, {
       localVue,
       store,
-      props: {
+      propsData: {
         action: 'import'
       },
       computed: {
@@ -122,7 +122,7 @@ describe("FolderPickerModal methods", () => {
     wrapper = shallowMount(FolderPickerModal, {
       localVue,
       store,
-      props: {
+      propsData: {
         action: 'import'
       },
     });
