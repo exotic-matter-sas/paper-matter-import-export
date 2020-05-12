@@ -22,5 +22,7 @@ jobs:
       - name: Install Node packages
         run: npm ci
 
-      - name: Run unittest
-        run: npm run unit
+      - name: Run headless unit test
+        uses: GabrielBB/xvfb-action@v1.2
+        with:
+            run: npm run unit
