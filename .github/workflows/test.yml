@@ -19,5 +19,8 @@ jobs:
         with:
           node-version: 12
 
+      - name: Install Node packages
+        run: npm ci
+
       - name: Run unittest
         run: npm run unit
