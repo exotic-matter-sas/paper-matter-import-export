@@ -1,4 +1,4 @@
-name: Build/release
+name: unit tests
 
 on: push
 
