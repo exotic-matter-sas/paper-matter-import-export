@@ -201,7 +201,6 @@
 
         while (vi.docsToImport.length > 0 && !(vi.importInterrupted || vi.accessToken === '')){
           serializedDocument = vi.docsToImport[0];
-          console.log(serializedDocument);
 
           let folderCreationError = false;
           await this.getOrCreateDocumentFolder(serializedDocument)
@@ -306,11 +305,8 @@
         // remove file name from path list
         folderPathList.pop();
 
-        console.log('folderPathList', folderPathList);
         for (const folderName of folderPathList){
           currentPath += '/' + folderName;
-          console.log('currentPath', currentPath);
-          console.log('createdFoldersCache', this.createdFoldersCache);
           // try to create folder only if it isn't cached in created folder yet
           if (!(currentPath in this.createdFoldersCache)) {
             await this.$api.createFolder(this.accessToken, folderName, parentId)

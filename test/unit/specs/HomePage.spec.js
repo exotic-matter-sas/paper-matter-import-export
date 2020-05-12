@@ -97,7 +97,6 @@ describe("HomePage mounted", () => {
   });
 
   it("electron remote.setContentSize is called to set window size", () => {
-    console.log(getCurrentWindowMock);
     expect(getCurrentWindowMock.callCount).to.equal(1);
     expect(setContentSizeMock.callCount).to.equal(1);
     expect(setContentSizeMock.lastCall.args[0]).to.equal(fakeWidth); // come from getContentSize return, first item

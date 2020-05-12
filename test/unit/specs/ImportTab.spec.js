@@ -254,7 +254,6 @@ describe("ImportTab computed", () => {
       }
     });
 
-    console.log(savedImportDestinationMock.actions);
     let testedValue = wrapper.vm.folderDestinationName;
 
     expect(testedValue).to.be.equal('rootFolderName');
@@ -276,7 +275,6 @@ describe("ImportTab computed", () => {
       }
     });
 
-    console.log(savedImportDestinationMock.actions);
     let testedValue = wrapper.vm.folderDestinationName;
 
     expect(testedValue).to.be.equal(fakeFolderName);
