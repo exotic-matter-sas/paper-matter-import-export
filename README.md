@@ -6,7 +6,7 @@
 
 ### Installation
 
-Please refer to this page to install on Windows, Linux (deb) (and soon, hopefully, MacOSX) : [https://welcome.papermatter.app/import-export/](https://welcome.papermatter.app/import-export/)
+Please refer to this page to install client on Windows, Linux (deb) (and soon, hopefully, MacOSX) : [https://welcome.papermatter.app/import-export/](https://welcome.papermatter.app/import-export/)
 
 ## For developers
 
