@@ -85,13 +85,12 @@
         vi.loading = true;
         vi.$api.listFolders(this.store.state.auth.accessToken, level)
           .then(response => {
-              vi.item.children = response.data
-                .map(function (e) {
-                  return {id: e.id, name: e.name, has_descendant: e.has_descendant, children: []}
-                })
-            }
-          )
-          .catch(error => vi.lastFolderListingFailed = true )
+            vi.item.children = response.data
+              .map(function (e) {
+                return {id: e.id, name: e.name, has_descendant: e.has_descendant, children: []}
+              })
+          })
+          .catch(error => vi.lastFolderListingFailed = true)
           .finally(() => vi.loading = false);
       }
     }

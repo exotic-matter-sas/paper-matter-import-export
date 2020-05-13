@@ -5,7 +5,6 @@
 
 const namespaced = true;
 const crypto = require('crypto');
-const log = require('electron-log');
 
 const actions = {
   /**

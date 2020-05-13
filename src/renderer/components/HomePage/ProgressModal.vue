@@ -65,7 +65,7 @@
 
     methods: {
       interruptImport() {
-          this.$emit('event-import-interrupt');
+        this.$emit('event-import-interrupt');
       },
     }
   }

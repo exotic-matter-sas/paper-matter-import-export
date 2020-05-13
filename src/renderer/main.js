@@ -7,7 +7,7 @@ import Vue from 'vue'
 
 import App from './App'
 import router from './router'
-import store from './store'
+import storeConfig from './store'
 import i18n from './i18n'
 import BootstrapVue from "bootstrap-vue";
 import axios from "axios";
@@ -27,11 +27,12 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 import './customBootstrap.scss'
 import '../../node_modules/bootstrap/js/dist/tab.js';
 import ApiClient from './apiClient'
+import Vuex from "vuex";
+import Router from "vue-router";
 
 const log = require('electron-log');
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
-Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiHostName);
 Vue.config.productionTip = false;
 
 // Font Awesome icons definition
@@ -39,6 +40,14 @@ library.add(faFolder, faFolderOpen, faFolderPlus, faPlusSquare, faMinusSquare);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 // register Bootstrap vue components
 Vue.use(BootstrapVue);
+// Vuex
+Vue.use(Vuex);
+// Router
+Vue.use(Router);
+
+const store = new Vuex.Store(storeConfig);
+
+Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiHostName);
 
 /* eslint-disable no-new */
 const vi = new Vue({

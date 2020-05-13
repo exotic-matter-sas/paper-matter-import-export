@@ -7,12 +7,17 @@ import pdfjsLib from 'pdfjs-dist/webpack'
 
 window.URL = window.URL || window.webkitURL;
 
-export const createThumbFromFile = function (file) {
-  let objectURL = window.URL.createObjectURL(file);
-  return createThumbFromUrl(objectURL);
-};
-
-export const createThumbFromUrl = function (url) {
+export const thumbnailGenerator = {
+  createThumbFromFile : function (file) {
+    try {
+      let objectURL = window.URL.createObjectURL(file);
+      return Promise.resolve(this.createThumbFromUrl(objectURL));
+    }
+    catch(error) {
+      return Promise.reject(error);
+    }
+  },
+  createThumbFromUrl : function (url) {
   let loadingTask = pdfjsLib.getDocument(url);
   let canvas;
   let pdfFile;
@@ -51,4 +56,5 @@ export const createThumbFromUrl = function (url) {
       loadingTask = null;
       canvas = null;
     })
+  }
 };

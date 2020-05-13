@@ -4,7 +4,7 @@
   -->
 
 <template>
-  <b-container class="h-100 d-flex align-content-evenly flex-wrap">
+  <b-container class="h-100 d-flex align-content-evenly flex-wrap" id="export-tab">
     <h2 class="text-muted text-center w-100 font-italic my-5">{{ $t('exportTab.comingSoonLabel')}}</h2>
 
     <!--
