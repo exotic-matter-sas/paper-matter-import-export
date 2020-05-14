@@ -163,9 +163,14 @@
         if (vi.files.length > 0 || vi.filesInsideFolder.length > 0){
           // we filter filesInsideFolder to get only supported files
           const filteredFilesInsideFolder = vi.filesInsideFolder.filter(file => {
-            let fileExtension = file.name.split('.');
-            fileExtension = fileExtension[fileExtension.length-1];
-            return this.supportedFileExtensions.includes(`.${fileExtension}`);
+            // check if file name contains a dot (no dot = no extension)
+            if (file.name.includes(".")){
+              let fileExtension = file.name.split('.');
+              fileExtension = fileExtension[fileExtension.length-1];
+              return this.supportedFileExtensions.includes(`.${fileExtension}`);
+            } else {
+              return false
+            }
           });
           // we merge files selected from file input and directory input
           const mergedFiles = vi.files.concat(filteredFilesInsideFolder);
