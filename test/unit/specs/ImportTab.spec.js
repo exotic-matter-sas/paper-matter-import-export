@@ -374,7 +374,10 @@ describe("ImportTab methods", () => {
     resetDataImportEndMock = sm.mock();
     getOrCreateDocumentFolderMock = sm.mock().resolveWith('fakeFolderId');
     createFolderPathMock = sm.mock().returnWith(Promise.resolve('fakeFolderId'));
-    getFileAndMd5FromSerializedDocumentMock = sm.mock().resolveWith({file: 'fakeFile', md5: 'fakeMd5'});
+    getFileAndMd5FromSerializedDocumentMock = sm.mock().resolveWith({
+      file: tv.FILES_PROPS,
+      md5: 'fakeMd5'
+    });
     constructJsonDataMock = sm.mock().returnWith('fakeJsonData');
     consumeFirstDocToImportMock = sm.mock();
     notifyImportEndMock = sm.mock();
@@ -470,14 +473,14 @@ describe("ImportTab methods", () => {
     expect(setDocsToImportMock.callCount).to.equal(0);
 
     // given there are files or filesInsideFolder
-    wrapper.setData({filesInsideFolder: [tv.FILES_PROPS, tv.FILES_PROPS_TYPE_KO]});
+    wrapper.setData({filesInsideFolder: [tv.FILES_PROPS, tv.FILES_PROPS_VARIANT, tv.FILES_PROPS_TYPE_KO]});
 
     wrapper.vm.prepareImport(true);
 
     // then
     expect(setDocsToImportMock.callCount).to.equal(1);
-    // only FILES_PROPS is committed
-    expect(setDocsToImportMock.lastCall.args[1]).to.eql([tv.FILES_PROPS]);
+    // only FILES_PROPS and FILES_PROPS_VARIANT are committed
+    expect(setDocsToImportMock.lastCall.args[1]).to.eql([tv.FILES_PROPS, tv.FILES_PROPS_VARIANT]);
   });
 
   it("prepareImport set settingDocumentsMetadata or call proceedToImport properly", () => {
@@ -669,14 +672,15 @@ describe("ImportTab methods", () => {
 
     // moveFirstDocFromImportToErrorMock call 1 time (docsToImportMock length)
     expect(constructJsonDataMock.callCount).to.be.equal(1);
-    expect(constructJsonDataMock.lastCall.args).to.be.eql(['fakeFolderId', 'fakeFile', 'fakeMd5', tv.FILES_PROPS.path]);
+    expect(constructJsonDataMock.lastCall.args).to.be.eql(['fakeFolderId', tv.FILES_PROPS.lastModified, 'fakeMd5',
+      tv.FILES_PROPS.path]);
   });
 
-  it("proceedToImport call createThumbFromFile", async () => {
+  it("proceedToImport call createThumbFromFile if needed", async () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToImport: ImportTab.methods.proceedToImport });
     // set new return value for docsToImportMock
-    let mockedDocsToImportValue = [tv.FILES_PROPS];
+    let mockedDocsToImportValue = [tv.FILES_PROPS, tv.FILES_PROPS_VARIANT];
     docsToImportMock.actions = [];
     docsToImportMock.returnWith(mockedDocsToImportValue);
     // Mock behavior of consumeFirstDocToImport by consuming first mockedDocsToImportValue item at each call
@@ -686,12 +690,17 @@ describe("ImportTab methods", () => {
       mockedDocsToImportValue.shift();
       docsToImportMock.returnWith(mockedDocsToImportValue);
     });
+    // Second document is NOT a PDF
+    getFileAndMd5FromSerializedDocumentMock.resolveWith({
+      file: tv.FILES_PROPS_VARIANT,
+      md5: 'fakeMd5'
+    });
 
     await wrapper.vm.proceedToImport();
 
-    // createThumbFromFileMock call 1 time (docsToImportMock length)
+    // createThumbFromFileMock call 1 time (only for PDF doc)
     expect(createThumbFromFileMock.callCount).to.be.equal(1);
-    expect(createThumbFromFileMock.lastCall.args[0]).to.be.equal('fakeFile');
+    expect(createThumbFromFileMock.lastCall.args[0]).to.be.equal(tv.FILES_PROPS);
   });
 
   it("proceedToImport handle createThumbFromFile error properly", async () => {
@@ -737,7 +746,7 @@ describe("ImportTab methods", () => {
 
     // moveFirstDocFromImportToErrorMock call 1 time (docsToImportMock length)
     expect(uploadDocumentMock.callCount).to.be.equal(1);
-    expect(uploadDocumentMock.lastCall.args).to.be.eql(['fakeAccessToken', 'fakeJsonData', 'fakeFile', 'fakeThumb']);
+    expect(uploadDocumentMock.lastCall.args).to.be.eql(['fakeAccessToken', 'fakeJsonData', tv.FILES_PROPS, 'fakeThumb']);
     expect(consumeFirstDocToImportMock.callCount).to.be.equal(1);
   });
 
@@ -948,7 +957,7 @@ describe("ImportTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ constructJsonData: ImportTab.methods.constructJsonData });
 
-    let testedValue = await wrapper.vm.constructJsonData(42, tv.FILES_PROPS, 'fakeMd5', 'fake/path');
+    let testedValue = await wrapper.vm.constructJsonData(42, tv.FILES_PROPS.lastModified, 'fakeMd5', 'fake/path');
 
     expect(testedValue).to.be.eql({
       ftl_folder: 42,
@@ -965,7 +974,7 @@ describe("ImportTab methods", () => {
     docsMetadataToImport.returnWith({'fakeMd5': docMetadata});
     hashStringMock.returnWith('fakeMd5');
 
-    let testedValue = await wrapper.vm.constructJsonData(42, tv.FILES_PROPS, 'fakeMd5', 'fake/path');
+    let testedValue = await wrapper.vm.constructJsonData(42, tv.FILES_PROPS.lastModified, 'fakeMd5', 'fake/path');
 
     expect(hashStringMock.callCount).to.be.equal(1);
     expect(hashStringMock.lastCall.args[1]).to.be.eql({algorithm: 'md5', string: 'fake/path'});

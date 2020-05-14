@@ -14,7 +14,7 @@
             :state="Boolean(files)"
             :placeholder=this.filesInputPlaceholder
             :drop-placeholder="$t('importTab.filesInputDropLabel')"
-            accept=".pdf"
+            :accept="supportedFileExtensions.join(',')"
             :browse-text="$t('bFormFile.BrowseLabel')"
           ></b-form-file>
 
@@ -96,6 +96,7 @@
       return {
         files: [],
         filesInsideFolder: [],
+        supportedFileExtensions: ['.pdf','.txt','.rtf','.doc','.xls','.ppt','.docx','.xlsx','.pptx','.odt','.odp','.ods'],
         importing: false,
         createdFoldersCache: {},
         settingDocumentsMetadata: false,
@@ -160,8 +161,12 @@
 
         // Store files to import in store if needed (not needed when documents are recover from a previous session)
         if (vi.files.length > 0 || vi.filesInsideFolder.length > 0){
-          // we filter filesInsideFolder to get only pdf files
-          const filteredFilesInsideFolder = vi.filesInsideFolder.filter(file => file.type === 'application/pdf');
+          // we filter filesInsideFolder to get only supported files
+          const filteredFilesInsideFolder = vi.filesInsideFolder.filter(file => {
+            let fileExtension = file.name.split('.');
+            fileExtension = fileExtension[fileExtension.length-1];
+            return this.supportedFileExtensions.includes(`.${fileExtension}`);
+          });
           // we merge files selected from file input and directory input
           const mergedFiles = vi.files.concat(filteredFilesInsideFolder);
           vi.$store.commit(
@@ -229,19 +234,26 @@
           if (fileReadingError) continue;
 
           // Format data for upload request
-          jsonData = await vi.constructJsonData(parentFolderId, file, md5, serializedDocument.path);
+          jsonData = await vi.constructJsonData(
+            parentFolderId,
+            serializedDocument.lastModified,
+            md5,
+            serializedDocument.path
+          );
 
-          // Generate doc thumbnail
+          // PDF ONLY: Generate doc thumbnail
           thumbnail = null;
-          await thumbnailGenerator.createThumbFromFile(file)
-            .then(thumb => {
-              thumbnail = thumb;
-              log.debug('thumbnail generated');
-            })
-            // Ignore thumbnail generation error, as it could be generated later by Paper Matter web app
-            .catch(error => {
+          if (file.type === 'application/pdf') {
+            await thumbnailGenerator.createThumbFromFile(file)
+              .then(thumb => {
+                thumbnail = thumb;
+                log.debug('thumbnail generated');
+              })
+              // Ignore thumbnail generation error, as it could be generated later by Paper Matter web app
+              .catch(error => {
                 log.warn('error during thumbnail generation', '\n', error);
-            });
+              });
+          }
 
           // Upload doc
           await vi.$api.uploadDocument(vi.accessToken, jsonData, file, thumbnail)
@@ -342,12 +354,9 @@
       async getFileAndMd5FromSerializedDocument (serializedDocument){
         try{
           const nodeFileBuffer = fs.readFileSync(serializedDocument.path);
-          const fileArrayBuffer = nodeFileBuffer.buffer;
           return Promise.resolve({
-            file: new File([fileArrayBuffer], serializedDocument.name, {
+            file: new File([nodeFileBuffer], serializedDocument.name, {
               type: serializedDocument.type,
-              lastModified: serializedDocument.lastModified,
-              lastModifiedDate: new Date(serializedDocument.lastModified)
             }),
             md5: await this.hashFile({algorithm: 'md5', file: nodeFileBuffer})
           })
@@ -357,10 +366,10 @@
         }
       },
 
-      async constructJsonData (parentFolderId, file, md5, filePath) {
+      async constructJsonData (parentFolderId, creationDate, md5, filePath) {
         let jsonData = {
           ftl_folder: parentFolderId,
-          created: new Date(file.lastModified).toISOString(),
+          created: new Date(creationDate).toISOString(),
           md5: md5,
         };
 

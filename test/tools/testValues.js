@@ -19,10 +19,10 @@ export const FILES_PROPS = {
 };
 
 export const FILES_PROPS_VARIANT = {
-  name: 'test2.pdf',
-  path: 'absolute/path/test2.pdf',
-  webkitRelativePath: 'relative/path/test2.pdf',
-  type: 'application/pdf',
+  name: 'test.txt',
+  path: 'absolute/path/test.txt',
+  webkitRelativePath: 'relative/path/test.txt',
+  type: 'text/plain',
   lastModified: 1567521895188,
 };
 
