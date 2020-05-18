@@ -100,7 +100,7 @@ export default {
       startImportButton: 'Start import',
       startImportLoadingButton: 'Checking metadata...',
       filePathLabel: 'File Path*',
-      filePathTooltip: 'Full files path to import (required)',
+      filePathTooltip: 'Full filepaths to import (required)',
       documentTitleLabel: 'Doc. Title',
       documentTitleTooltip: 'Document title will be used in document list and preview, it makes document search easier',
       documentNotesLabel: 'Doc. Notes',
