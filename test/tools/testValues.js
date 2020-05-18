@@ -18,12 +18,20 @@ export const FILES_PROPS = {
   lastModified: 1567521895187,
 };
 
-export const FILES_PROPS_VARIANT = {
+export const FILES_PROPS_2 = {
   name: 'test.txt',
   path: 'absolute/path/test.txt',
   webkitRelativePath: 'relative/path/test.txt',
   type: 'text/plain',
   lastModified: 1567521895188,
+};
+
+export const FILES_PROPS_3 = {
+  name: 'test.DOC',
+  path: 'absolute/path/test.DOC',
+  webkitRelativePath: 'relative/path/test.DOC',
+  type: 'application/msword',
+  lastModified: 1567521895189,
 };
 
 export const FILES_PROPS_TYPE_KO = {

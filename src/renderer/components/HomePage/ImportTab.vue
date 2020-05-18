@@ -79,6 +79,7 @@
 
   const log = require('electron-log');
   const fs = require('fs');
+  const path = require('path');
 
   export default {
     name: 'import-tab',
@@ -163,12 +164,11 @@
         if (vi.files.length > 0 || vi.filesInsideFolder.length > 0){
           // we filter filesInsideFolder to get only supported files
           const filteredFilesInsideFolder = vi.filesInsideFolder.filter(file => {
-            // check if file name contains a dot (no dot = no extension)
-            if (file.name.includes(".")){
-              let fileExtension = file.name.split('.');
-              fileExtension = fileExtension[fileExtension.length-1];
-              return this.supportedFileExtensions.includes(`.${fileExtension}`);
-            } else {
+            const fileExtension = path.extname(file.name).toLowerCase();
+            if (fileExtension){
+              return this.supportedFileExtensions.includes(fileExtension);
+            } // ignore files without extensions
+            else {
               return false
             }
           });

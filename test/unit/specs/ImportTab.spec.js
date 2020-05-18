@@ -301,7 +301,7 @@ describe("ImportTab computed", () => {
   });
 
   it("filesInputPlaceholder return proper value when docsToImport NOT empty", async () => {
-    docsToImportMock.returnWith([tv.FILES_PROPS, tv.FILES_PROPS_VARIANT]);
+    docsToImportMock.returnWith([tv.FILES_PROPS, tv.FILES_PROPS_2]);
     // mock returnWith isn't working if done after shallowMount, due to Vue computed cache perhaps?
     wrapper = shallowMount(ImportTab, {
       localVue,
@@ -317,7 +317,7 @@ describe("ImportTab computed", () => {
 
     let testedValue = wrapper.vm.filesInputPlaceholder;
 
-    expect(testedValue).to.be.equal(`${tv.FILES_PROPS.name}, ${tv.FILES_PROPS_VARIANT.name}`);
+    expect(testedValue).to.be.equal(`${tv.FILES_PROPS.name}, ${tv.FILES_PROPS_2.name}`);
   });
 });
 
@@ -473,14 +473,14 @@ describe("ImportTab methods", () => {
     expect(setDocsToImportMock.callCount).to.equal(0);
 
     // given there are files or filesInsideFolder
-    wrapper.setData({filesInsideFolder: [tv.FILES_PROPS, tv.FILES_PROPS_VARIANT, tv.FILES_PROPS_TYPE_KO]});
+    wrapper.setData({filesInsideFolder: [tv.FILES_PROPS, tv.FILES_PROPS_2, tv.FILES_PROPS_3, tv.FILES_PROPS_TYPE_KO]});
 
     wrapper.vm.prepareImport(true);
 
     // then
     expect(setDocsToImportMock.callCount).to.equal(1);
-    // only FILES_PROPS and FILES_PROPS_VARIANT are committed
-    expect(setDocsToImportMock.lastCall.args[1]).to.eql([tv.FILES_PROPS, tv.FILES_PROPS_VARIANT]);
+    // only FILES_PROPS and FILES_PROPS_2 are committed
+    expect(setDocsToImportMock.lastCall.args[1]).to.eql([tv.FILES_PROPS, tv.FILES_PROPS_2, tv.FILES_PROPS_3]);
   });
 
   it("prepareImport set settingDocumentsMetadata or call proceedToImport properly", () => {
@@ -518,7 +518,7 @@ describe("ImportTab methods", () => {
   it("resetDataImportEnd reset importing, files and filesInsideFolder properly", () => {
     // restore original method to test it
     wrapper.setMethods({ resetDataImportEnd: ImportTab.methods.resetDataImportEnd });
-    wrapper.setData({importing: true, files: [tv.FILES_PROPS], filesInsideFolder: [tv.FILES_PROPS_VARIANT]});
+    wrapper.setData({importing: true, files: [tv.FILES_PROPS], filesInsideFolder: [tv.FILES_PROPS_2]});
 
     // if importingMetadata true
     wrapper.vm.resetDataImportEnd();
@@ -680,7 +680,7 @@ describe("ImportTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToImport: ImportTab.methods.proceedToImport });
     // set new return value for docsToImportMock
-    let mockedDocsToImportValue = [tv.FILES_PROPS, tv.FILES_PROPS_VARIANT];
+    let mockedDocsToImportValue = [tv.FILES_PROPS, tv.FILES_PROPS_2];
     docsToImportMock.actions = [];
     docsToImportMock.returnWith(mockedDocsToImportValue);
     // Mock behavior of consumeFirstDocToImport by consuming first mockedDocsToImportValue item at each call
@@ -692,7 +692,7 @@ describe("ImportTab methods", () => {
     });
     // Second document is NOT a PDF
     getFileAndMd5FromSerializedDocumentMock.resolveWith({
-      file: tv.FILES_PROPS_VARIANT,
+      file: tv.FILES_PROPS_2,
       md5: 'fakeMd5'
     });
 
@@ -1028,8 +1028,8 @@ describe("ImportTab methods", () => {
         reason: 'boom',
       },
       {
-        name: tv.FILES_PROPS_VARIANT.name,
-        path: tv.FILES_PROPS_VARIANT.path,
+        name: tv.FILES_PROPS_2.name,
+        path: tv.FILES_PROPS_2.path,
         reason: 'kaBoom',
       },
     ]);
@@ -1040,7 +1040,7 @@ describe("ImportTab methods", () => {
     expect(htmlReportConstructorMock.callCount).to.be.equal(1);
     expect(htmlReportConstructorMock.lastCall.args[1]).to.be.eql([
       [tv.FILES_PROPS.name, tv.FILES_PROPS.path, 'boom'],
-      [tv.FILES_PROPS_VARIANT.name, tv.FILES_PROPS_VARIANT.path, 'kaBoom'],
+      [tv.FILES_PROPS_2.name, tv.FILES_PROPS_2.path, 'kaBoom'],
     ]);
     expect(htmlReportSaveMock.callCount).to.be.equal(1);
     expect(openExternalMock.callCount).to.be.equal(1);
