@@ -31,7 +31,7 @@ const mutations = {
   },
 
   CONSUME_FIRST_DOC_TO_IMPORT(state) {
-    const consumedDoc = state.docsToImport.splice(0, 1);
+    state.docsToImport.splice(0, 1);
   },
 
   CONSUME_DOC_METADATA_TO_IMPORT(state, metadataKey) {
