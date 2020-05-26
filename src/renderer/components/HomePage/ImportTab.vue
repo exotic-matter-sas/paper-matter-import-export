@@ -215,7 +215,7 @@
           let folderCreationError = false;
           await this.getOrCreateDocumentFolder(serializedDocument)
             .then(folderId => {
-            parentFolderId = folderId;
+              parentFolderId = folderId;
           })
           .catch(error => {
             log.error('skipping document, parent folder creation failed');
@@ -331,11 +331,11 @@
               log.debug(`folder "${currentPath}" created`);
               this.createdFoldersCache[currentPath] = response.data.id;
             })
-            .catch((error) => {
+            .catch(async (error) => {
               // folder already exist
               if (error.response && error.response.data.code === 'folder_name_unique_for_org_level') {
                 log.debug(`folder ${currentPath} already exist`);
-                this.getFolderId(parentId, folderName)
+                await this.getFolderId(parentId, folderName)
                 .then(folderId => {
                   this.createdFoldersCache[currentPath] = folderId;
                 })
