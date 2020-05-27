@@ -47,7 +47,7 @@ describe("ExportTab template", () => {
   });
 
   it("renders properly html element", () => {
-    const elementSelector = "#export-tab";
+    const elementSelector = "#export-tab-content";
     const elem = wrapper.find(elementSelector);
     expect(elem.is(elementSelector)).to.equal(true);
   });

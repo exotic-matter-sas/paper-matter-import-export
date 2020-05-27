@@ -4,7 +4,7 @@
   -->
 
 <template>
-  <b-container class="pt-2" id="import-tab">
+  <b-container id="import-tab-content" class="pt-2">
     <b-row>
       <b-col>
         <b-form-group :label="$t('importTab.sourcesFormGroupLabel')" >

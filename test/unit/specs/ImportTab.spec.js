@@ -87,7 +87,7 @@ describe("ImportTab template", () => {
   });
 
   it("renders properly html element", () => {
-    const elementSelector = "#import-tab";
+    const elementSelector = "#import-tab-content";
     const elem = wrapper.find(elementSelector);
     expect(elem.is(elementSelector)).to.equal(true);
   });

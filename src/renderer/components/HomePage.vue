@@ -40,12 +40,13 @@
     </div>
     <ProgressModal v-if="actionOnGoing" :action="actionType" :totalCount="totalCount"
       @event-import-interrupt="interruptImport"/>
-    <FolderPickerModal id="folder-picker-modal"
-                       v-if="pickingFolder"
-                       :title="folderPickerModalTitle"
-                       :default-destination="folderPickerDefaultDestination"
-                       @event-save-picked-folder="saveFolderPickerSelection"
-                       @event-folder-picker-modal-hidden="pickingFolder = false"/>
+    <FolderPickerModal
+      id="folder-picker-modal"
+      v-if="pickingFolder"
+      :title="folderPickerModalTitle"
+      :default-destination="folderPickerDefaultDestination"
+      @event-save-picked-folder="saveFolderPickerSelection"
+      @event-folder-picker-modal-hidden="pickingFolder = false"/>
   </b-container>
 </template>
 
@@ -98,13 +99,13 @@
     },
 
     methods: {
+      disconnectUser () {
+        this.$store.dispatch('auth/disconnectUser', 'user disconnect himself');
+      },
+
       saveFolderPickerSelection (destinationFolder) {
         this.actionType === 'import' ? this.$store.commit('import/SET_IMPORT_DESTINATION', destinationFolder):
           this.$store.commit('export/SET_EXPORT_SOURCE', destinationFolder);
-      },
-
-      disconnectUser () {
-        this.$store.dispatch('auth/disconnectUser', 'user disconnect himself');
       },
 
       displayImportProgress(totalCount) {
