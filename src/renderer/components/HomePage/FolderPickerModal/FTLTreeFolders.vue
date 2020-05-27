@@ -12,7 +12,7 @@
           v-for="folder in folders"
           :key="folder.id"
           :item="folder"
-          :unSavedImportDestination="unSavedImportDestination"
+          :unsavedDestination="unsavedDestination"
           :store="store"
           :i18n="i18n"
           @event-folder-selected="(folder) => {$emit('event-folder-selected', folder)}"
@@ -42,9 +42,9 @@
 
     props: {
       root: {type: Boolean, default: true},
-      unSavedImportDestination: {type: Object},
-      store: {type: Object}, // using props to get store reference instead of normal usage as a workaround
-      i18n: {type: Object} // using props to get t method reference instead of normal usage as a workaround
+      unsavedDestination: {type: Object},
+      store: {type: Object, required: true}, // using props to get store reference instead of normal usage as a workaround
+      i18n: {type: Object, required: true} // using props to get t method reference instead of normal usage as a workaround
     },
 
     data() {

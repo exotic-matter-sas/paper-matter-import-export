@@ -7,12 +7,14 @@
   <b-container fluid class="d-flex flex-column">
     <ul class="nav nav-tabs row bg-dark align-items-center" role="tablist">
       <li class="nav-item col">
-        <a class="nav-link active text-center" id="import-tab" data-toggle="tab" href="#import" role="tab" aria-controls="home" aria-selected="true">
+        <a class="nav-link active text-center" id="import-tab" data-toggle="tab" href="#import" role="tab"
+           aria-controls="home" aria-selected="true" @click.prevent="actionType = 'import'">
           {{$t('homePage.importTabLabel')}}
         </a>
       </li>
       <li class="nav-item col">
-        <a class="nav-link text-center" id="export-tab" data-toggle="tab" href="#export" role="tab" aria-controls="profile" aria-selected="false">
+        <a class="nav-link text-center" id="export-tab" data-toggle="tab" href="#export" role="tab"
+           aria-controls="profile" aria-selected="false" @click.prevent="actionType = 'export'">
           {{$t('homePage.exportTabLabel')}}
         </a>
       </li>
@@ -38,9 +40,12 @@
     </div>
     <ProgressModal v-if="actionOnGoing" :action="actionType" :totalCount="totalCount"
       @event-import-interrupt="interruptImport"/>
-    <FolderPickerModal id="folder-picker-modal" v-if="pickingFolder" :action="actionType"
-      @event-import-interrupt="interruptImport"
-      @event-folder-picker-modal-hidden="pickingFolder = false"/>
+    <FolderPickerModal id="folder-picker-modal"
+                       v-if="pickingFolder"
+                       :title="folderPickerModalTitle"
+                       :default-destination="folderPickerDefaultDestination"
+                       @event-save-picked-folder="saveFolderPickerSelection"
+                       @event-folder-picker-modal-hidden="pickingFolder = false"/>
   </b-container>
 </template>
 
@@ -66,7 +71,7 @@
     data() {
       return {
         windowHeight: 386,
-        actionType: 'import', // TODO make this value dynamic based on active tab
+        actionType: 'import', // default active tab
         actionOnGoing: false,
         totalCount: 0,
         importInterrupted: false,
@@ -81,10 +86,23 @@
     },
 
     computed: {
-      ...mapState('auth', ['accountName'])
+      folderPickerModalTitle () {
+        return this.actionType === 'import' ? this.$t('folderPickerModal.importTitle') : this.$t('folderPickerModal.exportTitle')
+      },
+      folderPickerDefaultDestination () {
+        return this.actionType === 'import' ? this.savedImportDestination : this.savedExportSource
+      },
+      ...mapState('auth', ['accountName']),
+      ...mapState('import', ['savedImportDestination']),
+      ...mapState('export', ['savedExportSource']),
     },
 
     methods: {
+      saveFolderPickerSelection (destinationFolder) {
+        this.actionType === 'import' ? this.$store.commit('import/SET_IMPORT_DESTINATION', destinationFolder):
+          this.$store.commit('export/SET_EXPORT_SOURCE', destinationFolder);
+      },
+
       disconnectUser () {
         this.$store.dispatch('auth/disconnectUser', 'user disconnect himself');
       },
