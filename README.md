@@ -30,7 +30,7 @@ During dev you can remote debug the app by copying the debugger url which appear
     Debugger listening on ws://127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0
     
 To attach debugger in Chrome, open this url:
- - chrome-devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=`127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0`
+ - devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=`127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0`
 
 _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/debugging-production.html_
 
