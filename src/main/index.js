@@ -26,7 +26,7 @@ function createWindow () {
     // When using run dev, electron version may be shown instead of packages.json version
     title: 'Paper Matter import and export - ' + app.getVersion(),
     width: 500,
-    height: 375,
+    height: 438,
     useContentSize: false, // width and height set webview content instead of windows size (with borders and title bar)
     webPreferences: {
       nodeIntegration: true, // not an issue as long as we do not display third party web page through the app
