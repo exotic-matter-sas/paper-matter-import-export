@@ -7,35 +7,37 @@ import axios from "axios";
 
 export default class ApiCient {
   constructor(hostName) {
-    this.http = axios.create({baseURL: hostName + '/app/api'})
+    this.http = axios.create({baseURL: hostName + '/app'})
   }
 
   getAccessToken(email, password){
     return this.http.post(
-      '/token',
+      '/api/token',
       {email, password}
     )
   }
 
   refreshAccessToken(refreshToken){
     return this.http.post(
-      '/token/refresh',
+      '/api/token/refresh',
       {refresh: refreshToken}
+    )
+  }
+
+
+  createFolder(accessToken, name, parent=null){
+    return this.http.post(
+      '/api/v1/folders',
+      {name, parent},
+      {headers: {'Authorization': "Bearer " + accessToken}}
     )
   }
 
   listFolders(accessToken, parent=null){
     let queryString = parent !== null ? `?level=${parent}` : '';
-    return this.http.get(
-      `/v1/folders${queryString}`,
-      {headers: {'Authorization': "Bearer " + accessToken}}
-    )
-  }
 
-  createFolder(accessToken, name, parent=null){
-    return this.http.post(
-      '/v1/folders',
-      {name, parent},
+    return this.http.get(
+      `/api/v1/folders${queryString}`,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
   }
@@ -50,10 +52,31 @@ export default class ApiCient {
     }
 
     return this.http.post(
-      '/v1/documents/upload',
+      '/api/v1/documents/upload',
       formData,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
   }
+
+  listDocuments(accessToken, page=1){
+    // FIXME server does not allow to pass flat and level keyword (to export a specific folder)
+    let queryString = page > 1 ? `&page=${page}` : '';
+
+    return this.http.get(
+      `/api/v1/documents?flat${queryString}`,
+      {headers: {'Authorization': "Bearer " + accessToken}}
+    )
+  }
+
+  downloadDocumentAsArrayBuffer(accessToken, docPid){
+    return this.http.get(
+      `/uploads/${docPid}`,
+      {
+        headers: {'Authorization': "Bearer " + accessToken},
+        responseType: 'arraybuffer'
+      }
+    )
+  }
+
 }
 
