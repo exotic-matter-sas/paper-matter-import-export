@@ -55,7 +55,7 @@ export default {
       folderInputPlaceholder: 'Choose a folder to import...',
       folderInputDropLabel: 'Drop a folder to import here...',
       destinationFormGroupLabel: 'Destination',
-      destinationFormGroupDescription: 'Selected files and/or content of selected folder will be imported into the destination',
+      destinationFormGroupDescription: 'Selected files (or content of selected folder) will be imported into the destination',
       importButtonWithoutMetadataValue: 'Import documents',
       importButtonWithMetadataValue: 'Import documents with metadata',
       warningResumeLastImportTitle: 'You can resume last import',
@@ -72,7 +72,11 @@ export default {
       displayErrorReportButtonValue: 'Display detailed report'
     },
     exportTab: {
-      comingSoonLabel: 'Coming soon',
+      sourcesFormGroupLabel: 'Source',
+      destinationFormGroupLabel: 'Destination',
+      setDestinationFolderPromptTitle: 'Select destination folder for export',
+      setDestinationFolderPromptMessage: 'A new folder will be created inside selected destination',
+      destinationFormGroupDescription: 'Source folder will be imported into the destination',
       exportButtonValue: 'Export'
     },
     folderPickerModal: {

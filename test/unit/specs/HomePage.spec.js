@@ -141,7 +141,7 @@ describe("HomePage methods", () => {
   it("saveFolderPickerSelection commit data to proper store", async () => {
     let fakeDestinationFolder = 'fakeDestinationFolder';
     // given current tab is import
-    wrapper.setData({actionType: 'import'});
+    wrapper.setData({action: 'import'});
 
     wrapper.vm.saveFolderPickerSelection(fakeDestinationFolder);
 
@@ -149,7 +149,7 @@ describe("HomePage methods", () => {
     expect(setImportDestinationMock.lastCall.args[1]).to.equal(fakeDestinationFolder);
 
     // given current tab is export
-    wrapper.setData({actionType: 'export'});
+    wrapper.setData({action: 'export'});
 
     wrapper.vm.saveFolderPickerSelection(fakeDestinationFolder);
 

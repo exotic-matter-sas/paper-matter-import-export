@@ -7,14 +7,14 @@
   <b-container fluid class="d-flex flex-column">
     <ul class="nav nav-tabs row bg-dark align-items-center" role="tablist">
       <li class="nav-item col">
-        <a class="nav-link active text-center" id="import-tab" data-toggle="tab" href="#import" role="tab"
-           aria-controls="home" aria-selected="true" @click.prevent="actionType = 'import'">
+        <a class="active nav-link text-center" id="import-tab" data-toggle="tab" href="#import" role="tab"
+           aria-controls="home" aria-selected="true" @click.prevent="action = 'import'">
           {{$t('homePage.importTabLabel')}}
         </a>
       </li>
       <li class="nav-item col">
         <a class="nav-link text-center" id="export-tab" data-toggle="tab" href="#export" role="tab"
-           aria-controls="profile" aria-selected="false" @click.prevent="actionType = 'export'">
+           aria-controls="profile" aria-selected="false" @click.prevent="action = 'export'">
           {{$t('homePage.exportTabLabel')}}
         </a>
       </li>
@@ -35,11 +35,15 @@
           @event-pick-folder="pickingFolder = true"/>
       </div>
       <div class="tab-pane col" id="export" role="tabpanel" aria-labelledby="export-tab">
-        <ExportTab/>
+        <ExportTab
+          :importInterrupted="importInterrupted"
+          @event-export-started="displayImportProgress"
+          @event-export-end="hideImportProgress"
+          @event-pick-folder="pickingFolder = true"/>
       </div>
     </div>
-    <ProgressModal v-if="actionOnGoing" :action="actionType" :totalCount="totalCount"
-      @event-import-interrupt="interruptImport"/>
+    <ProgressModal v-if="actionOnGoing" :action="action" :totalCount="totalCount"
+                   @event-import-interrupt="interruptImport"/>
     <FolderPickerModal
       id="folder-picker-modal"
       v-if="pickingFolder"
@@ -72,7 +76,7 @@
     data() {
       return {
         windowHeight: 386,
-        actionType: 'import', // default active tab
+        action: 'import', // default active tab
         actionOnGoing: false,
         totalCount: 0,
         importInterrupted: false,
@@ -88,10 +92,10 @@
 
     computed: {
       folderPickerModalTitle () {
-        return this.actionType === 'import' ? this.$t('folderPickerModal.importTitle') : this.$t('folderPickerModal.exportTitle')
+        return this.action === 'import' ? this.$t('folderPickerModal.importTitle') : this.$t('folderPickerModal.exportTitle')
       },
       folderPickerDefaultDestination () {
-        return this.actionType === 'import' ? this.savedImportDestination : this.savedExportSource
+        return this.action === 'import' ? this.savedImportDestination : this.savedExportSource
       },
       ...mapState('auth', ['accountName']),
       ...mapState('import', ['savedImportDestination']),
@@ -104,7 +108,7 @@
       },
 
       saveFolderPickerSelection (destinationFolder) {
-        this.actionType === 'import' ? this.$store.commit('import/SET_IMPORT_DESTINATION', destinationFolder):
+        this.action === 'import' ? this.$store.commit('import/SET_IMPORT_DESTINATION', destinationFolder):
           this.$store.commit('export/SET_EXPORT_SOURCE', destinationFolder);
       },
 
