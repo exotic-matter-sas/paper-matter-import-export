@@ -70,7 +70,7 @@ export default class ApiCient {
 
   downloadDocumentAsArrayBuffer(accessToken, docPid){
     return this.http.get(
-      `/uploads/${docPid}`,
+      `/uploads/${docPid}/`,
       {
         headers: {'Authorization': "Bearer " + accessToken},
         responseType: 'arraybuffer'
