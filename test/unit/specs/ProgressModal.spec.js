@@ -31,28 +31,29 @@ localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
 let docsToImportMock;
-let docsInErrorMock;
+let importDocsInErrorMock;
 
 
-describe("ProgressModal template", () => {
+describe("ProgressModal import template", () => {
   // define all var needed for the test here
   let wrapper;
   let store;
 
   beforeEach(() => {
     docsToImportMock = sm.mock().returnWith("");
-    docsInErrorMock = sm.mock().returnWith("");
+    importDocsInErrorMock = sm.mock().returnWith("");
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(ProgressModal, {
       localVue,
       store,
       computed: {
         docsToImport: docsToImportMock,
-        docsInError: docsInErrorMock,
+        importDocsInError: importDocsInErrorMock,
       },
       propsData: {
-        totalCount: 0,
-        action: 'import'
+        action: 'import',
+        currentCount: 0,
+        totalCount: 100
       }
     });
   });
@@ -65,7 +66,60 @@ describe("ProgressModal template", () => {
   it("renders properly html element", () => {
     const elementSelector = "#progress-modal";
     const elem = wrapper.find(elementSelector);
+    const elementSelector2 = "#import-progress-bar";
+    const elem2 = wrapper.find(elementSelector2);
+
     expect(elem.is(elementSelector)).to.equal(true);
+    expect(elem2.is(elementSelector2)).to.equal(true);
+  });
+
+  it("renders properly component data", () => {
+    expect(wrapper.text()).to.contains(`${wrapper.vm.currentCount}/${wrapper.vm.totalCount}`);
+  });
+});
+
+describe("ProgressModal export template", () => {
+  // define all var needed for the test here
+  let wrapper;
+  let store;
+
+  beforeEach(() => {
+    docsToImportMock = sm.mock().returnWith("");
+    importDocsInErrorMock = sm.mock().returnWith("");
+    store = new Vuex.Store(storeConfig);
+    wrapper = shallowMount(ProgressModal, {
+      localVue,
+      store,
+      computed: {
+        docsToImport: docsToImportMock,
+        importDocsInError: importDocsInErrorMock,
+      },
+      propsData: {
+        action: 'export',
+        currentStep: 2,
+        currentCount: 0,
+        totalCount: 100
+      }
+    });
+  });
+
+  afterEach(() => {
+    sm.restore();
+    showModalMock.reset();
+  });
+
+  it("renders properly html element", () => {
+    const elementSelector = "#progress-modal";
+    const elem = wrapper.find(elementSelector);
+    const elementSelector2 = "#export-progress-bar-2";
+    const elem2 = wrapper.find(elementSelector2);
+
+    expect(elem.is(elementSelector)).to.equal(true);
+    expect(elem2.is(elementSelector2)).to.equal(true);
+  });
+
+  it("renders properly component data", () => {
+    expect(wrapper.text()).to.contains(`${wrapper.vm.currentCount}/${wrapper.vm.totalCount}`);
   });
 });
 
@@ -75,18 +129,19 @@ describe("ProgressModal mounted", () => {
 
   beforeEach(() => {
     docsToImportMock = sm.mock().returnWith("");
-    docsInErrorMock = sm.mock().returnWith("");
+    importDocsInErrorMock = sm.mock().returnWith("");
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(ProgressModal, {
       localVue,
       store,
       computed: {
         docsToImport: docsToImportMock,
-        docsInError: docsInErrorMock,
+        importDocsInError: importDocsInErrorMock,
       },
       propsData: {
-        totalCount: 0,
-        action: 'import'
+        action: 'import',
+        currentCount: 0,
+        totalCount: 100
       }
     });
   });
@@ -108,18 +163,19 @@ describe("ProgressModal methods", () => {
 
   beforeEach(() => {
     docsToImportMock = sm.mock().returnWith("");
-    docsInErrorMock = sm.mock().returnWith("");
+    importDocsInErrorMock = sm.mock().returnWith("");
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(ProgressModal, {
       localVue,
       store,
       computed: {
         docsToImport: docsToImportMock,
-        docsInError: docsInErrorMock,
+        importDocsInError: importDocsInErrorMock,
       },
       propsData: {
-        totalCount: 0,
-        action: 'import'
+        action: 'import',
+        currentCount: 0,
+        totalCount: 100
       }
     });
   });
@@ -129,11 +185,11 @@ describe("ProgressModal methods", () => {
     showModalMock.reset();
   });
 
-  it("interruptImport emit event event-import-interrupt", () => {
+  it("interruptAction emit event event-import-interrupt", () => {
     const testedEvent = "event-import-interrupt";
 
     // when
-    wrapper.vm.interruptImport();
+    wrapper.vm.interruptAction();
 
     // then
     expect(wrapper.emitted(testedEvent)).to.not.be.undefined;

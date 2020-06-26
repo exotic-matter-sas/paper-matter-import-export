@@ -60,23 +60,25 @@ const vi = new Vue({
 
 // listen to webContents close event to ask user for confirmation on close (if needed)
 ipcRenderer.on('closeMainWindow', (event, message) => {
-  if (store.state.import.docsToImport.length  > 0){
+  if (store.state.import.docsToImport.length  > 0 || store.state.export.docsToExport.length  > 0){
     remote.dialog.showMessageBox(null,
       {
         type: 'question',
-        title: i18n.t('main.warningExitingImportIncompleteTitle'),
-        message: i18n.t('main.warningExitingImportIncompleteMessage'),
-        detail: i18n.t('main.warningExitingImportIncompleteDetail'),
+        title: i18n.t('main.warningExitingActionIncompleteTitle'),
+        message: i18n.t('main.warningExitingActionIncompleteMessage'),
+        detail: i18n.t('main.warningExitingActionIncompleteDetail'),
         buttons: [i18n.t('bModal.cancelButtonValue'), i18n.t('bModal.closeButtonValue')],
         defaultId: 0
       }).then( ({response}) => {
         if (response === 1){
           store.commit('import/RESET_IMPORT_DATA');
+          store.commit('export/RESET_EXPORT_DATA');
           ipcRenderer.sendSync('closeConfirmed');
        }
     });
   } else {
     store.commit('import/RESET_IMPORT_DATA');
+    store.commit('export/RESET_EXPORT_DATA');
     ipcRenderer.sendSync('closeConfirmed');
   }
 });

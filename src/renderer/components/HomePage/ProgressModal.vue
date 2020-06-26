@@ -7,32 +7,67 @@
   <b-modal id="progress-modal" centered hide-header no-close-on-esc no-close-on-backdrop>
     <b-container fluid>
       <b-row class="align-items-center">
-        <b-col>
-          <b-row v-if="action === 'import'">
+        <!-- Import progress -->
+        <b-col v-if="action === 'import'">
+          <b-row>
             <h1 class="text-primary">{{ $t('progressModal.importTitle') }}</h1>
-          </b-row>
-          <b-row v-else>
-            <h1 class="text-primary">{{ $t('progressModal.exportTitle') }}</h1>
           </b-row>
           <b-row class="align-items-end">
             <b-col cols="12">
-              <b-progress id="progress-bar" height="2rem" :value="totalCount - docsToImport.length"
+              <b-progress id="import-progress-bar" height="2rem" :value="currentCount"
                   :max="totalCount" variant="primary" show-progress animated/>
             </b-col>
             <b-col cols="6" id="error-count" class="text-left text-danger">
-              <span v-if="docsInError.length">
-                {{ $tc('progressModal.errorCountLabel', docsInError.length) }}
+              <span v-if="importDocsInError.length">
+                {{ $tc('progressModal.errorCountLabel', importDocsInError.length) }}
               </span>
             </b-col>
             <b-col cols="6" id="progression-count" class="text-right text-muted">
-              {{totalCount - docsToImport.length}}/{{totalCount}}
+              {{currentCount}}/{{totalCount}}
+            </b-col>
+          </b-row>
+        </b-col>
+        <!-- Export progress, step 1: listing docs -->
+        <b-col v-if="action === 'export' && currentStep === 1">
+          <b-row>
+            <h1 class="text-primary">{{ $t('progressModal.exportTitle1') }}</h1>
+            <h2 class="text-muted font-italic">{{ $t('progressModal.exportSubTitle1') }}</h2>
+          </b-row>
+          <b-row class="align-items-end">
+            <b-col cols="12">
+              <b-progress id="export-progress-bar-1" height="2rem" variant="primary"
+                          :value="currentCount" :max="totalCount"
+                          show-progress animated/>
+            </b-col>
+          </b-row>
+        </b-col>
+        <!-- Export progress, step 2: downloading docs  -->
+        <b-col v-if="action === 'export' && currentStep === 2">
+          <b-row>
+            <h1 class="text-primary">{{ $t('progressModal.exportTitle2') }}</h1>
+            <h2 class="text-muted font-italic">{{ $t('progressModal.exportSubTitle2') }}</h2>
+          </b-row>
+          <b-row class="align-items-end">
+            <b-col cols="12">
+              <b-progress id="export-progress-bar-2" height="2rem" variant="primary"
+                          :value="currentCount" :max="totalCount"
+                          show-progress animated/>
+            </b-col>
+
+            <b-col cols="6" id="error-count" class="text-left text-danger">
+            <span v-if="exportDocsInError.length">
+            {{ $tc('progressModal.errorCountLabel', exportDocsInError.length) }}
+            </span>
+            </b-col>
+            <b-col cols="6" id="progression-count" class="text-right text-muted">
+            {{currentCount}}/{{totalCount}}
             </b-col>
           </b-row>
         </b-col>
       </b-row>
     </b-container>
     <template slot="modal-footer">
-      <b-button id="stop-button" variant="outline-danger" @click.prevent="interruptImport" class="w-100">
+      <b-button id="stop-button" variant="outline-danger" @click.prevent="interruptAction" class="w-100">
         {{ $t('progressModal.stopButtonValue') }}
       </b-button>
     </template>
@@ -50,6 +85,13 @@
         type: String,
         validator: (val) => ['export', 'import'].includes(val)
       },
+      currentStep: {
+        type: Number,
+        default: 1
+      },
+      currentCount: {
+        type: Number
+      },
       totalCount: {
         type: Number
       }
@@ -60,11 +102,12 @@
     },
 
     computed: {
-      ...mapState('import', ['docsToImport', 'docsInError'])
+      ...mapState('import', ['docsToImport', 'importDocsInError']),
+      ...mapState('export', ['docsToExport', 'exportDocsInError'])
     },
 
     methods: {
-      interruptImport() {
+      interruptAction() {
         this.$emit('event-import-interrupt');
       },
     }
@@ -78,5 +121,17 @@
     font-size: 2rem;
     width: 100%;
     text-align: center;
+  }
+  h2{
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+</style>
+
+<style lang="scss">
+  /*Disable transition to prevent bar to go backward when displaying export step2 progressbar in place of step1 one*/
+  .progress-bar{
+    transition: none !important;
   }
 </style>

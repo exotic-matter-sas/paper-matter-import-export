@@ -40,6 +40,7 @@
 <script>
   import {mapActions, mapState} from "vuex";
   import {remote} from "electron";
+  import {reportTools} from "../../htmlReport";
 
   const log = require('electron-log');
   const fs = require('fs');
@@ -49,20 +50,28 @@
     name: 'export-tab',
 
     props: {
-      exportInterrupted: {
+      actionInterrupted: {
         type: Boolean
       }
     },
 
-    data(){
-      return {
-        exportStartDate: '',
-        filePathDuplicatedCount: {} // TODO move into store
-      }
-    },
-
     mounted() {
-
+      // if last export wasn't properly completed
+      if (this.docsToExport.length > 0){
+        log.info('last export wasn\'t fully completed, inform user that he can resume it');
+        const win = remote.getCurrentWindow();
+        remote.dialog.showMessageBox(win,
+          {
+            type: 'info',
+            title: this.$t('exportTab.warningResumeLastExportTitle'),
+            message: this.$t('exportTab.warningResumeLastExportMessage'),
+            detail: this.$tc('exportTab.warningResumeLastExportDetail', this.docsToExport.length),
+            buttons: ['Ok'],
+            defaultId: 0
+          });
+      } else if (this.exportDocsInError.length > 0) {
+        this.displayExportErrorPrompt(this.exportDocsInError.length)
+      }
     },
 
     computed: {
@@ -72,7 +81,9 @@
       },
 
       ...mapState('auth', ['accessToken']),
-      ...mapState('export', ['docsToExport', 'savedExportSource', 'savedExportDestination'])
+      ...mapState('export', ['savedExportSource', 'savedExportDestination', 'exportFolderName', 'docsToExport',
+        'exportDocsInError', 'duplicatedFilePathCount']),
+      ...mapState('config', ['apiHostName'])
     },
 
     methods: {
@@ -100,37 +111,44 @@
 
       async proceedToExport () {
         const vi = this;
-        this.resetDataExportStart();
 
-        // List and store all documents to export
+        // List and store all documents to export, unless documents are recovered from a previous session
         let listDocumentsError = false;
-        await vi.listAllDocuments()
-        .then(allDocuments => {
-          console.log('allDocuments', allDocuments);
-          vi.$store.commit(
-            'export/SET_DOCS_TO_EXPORT',
-            // storing only useful fields of documents to export
-            allDocuments.map(
-              ({pid, title, note, created, path, md5, ext}) =>
-              ({pid, title, note, created, path, md5, ext})
-            )
-          );
-        })
-        .catch(error => {
-          log.error(`aborting export, error occurred during documents listing:\n ${error}`);
-          listDocumentsError = true;
-        });
+        let totalCount = 0;
+        if (vi.docsToExport.length === 0) {
+          await vi.listAllDocuments()
+            .then(allDocuments => {
+              vi.$store.commit(
+                'export/SET_DOCS_TO_EXPORT',
+                // storing only useful fields of documents to export
+                allDocuments.map(
+                  ({pid, title, note, created, path, md5, ext}) =>
+                    ({pid, title, note, created, path, md5, ext})
+                )
+              );
+              totalCount = allDocuments.length;
+              vi.$emit('event-step-end') // to display second step progressbar
+            })
+            .catch(error => {
+              log.error(`aborting export, error occurred during documents listing:\n ${error}`);
+              listDocumentsError = true;
+            });
+        }
 
         let serializedDocument;
         let docDirAbsolutePath;
-        while (vi.docsToExport.length > 0 && !(vi.importInterrupted || vi.accessToken === '' || listDocumentsError)) {
-          serializedDocument = vi.docsToExport[0];
+        while (vi.docsToExport.length > 0 && !(vi.actionInterrupted || vi.accessToken === '' || listDocumentsError)) {
+          // Display and update progressModal
+          vi.$emit('event-exporting', {
+            currentCount: totalCount - vi.docsToExport.length,
+            totalCount: totalCount
+          });
 
+          serializedDocument = vi.docsToExport[0];
           docDirAbsolutePath = this.getDocDirAbsolutePath(serializedDocument.path);
 
           // Create folder path for document if needed
           let folderCreationError = false;
-          console.log('docDirAbsolutePath', docDirAbsolutePath);
 
           await fs.promises.mkdir(docDirAbsolutePath, {recursive: true})
           .catch(error => {
@@ -156,6 +174,10 @@
 
           vi.$store.commit('export/CONSUME_FIRST_DOC_TO_EXPORT')
         }
+
+        log.debug('export end');
+        vi.$emit('event-export-end', vi.docsToExport.length); // close progressModal
+        vi.notifyExportEnd(totalCount);
         // TODO complete API doc to add info about download and document details + refactor url format
         // first version limitations :
         //    a new folder is created into destination at each export
@@ -163,33 +185,35 @@
         //    no export of empty folder (containing no documents or only folders with no documents)
       },
 
-      async resetDataExportStart () {
-        this.exportStartDate = new Date();
-      },
-
-      async listAllDocuments(firstPage=1) {
+      listAllDocuments(startPage=1, currentDocumentCount=0) {
         let vi = this;
         let documentsToExport;
 
-        // TODO emit events for progressbar
-
-        return await this.$api.listDocuments(vi.accessToken, firstPage)
+        return this.$api.listDocuments(vi.accessToken, startPage)
           .then(async response => {
+            // Display and update progressModal
+            vi.$emit('event-exporting', {
+              currentCount: currentDocumentCount,
+              totalCount: response.data.count
+            });
+
             documentsToExport = response.data.results;
+
             // If results are paginated, additional API calls are required
             if (response.data.next !== null) {
-              // if user interrupted export or need to log again, no need to pursue
-              if (!(vi.exportInterrupted || vi.accessToken === '')) {
-                // recursion black magic happen here
-                await this.listAllDocuments(firstPage + 1)
+              // if user does not interrupt export or doesn't need to log again
+              if (!(vi.actionInterrupted || vi.accessToken === '')) {
+                // /!\ recursion black magic happen here
+                await this.listAllDocuments(startPage + 1, currentDocumentCount + documentsToExport.length)
                   .then(additionalDocumentsToExport => {
                       // merging returned array with documentsToExport
                       Array.prototype.push.apply(documentsToExport, additionalDocumentsToExport);
                     }
                   );
-              } else {
+              }
+              else {
                 let errorMessage;
-                if (vi.exportInterrupted) {
+                if (vi.actionInterrupted) {
                   errorMessage = 'Export interrupted by user';
                 }
                 else {
@@ -206,7 +230,7 @@
       getDocDirAbsolutePath(docDirPathArray) {
         let docDirAbsolutePathArray = [
           this.savedExportDestination,
-          this.exportStartDate.toISOString().replace(/[:.]/g, '-'), // replace non path friendly characters by "-"
+          this.exportFolderName
         ];
 
         // if doc is in a sub folder
@@ -235,18 +259,19 @@
       },
 
       downloadAndIntegrityCheckDocument(serializedDocument, docDirAbsolutePath){
-        const docAbsolutePath = this.getDocAbsolutePath(
+        let vi = this;
+        const docAbsolutePath = vi.getDocAbsolutePath(
           docDirAbsolutePath,
           serializedDocument.title,
           serializedDocument.ext
         );
 
-        return this.$api.downloadDocumentAsArrayBuffer(this.accessToken, serializedDocument.pid)
+        return vi.$api.downloadDocumentAsArrayBuffer(vi.accessToken, serializedDocument.pid)
         // compute and check md5
         .then(response => {
           const nodeFileBuffer = Buffer.from(response.data);
 
-          return this.hashFile({algorithm: 'md5', file: nodeFileBuffer}).then(computedMd5 => {
+          return vi.hashFile({algorithm: 'md5', file: nodeFileBuffer}).then(computedMd5 => {
               if (serializedDocument.md5 === computedMd5) {
                 return Promise.resolve(nodeFileBuffer);
               } else {
@@ -264,20 +289,26 @@
             .catch(async error => {
             // a file with the same name already exist in the folder
             if ('code' in error && error.code === 'EEXIST'){
-              console.log('error catched!');
               // compute the count to add to file name
-              const docPathHash = await this.hashString({algorithm: 'md5', string: docAbsolutePath});
+              const docPathHash = await vi.hashString({algorithm: 'md5', string: docAbsolutePath});
               let fileCount;
 
-              if (docPathHash in this.filePathDuplicatedCount) {
-                fileCount = this.filePathDuplicatedCount[docPathHash] += 1
+              if (docPathHash in vi.duplicatedFilePathCount) {
+                fileCount = vi.duplicatedFilePathCount[docPathHash] + 1;
+                vi.$store.commit(
+                  'export/SET_DUPLICATED_FILE_PATH_COUNT',
+                  [docPathHash, fileCount]
+                );
               }
               else {
-                fileCount = this.filePathDuplicatedCount[docPathHash] = 1
+                fileCount = 1;
+                vi.$store.commit(
+                  'export/SET_DUPLICATED_FILE_PATH_COUNT',
+                  [docPathHash, fileCount]
+                );
               }
-              console.log('recall write file');
               return fs.promises.writeFile(
-                this.getDocAbsolutePath(
+                vi.getDocAbsolutePath(
                   docDirAbsolutePath,
                   serializedDocument.title,
                   serializedDocument.ext,
@@ -294,7 +325,77 @@
         })
       },
 
-      ...mapActions('tools', ['hashString', 'hashFile'])
+      displayExportErrorPrompt(errorCount, export_interrupted_mention='') {
+        const win = remote.getCurrentWindow();
+
+        log.error('theses files could not be exported:', this.exportDocsInError);
+        remote.dialog.showMessageBox(win,
+          {
+            type: 'error',
+            title: this.$tc('exportTab.errorExportTitle', this.exportDocsInError.length),
+            message: this.$tc('exportTab.errorExportMessage', this.exportDocsInError.length),
+            detail: this.$tc('exportTab.errorExportDetail', this.exportDocsInError.length,
+              {export_interrupted_mention}),
+            buttons: ['Ok', this.$t('exportTab.displayErrorReportButtonValue')],
+            defaultId: 0
+          }).then( ({response}) => {
+            if (response === 1){ // Second button clicked
+              this.displayExportErrorReport();
+            }
+            // Move docs in error list to able to retry an export
+            this.$store.commit('export/MOVE_DOCS_FROM_ERROR_TO_EXPORT');
+          }
+        );
+      },
+
+      notifyExportEnd (totalCount){
+        const errorCount = this.exportDocsInError.length; // reset by export/RESET_EXPORT_DATA mutation
+        const win = remote.getCurrentWindow();
+        const export_interrupted_mention = this.actionInterrupted ? this.$t('exportTab.exportInterruptedMention') : '';
+
+        // Do not display success or error messages when user get disconnected
+        // (it will be shown at the end of the resumed export after reconnection)
+        if(this.accessToken){
+          if (errorCount) {
+            this.displayExportErrorPrompt(errorCount, export_interrupted_mention);
+          } else {
+            remote.dialog.showMessageBox(win,
+              {
+                type: 'info',
+                title: this.$t('exportTab.successExportTitle'),
+                message: this.$tc(
+                  'exportTab.successExportMessage',
+                  totalCount - this.docsToExport.length, {export_interrupted_mention}
+                  ),
+                buttons: ['Ok'],
+                defaultId: 0
+              });
+          }
+        } else {
+          remote.dialog.showMessageBox(win,
+            {
+              type: 'error',
+              title: this.$t('exportTab.warningExportInterruptedTitle'),
+              message: this.$t('exportTab.warningExportInterruptedMessage'),
+              buttons: ['Ok'],
+              defaultId: 0
+            });
+        }
+      },
+
+      displayExportErrorReport() {
+        log.debug('displaying detailed report');
+        const report = new reportTools.HtmlReport(
+          ['Title', 'Error detail'],
+          this.exportDocsInError.map(({title, pid, reason}) => ([
+            `<a href="${this.apiHostName}/app/#/home?doc=${pid}" target="_blank">${title}</a>`,
+            reason
+          ]))
+        );
+        this.$electron.shell.openExternal('file:///'+ report.save());
+      },
+
+      ...mapActions('tools', ['hashString', 'hashFile']),
     }
   }
 </script>

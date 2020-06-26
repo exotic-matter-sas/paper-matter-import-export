@@ -88,7 +88,7 @@
     },
 
     props: {
-      importInterrupted: {
+      actionInterrupted: {
         type: Boolean
       }
     },
@@ -101,7 +101,7 @@
         importing: false,
         createdFoldersCache: {},
         settingDocumentsMetadata: false,
-        guessMetadataFileName: ['data_documents_exported.csv', 'import.csv'],
+        expectedMetadataFileNameList: ['data_documents_exported.csv', 'import.csv'],
         metadataFileDetected: false
       }
     },
@@ -109,7 +109,7 @@
     mounted() {
       // if last import wasn't properly completed
       if (this.docsToImport.length > 0){
-        log.info('last import wasn\'t fully completed, inform user that he can finish it');
+        log.info('last import wasn\'t fully completed, inform user that he can resume it');
         const win = remote.getCurrentWindow();
         remote.dialog.showMessageBox(win,
           {
@@ -120,8 +120,8 @@
             buttons: ['Ok'],
             defaultId: 0
           });
-      } else if (this.docsInError.length > 0) {
-        this.displayImportErrorPrompt(this.docsInError.length)
+      } else if (this.importDocsInError.length > 0) {
+        this.displayImportErrorPrompt(this.importDocsInError.length)
       }
     },
 
@@ -129,7 +129,7 @@
       filesInsideFolder: function (newVal, oldVal) {
         if (newVal !== oldVal && newVal != null) {
           // we try to detect the presence of a csv file with document metadata inside folder to import
-          if (newVal.some(({name}) => this.guessMetadataFileName.includes(name))) {
+          if (newVal.some(({name}) => this.expectedMetadataFileNameList.includes(name))) {
             this.metadataFileDetected = true;
           } else {
             this.metadataFileDetected = false;
@@ -152,7 +152,7 @@
         }
       },
       ...mapState('auth', ['accessToken']),
-      ...mapState('import', ['docsToImport', 'docsInError', 'savedImportDestination', 'docsMetadataToImport'])
+      ...mapState('import', ['docsToImport', 'importDocsInError', 'savedImportDestination', 'docsMetadataToImport'])
     },
 
     methods: {
@@ -160,7 +160,7 @@
         let vi = this;
         log.debug(importingMetadata ? 'preparing import with metadata' : 'preparing import without metadata');
 
-        // Store files to import in store if needed (not needed when documents are recover from a previous session)
+        // Store files to import in store if needed (not needed when documents are recovered from a previous session)
         if (vi.files.length > 0 || vi.filesInsideFolder.length > 0){
           // we filter filesInsideFolder to get only supported files
           const filteredFilesInsideFolder = vi.filesInsideFolder.filter(file => {
@@ -200,7 +200,6 @@
         log.debug('importing start');
         vi.importing = true;
         const totalCount = vi.docsToImport.length;
-        vi.$emit('event-import-started', totalCount); // display progressModal
 
         let jsonData = {};
         let serializedDocument;
@@ -209,7 +208,13 @@
         let thumbnail;
         let parentFolderId;
 
-        while (vi.docsToImport.length > 0 && !(vi.importInterrupted || vi.accessToken === '')){
+        while (vi.docsToImport.length > 0 && !(vi.actionInterrupted || vi.accessToken === '')){
+          // Display and update progressModal
+          vi.$emit('event-importing', {
+            currentCount: totalCount - vi.docsToImport.length,
+            totalCount: totalCount
+          });
+
           serializedDocument = vi.docsToImport[0];
 
           let folderCreationError = false;
@@ -272,7 +277,7 @@
           });
         }
 
-        if(vi.importInterrupted){
+        if(vi.actionInterrupted){
           log.info('Import interrupt by user');
         } else if (vi.accessToken === '') {
           log.info('User has been disconnected');
@@ -280,7 +285,7 @@
 
         log.debug('importing end');
         vi.resetDataImportEnd();
-        vi.$emit('event-import-end', vi.docsToImport.length); // close progressModal
+        vi.$emit('event-import-end'); // close progressModal
         vi.notifyImportEnd(totalCount);
       },
 
@@ -411,16 +416,16 @@
         });
       },
 
-      displayImportErrorPrompt(errorCount, export_interrupted_mention='') {
+      displayImportErrorPrompt(errorCount, import_interrupted_mention='') {
         const win = remote.getCurrentWindow();
 
-        log.error('theses files could not be imported:', this.docsInError);
+        log.error('theses files could not be imported:', this.importDocsInError);
         remote.dialog.showMessageBox(win,
           {
             type: 'error',
-            title: this.$tc('importTab.errorImportTitle', this.docsInError.length),
-            message: this.$tc('importTab.errorImportMessage', this.docsInError.length),
-            detail: this.$tc('importTab.errorImportDetail', this.docsInError.length, {export_interrupted_mention}),
+            title: this.$tc('importTab.errorImportTitle', this.importDocsInError.length),
+            message: this.$tc('importTab.errorImportMessage', this.importDocsInError.length),
+            detail: this.$tc('importTab.errorImportDetail', this.importDocsInError.length, {import_interrupted_mention}),
             buttons: ['Ok', this.$t('importTab.displayErrorReportButtonValue')],
             defaultId: 0
           }).then( ({response}) => {
@@ -434,22 +439,22 @@
       },
 
       notifyImportEnd (totalCount){
-        const errorCount = this.docsInError.length; // reset by import/RESET_IMPORT_DATA mutation
+        const errorCount = this.importDocsInError.length; // reset by import/RESET_IMPORT_DATA mutation
         const win = remote.getCurrentWindow();
-        const export_interrupted_mention = this.importInterrupted ? this.$t('importTab.exportInterruptedMention') : '';
+        const import_interrupted_mention = this.actionInterrupted ? this.$t('importTab.importInterruptedMention') : '';
 
         // Do not display success or error messages when user get disconnected
         // (it will be shown at the end of the resumed import after reconnection)
         if(this.accessToken){
           if (errorCount) {
-            this.displayImportErrorPrompt(errorCount, export_interrupted_mention);
+            this.displayImportErrorPrompt(errorCount, import_interrupted_mention);
           } else {
             remote.dialog.showMessageBox(win,
               {
                 type: 'info',
                 title: this.$t('importTab.successImportTitle'),
                 message: this.$tc('importTab.successImportMessage',
-                  totalCount - this.docsToImport.length, {export_interrupted_mention}),
+                  totalCount - this.docsToImport.length, {import_interrupted_mention}),
                 buttons: ['Ok'],
                 defaultId: 0
               });
@@ -458,8 +463,8 @@
           remote.dialog.showMessageBox(win,
             {
               type: 'error',
-              title: this.$t('importTab.warningExportInterruptedTitle'),
-              message: this.$t('importTab.warningExportInterruptedMessage'),
+              title: this.$t('importTab.warningImportInterruptedTitle'),
+              message: this.$t('importTab.warningImportInterruptedMessage'),
               buttons: ['Ok'],
               defaultId: 0
             });
@@ -470,7 +475,7 @@
         log.debug('displaying detailed report');
         const report = new reportTools.HtmlReport(
             ['Name', 'Path', 'Error detail'],
-            this.docsInError.map(({name, path, reason}) => ([name, path, reason]))
+            this.importDocsInError.map(({name, path, reason}) => ([name, path, reason]))
         );
         this.$electron.shell.openExternal('file:///'+ report.save());
       },

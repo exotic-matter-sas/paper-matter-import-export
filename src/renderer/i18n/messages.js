@@ -16,9 +16,9 @@ export default {
       cancelButtonValue: 'Cancel'
     },
     main: {
-      warningExitingImportIncompleteTitle: 'Are you sure you want to quit?',
-      warningExitingImportIncompleteMessage: 'There are some documents which remain to be imported.',
-      warningExitingImportIncompleteDetail: 'If you close now, ongoing import or documents selection will be lost.',
+      warningExitingActionIncompleteTitle: 'Are you sure you want to quit?',
+      warningExitingActionIncompleteMessage: 'There are some documents which remain to be imported or exported.',
+      warningExitingActionIncompleteDetail: 'If you close now, ongoing import or export wont be fully completed.',
     },
     loginPage: {
       logoAlt: 'Paper Matter logo',
@@ -34,7 +34,6 @@ export default {
       errorUnknown: 'Unknown error, please retry later.',
       errorUnknownCustomHostName: 'Unknown error, please double check the server address set.',
       errorServerUnreachable: 'The Paper Matter server seems unreachable, please check your internet connection.',
-
     },
     editServerAddressModal: {
       title: 'Set your server address',
@@ -61,14 +60,14 @@ export default {
       warningResumeLastImportTitle: 'You can resume last import',
       warningResumeLastImportMessage: 'Last import wasn\'t fully completed.',
       warningResumeLastImportDetail: '| There is one file left to import, you can finish the import by clicking the Import button. | There is {n} files left to import, you can finish the import by clicking the Import button.',
-      exportInterruptedMention: ' (export has been interrupted)',
+      importInterruptedMention: ' (import has been interrupted)',
       successImportTitle: 'Documents successfully imported',
-      successImportMessage: '|  One document imported without error{export_interrupted_mention}. | {n} documents imported without errors{export_interrupted_mention}.',
-      warningExportInterruptedTitle: 'Export interrupted',
-      warningExportInterruptedMessage: 'You have been disconnected, please log again to resume your import',
+      successImportMessage: '| One document imported without error{import_interrupted_mention}. | {n} documents imported without error{import_interrupted_mention}.',
+      warningImportInterruptedTitle: 'Import interrupted',
+      warningImportInterruptedMessage: 'You have been disconnected, please log again to resume your import',
       errorImportTitle: '| One error occurred during import | Errors occurred during import',
       errorImportMessage: '| One document couldn\'t be imported: | {n} documents couldn\'t be imported:',
-      errorImportDetail: '| You can retry to import it by clicking the Import button{export_interrupted_mention}. | You can retry to import them by clicking the Import button{export_interrupted_mention}.',
+      errorImportDetail: '| You can retry to import it by clicking the Import button{import_interrupted_mention}. | You can retry to import them by clicking the Import button{import_interrupted_mention}.',
       displayErrorReportButtonValue: 'Display detailed report'
     },
     exportTab: {
@@ -76,8 +75,20 @@ export default {
       destinationFormGroupLabel: 'Destination',
       setDestinationFolderPromptTitle: 'Select destination folder for export',
       setDestinationFolderPromptMessage: 'A new folder will be created inside selected destination',
-      destinationFormGroupDescription: 'Source folder will be imported into the destination',
-      exportButtonValue: 'Export'
+      destinationFormGroupDescription: 'Source folder will be exported into the destination (empty folders wont be exported)',
+      exportButtonValue: 'Export documents',
+      warningResumeLastExportTitle: 'You can resume last export',
+      warningResumeLastExportMessage: 'Last export wasn\'t fully completed.',
+      warningResumeLastExportDetail: '| There is one file left to export, you can finish the export by clicking the Export button. | There is {n} files left to export, you can finish the export by clicking the Export button.',
+      errorExportTitle: '| One error occurred during export | Errors occurred during export',
+      errorExportMessage: '| One document couldn\'t be exported: | {n} documents couldn\'t be exported:',
+      errorExportDetail: '| You can retry to export it by clicking the Export button{export_interrupted_mention}. | You can retry to export them by clicking the Export button{export_interrupted_mention}.',
+      successExportTitle: 'Documents successfully exported',
+      successExportMessage: '| One document exported without error{import_interrupted_mention}. | {n} documents exported without error{import_interrupted_mention}.',
+      warningExportInterruptedTitle: 'Export interrupted',
+      warningExportInterruptedMessage: 'You have been disconnected, please log again to resume your export',
+      displayErrorReportButtonValue: 'Display detailed report',
+      exportInterruptedMention: ' (export has been interrupted)',
     },
     folderPickerModal: {
       importTitle: 'Select destination folder',
@@ -91,7 +102,10 @@ export default {
     },
     progressModal: {
       importTitle: 'Importing your documents...',
-      exportTitle: 'Exporting your documents...',
+      exportTitle1: 'Listing documents...',
+      exportSubTitle1: 'Step 1/2',
+      exportTitle2: 'Downloading documents...',
+      exportSubTitle2: 'Step 2/2',
       errorCountLabel: ' | One error | {n} errors',
       stopButtonValue: 'Stop'
     },
@@ -135,9 +149,9 @@ export default {
       cancelButtonValue: 'Annuler'
     },
     main: {
-      warningExitingImportIncompleteTitle: 'Êtes-vous sûr de vouloir quitter ?',
-      warningExitingImportIncompleteMessage: 'Certains documents restent à importer.',
-      warningExitingImportIncompleteDetail: 'Si vous quittez maintenant, l\'import en cours ou la sélection des documents seront perdus.',
+      warningExitingActionIncompleteTitle: 'Êtes-vous sûr de vouloir quitter ?',
+      warningExitingActionIncompleteMessage: 'Certains documents restent à importer ou exporter.',
+      warningExitingActionIncompleteDetail: 'Si vous quittez maintenant, l\'import ou l\'export en cours ne sera pas complètement terminé.',
     },
     loginPage: {
       logoAlt: 'Logo Paper Matter',
@@ -179,19 +193,35 @@ export default {
       warningResumeLastImportTitle: 'Vous pouvez reprendre le dernier import',
       warningResumeLastImportMessage: 'Le dernier import n\'a pas été terminé.',
       warningResumeLastImportDetail: '| Il y a un fichier restant à importer, vous pouvez terminer l\'import en cliquant sur le bouton Importer. | Il y a {n} fichiers restant à importer, vous pouvez terminer l\'import en cliquant sur le bouton Importer.',
-      exportInterruptedMention: ' (l\'export a été interrompu)',
+      importInterruptedMention: ' (l\'import a été interrompu)',
       successImportTitle: 'Documents importés avec succès',
-      successImportMessage: '|  Un document importé sans erreur{export_interrupted_mention}. | {n} documents importés sans erreurs{export_interrupted_mention}.',
-      warningExportInterruptedTitle: 'Export interrompu',
-      warningExportInterruptedMessage: 'Vous avez été déconnecté, veuillez vous reconnecter pour poursuivre l\'import',
+      successImportMessage: '|  Un document importé sans erreur{import_interrupted_mention}. | {n} documents importés sans erreurs{import_interrupted_mention}.',
+      warningImportInterruptedTitle: 'Import interrompu',
+      warningImportInterruptedMessage: 'Vous avez été déconnecté, veuillez vous reconnecter pour poursuivre l\'import',
       errorImportTitle: '| Une erreur s\'est produite durant l\'import | Des erreurs se sont produites durant l\'import',
       errorImportMessage: '| Un document n\'a pu être importé : | {n} documents n\'ont pu être importés :',
-      errorImportDetail: '| Vous pouvez retenter de l\'importer en cliquant sur le bouton Importer{export_interrupted_mention}. | Vous pouvez retenter de les importer en cliquant sur le bouton Importer{export_interrupted_mention}.',
+      errorImportDetail: '| Vous pouvez retenter de l\'importer en cliquant sur le bouton Importer{import_interrupted_mention}. | Vous pouvez retenter de les importer en cliquant sur le bouton Importer{import_interrupted_mention}.',
       displayErrorReportButtonValue: 'Display detailed report'
     },
     exportTab: {
-      comingSoonLabel: 'Bientôt disponible',
-      exportButtonValue: 'Exporter'
+      sourcesFormGroupLabel: 'Source',
+      destinationFormGroupLabel: 'Destination',
+      setDestinationFolderPromptTitle: 'Sélectionnez le dossier de destination de l\'export',
+      setDestinationFolderPromptMessage: 'Un nouveau dossier sera créé dans cette destination',
+      destinationFormGroupDescription: 'Le dossier source sera exporté vers la destination (les dossiers vides ne seront pas exportés)',
+      exportButtonValue: 'Exporter les documents',
+      warningResumeLastExportTitle: 'Vous pouvez reprendre le dernier export',
+      warningResumeLastExportMessage: 'Le dernier export n\'a pas été terminé.',
+      warningResumeLastExportDetail: '| Il reste un document à exporter, vous pouvez terminer l\'export en cliquant sur le bouton Exporter. | Il y a {n} documents à exporter, vous pouvez terminer l\'export en cliquant sur le bouton Exporter.',
+      errorExportTitle: '| Une erreur est survenue durant l\'export | Des erreurs sont survenues durant l\'export',
+      errorExportMessage: '| Un document n\'a pu être exporté : | {n} documents n\'ont pu être exportés :',
+      errorExportDetail: '| Vous pouvez retenter de l\'exporter en cliquant sur le bouton Exporter{export_interrupted_mention}. | Vous pouvez retenter de les exporter en cliquant sur le bouton Exporter{export_interrupted_mention}.',
+      successExportTitle: 'Documents exportés avec succès',
+      successExportMessage: '| Un document exporté sans erreur{import_interrupted_mention}. | {n} documents exportés sans erreur{import_interrupted_mention}.',
+      warningExportInterruptedTitle: 'Export interrompu',
+      warningExportInterruptedMessage: 'vous avez été déconnecté, veuillez vous reconnecter pour reprendre l\'export',
+      displayErrorReportButtonValue: 'Afficher le rapport détaillé',
+      exportInterruptedMention: ' (l\'export a été interrompu)',
     },
     folderPickerModal: {
       importTitle: 'Sélectionnez le dossier de destination',
@@ -205,7 +235,10 @@ export default {
     },
     progressModal: {
       importTitle: 'Import de vos documents...',
-      exportTitle: 'Export de vos documents...',
+      exportTitle1: 'Listage des documents...',
+      exportSubTitle1: 'Étape 1/2',
+      exportTitle2: 'Téléchargement des documents...',
+      exportSubTitle2: 'Étape 2/2',
       errorCountLabel: ' | Une erreur | {n} erreurs',
       stopButtonValue: 'Stop'
     },

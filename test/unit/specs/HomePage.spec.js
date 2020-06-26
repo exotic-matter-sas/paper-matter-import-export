@@ -157,25 +157,28 @@ describe("HomePage methods", () => {
     expect(setExportSourceMock.lastCall.args[1]).to.equal(fakeDestinationFolder);
   });
 
-  it("displayImportProgress set proper values", () => {
+  it("updateActionProgress set proper values", () => {
+    const fakeCurrentCount = 1;
     const fakeTotalCount = 42;
-    wrapper.vm.displayImportProgress(fakeTotalCount);
+    wrapper.vm.updateActionProgress({currentCount: fakeCurrentCount, totalCount: fakeTotalCount});
 
     expect(wrapper.vm.actionOnGoing).to.equal(true);
+    expect(wrapper.vm.currentCount).to.equal(fakeCurrentCount);
     expect(wrapper.vm.totalCount).to.equal(fakeTotalCount);
   });
 
-  it("interruptImport call set importInterrupted to true", () => {
-    wrapper.vm.interruptImport();
+  it("interruptAction call set actionInterrupted to true", () => {
+    wrapper.vm.interruptAction();
 
-    expect(wrapper.vm.importInterrupted).to.equal(true);
+    expect(wrapper.vm.actionInterrupted).to.equal(true);
   });
 
   it("hideImportProgress set proper values", () => {
     wrapper.vm.hideImportProgress();
 
     expect(wrapper.vm.actionOnGoing).to.equal(false);
+    expect(wrapper.vm.currentStep).to.equal(1);
     expect(wrapper.vm.totalCount).to.equal(0);
-    expect(wrapper.vm.importInterrupted).to.equal(false);
+    expect(wrapper.vm.actionInterrupted).to.equal(false);
   });
 });

@@ -29,21 +29,26 @@
     <div class="tab-content row flex-grow-1 mb-3">
       <div class="tab-pane show active col" id="import" role="tabpanel" aria-labelledby="import-tab">
         <ImportTab
-          :importInterrupted="importInterrupted"
-          @event-import-started="displayImportProgress"
+          :actionInterrupted="actionInterrupted"
+          @event-importing="updateActionProgress"
           @event-import-end="hideImportProgress"
           @event-pick-folder="pickingFolder = true"/>
       </div>
       <div class="tab-pane col" id="export" role="tabpanel" aria-labelledby="export-tab">
         <ExportTab
-          :importInterrupted="importInterrupted"
-          @event-export-started="displayImportProgress"
+          :actionInterrupted="actionInterrupted"
+          @event-exporting="updateActionProgress"
+          @event-step-end="currentStep++"
           @event-export-end="hideImportProgress"
           @event-pick-folder="pickingFolder = true"/>
       </div>
     </div>
-    <ProgressModal v-if="actionOnGoing" :action="action" :totalCount="totalCount"
-                   @event-import-interrupt="interruptImport"/>
+    <ProgressModal v-if="actionOnGoing"
+                   :action="action"
+                   :currentStep="currentStep"
+                   :current-count="currentCount"
+                   :totalCount="totalCount"
+                   @event-import-interrupt="interruptAction"/>
     <FolderPickerModal
       id="folder-picker-modal"
       v-if="pickingFolder"
@@ -78,8 +83,10 @@
         windowHeight: 386,
         action: 'import', // default active tab
         actionOnGoing: false,
+        currentStep: 1,
+        currentCount: 0,
         totalCount: 0,
-        importInterrupted: false,
+        actionInterrupted: false,
         pickingFolder: false
       }
     },
@@ -112,17 +119,21 @@
           this.$store.commit('export/SET_EXPORT_SOURCE', destinationFolder);
       },
 
-      displayImportProgress(totalCount) {
-          this.actionOnGoing = true;
-          this.totalCount = totalCount;
+      updateActionProgress({currentCount, totalCount}) {
+        this.actionOnGoing = true;
+        this.currentCount = currentCount;
+        this.totalCount = totalCount;
       },
-      interruptImport() {
-          this.importInterrupted = true;
+
+      interruptAction() {
+          this.actionInterrupted = true;
       },
+
       hideImportProgress() {
           this.actionOnGoing = false;
+          this.currentStep = 1;
           this.totalCount = 0;
-          this.importInterrupted = false;
+          this.actionInterrupted = false;
       },
     }
   }
