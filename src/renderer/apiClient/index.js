@@ -59,7 +59,7 @@ export default class ApiCient {
   }
 
   listDocuments(accessToken, page=1){
-    // FIXME server does not allow to pass flat and level keyword (to export a specific folder)
+    // FIXME server does not allow to pass simultaneously flat and level keyword (to export a specific folder)
     let queryString = page > 1 ? `&page=${page}` : '';
 
     return this.http.get(
