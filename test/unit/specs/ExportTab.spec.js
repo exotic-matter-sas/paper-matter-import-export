@@ -547,6 +547,20 @@ describe("ExporTab methods", () => {
     );
   });
 
+  it("downloadAndIntegrityCheckDocument resolve proper value", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
+    const dirAbsolutePath = '/fake/absolute/path';
+
+    // then
+    let testedValue;
+    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, dirAbsolutePath)
+      .then(absolutePath => {testedValue = absolutePath});
+
+    // then
+    expect(testedValue).to.eql('/fake/absolute/path/Document title.pdf');
+  });
+
   it("downloadAndIntegrityCheckDocument call getDocAbsolutePath", async () => {
     // restore original method to test it
     wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });

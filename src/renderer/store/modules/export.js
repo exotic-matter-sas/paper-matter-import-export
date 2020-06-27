@@ -20,12 +20,15 @@ const mutations = {
     state.savedExportSource = folder;
   },
 
+  SET_EXPORT_FOLDER_NAME(state) {
+    state.exportFolderName = new Date().toISOString().replace(/[:.]/g, '-');
+  },
+
   SET_EXPORT_DESTINATION(state, folderPath) {
     state.savedExportDestination = folderPath;
   },
 
   SET_DOCS_TO_EXPORT(state, serializedDocuments) {
-    state.exportFolderName = new Date().toISOString().replace(/[:.]/g, '-');
     // store serialized version of File objects
     state.docsToExport = serializedDocuments;
   },

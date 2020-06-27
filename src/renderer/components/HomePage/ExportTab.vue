@@ -41,10 +41,12 @@
   import {mapActions, mapState} from "vuex";
   import {remote} from "electron";
   import {reportTools} from "../../htmlReport";
+  import {format} from '@fast-csv/format';
 
   const log = require('electron-log');
   const fs = require('fs');
   const os = require('os');
+  const path = require('path');
 
   export default {
     name: 'export-tab',
@@ -97,8 +99,8 @@
             message: this.$t('exportTab.setDestinationFolderPromptMessage'),
             defaultPath: this.savedExportDestination === null ? os.homedir() : this.savedExportDestination,
             properties: ['openDirectory', 'createDirectory']
-          }
-        ).then(selectionObject => {
+          })
+        .then(selectionObject => {
           if (selectionObject.canceled) {
             log.info('User canceled destination folder selection for export');
           }
@@ -109,14 +111,47 @@
         });
       },
 
+      // Current limitations :
+      // - a new folder is created into destination at each export
+      // - no source selection possible (only Root)
+      // - no export of empty folder (containing no documents or only folders with no documents)
       async proceedToExport () {
         const vi = this;
-
-        // List and store all documents to export, unless documents are recovered from a previous session
-        let listDocumentsError = false;
+        let csvWriteStream;
+        let csvFormatStream;
         let totalCount = 0;
-        if (vi.docsToExport.length === 0) {
-          await vi.listAllDocuments()
+        let skipMetaExport = false;
+
+        try {
+          // Create export parent folder
+          try {
+            vi.$store.commit('export/SET_EXPORT_FOLDER_NAME');
+            fs.mkdirSync(path.join(this.savedExportDestination, this.exportFolderName), {recursive: true})
+          }
+          catch (e) {
+            log.error('aborting export, initial folder creation failed', e);
+            const error = new Error('Initial folder creation failed');
+            error.name = 'PMIError';
+            throw error;
+          }
+
+          // Create CSV file to store docs metadata
+          try {
+            csvWriteStream = fs.createWriteStream(
+              [this.savedExportDestination, this.exportFolderName, 'import.csv'].join('/'),
+              {flags: 'a'}
+            );
+            csvFormatStream = format({ headers: true });
+            csvFormatStream.pipe(csvWriteStream);
+          } catch (e) {
+            log.error('ignoring metadata export, an error occurred during csv file init:\n', e);
+            skipMetaExport = true;
+          }
+
+          // List and store all documents to export
+          // (unless there is already documentsToExport, recovered from a previous session)
+          if (vi.docsToExport.length === 0) {
+            await vi.listAllDocuments()
             .then(allDocuments => {
               vi.$store.commit(
                 'export/SET_DOCS_TO_EXPORT',
@@ -129,60 +164,77 @@
               totalCount = allDocuments.length;
               vi.$emit('event-step-end') // to display second step progressbar
             })
-            .catch(error => {
-              log.error(`aborting export, error occurred during documents listing:\n ${error}`);
-              listDocumentsError = true;
+            .catch(e => {
+              log.error('aborting export, error occurred during documents listing:\n', e);
+              const error = new Error('Document listing failed');
+              error.name = 'PMIError';
+              throw error;
             });
+          }
+
+          // Export each listed document to file and associated metadata to csv file
+          let serializedDocument;
+          let docDirAbsolutePath;
+          let docAbsolutePath;
+          while (vi.docsToExport.length > 0 && !(vi.actionInterrupted || vi.accessToken === '')) {
+            // Display and update progressModal
+            vi.$emit('event-exporting', {
+              currentCount: totalCount - vi.docsToExport.length,
+              totalCount: totalCount
+            });
+
+            serializedDocument = vi.docsToExport[0];
+            docDirAbsolutePath = this.getDocDirAbsolutePath(serializedDocument.path);
+
+            // Create folder path for document if needed
+            let folderCreationError = false;
+
+            await fs.promises.mkdir(docDirAbsolutePath, {recursive: true})
+            .catch(e => {
+              log.error('skipping document, parent folder creation failed:\n', e);
+              vi.$store.commit('export/MOVE_FIRST_DOC_FROM_EXPORT_TO_ERROR', 'Parent folder creation failed');
+              folderCreationError = true;
+            });
+            if (folderCreationError) continue;
+
+            // Download document and check its integrity
+            let downloadError = false;
+            await this.downloadAndIntegrityCheckDocument(
+              serializedDocument,
+              docDirAbsolutePath
+            )
+            .then(path => {docAbsolutePath = path})
+            .catch(e => {
+              log.error('skipping document, download failed:\n', e);
+              vi.$store.commit('export/MOVE_FIRST_DOC_FROM_EXPORT_TO_ERROR', 'Download failed');
+              downloadError = true;
+            });
+            if (downloadError) continue;
+
+            // Append doc metadata to import.csv file
+            if(!skipMetaExport){
+              csvFormatStream.write({
+                path: docAbsolutePath,
+                name: serializedDocument.title,
+                notes: serializedDocument.note,
+              });
+            }
+
+            vi.$store.commit('export/CONSUME_FIRST_DOC_TO_EXPORT')
+          }
         }
-
-        let serializedDocument;
-        let docDirAbsolutePath;
-        while (vi.docsToExport.length > 0 && !(vi.actionInterrupted || vi.accessToken === '' || listDocumentsError)) {
-          // Display and update progressModal
-          vi.$emit('event-exporting', {
-            currentCount: totalCount - vi.docsToExport.length,
-            totalCount: totalCount
-          });
-
-          serializedDocument = vi.docsToExport[0];
-          docDirAbsolutePath = this.getDocDirAbsolutePath(serializedDocument.path);
-
-          // Create folder path for document if needed
-          let folderCreationError = false;
-
-          await fs.promises.mkdir(docDirAbsolutePath, {recursive: true})
-          .catch(error => {
-            log.error('skipping document, parent folder creation failed');
-            vi.$store.commit('export/MOVE_FIRST_DOC_FROM_EXPORT_TO_ERROR', 'Parent folder creation failed');
-            folderCreationError = true;
-          });
-          if (folderCreationError) continue;
-
-          // Download document and check its integrity
-          let downloadError = false;
-          await this.downloadAndIntegrityCheckDocument(
-            serializedDocument,
-            docDirAbsolutePath
-          )
-          .catch(error => {
-            log.error(`skipping document, download failed (${error})`);
-            vi.$store.commit('export/MOVE_FIRST_DOC_FROM_EXPORT_TO_ERROR', 'Download failed');
-            downloadError = true;
-          });
-          if (downloadError) continue;
-          // TODO Store document meta into CSV
-
-          vi.$store.commit('export/CONSUME_FIRST_DOC_TO_EXPORT')
+        catch (e) {
+          // Unexpected error
+          if (e.name !== 'PMIError'){
+            log.error('Export aborted due to an unexpected error:\n', e)
+          }
         }
-
-        log.debug('export end');
-        vi.$emit('event-export-end', vi.docsToExport.length); // close progressModal
-        vi.notifyExportEnd(totalCount);
-        // TODO complete API doc to add info about download and document details + refactor url format
-        // first version limitations :
-        //    a new folder is created into destination at each export
-        //    no source selection possible (only Root)
-        //    no export of empty folder (containing no documents or only folders with no documents)
+        finally {
+          csvFormatStream.end();
+          log.debug('export end');
+          this.$emit('event-export-end', this.docsToExport.length); // close progressModal
+          this.notifyExportEnd(totalCount);
+        }
       },
 
       listAllDocuments(startPage=1, currentDocumentCount=0) {
@@ -190,41 +242,41 @@
         let documentsToExport;
 
         return this.$api.listDocuments(vi.accessToken, startPage)
-          .then(async response => {
-            // Display and update progressModal
-            vi.$emit('event-exporting', {
-              currentCount: currentDocumentCount,
-              totalCount: response.data.count
-            });
+        .then(async response => {
+          // Display and update progressModal
+          vi.$emit('event-exporting', {
+            currentCount: currentDocumentCount,
+            totalCount: response.data.count
+          });
 
-            documentsToExport = response.data.results;
+          documentsToExport = response.data.results;
 
-            // If results are paginated, additional API calls are required
-            if (response.data.next !== null) {
-              // if user does not interrupt export or doesn't need to log again
-              if (!(vi.actionInterrupted || vi.accessToken === '')) {
-                // /!\ recursion black magic happen here
-                await this.listAllDocuments(startPage + 1, currentDocumentCount + documentsToExport.length)
-                  .then(additionalDocumentsToExport => {
-                      // merging returned array with documentsToExport
-                      Array.prototype.push.apply(documentsToExport, additionalDocumentsToExport);
-                    }
-                  );
+          // If results are paginated, additional API calls are required
+          if (response.data.next !== null) {
+            // if user does not interrupt export or doesn't need to log again
+            if (!(vi.actionInterrupted || vi.accessToken === '')) {
+              // /!\ recursion black magic happen here
+              await this.listAllDocuments(startPage + 1, currentDocumentCount + documentsToExport.length)
+              .then(additionalDocumentsToExport => {
+                  // merging returned array with documentsToExport
+                  Array.prototype.push.apply(documentsToExport, additionalDocumentsToExport);
+                }
+              );
+            }
+            else {
+              let errorMessage;
+              if (vi.actionInterrupted) {
+                errorMessage = 'Export interrupted by user';
               }
               else {
-                let errorMessage;
-                if (vi.actionInterrupted) {
-                  errorMessage = 'Export interrupted by user';
-                }
-                else {
-                  errorMessage = 'User need to login to get a new access token';
-                }
-                return Promise.reject(errorMessage);
+                errorMessage = 'User need to login to get a new access token';
               }
-
+              return Promise.reject(errorMessage);
             }
-            return Promise.resolve(documentsToExport);
-          })
+
+          }
+          return Promise.resolve(documentsToExport);
+        })
       },
 
       getDocDirAbsolutePath(docDirPathArray) {
@@ -286,42 +338,44 @@
               nodeFileBuffer,
               {flag: 'wx'}  // write mode + error in case file already exist
             )
-            .catch(async error => {
-            // a file with the same name already exist in the folder
-            if ('code' in error && error.code === 'EEXIST'){
-              // compute the count to add to file name
-              const docPathHash = await vi.hashString({algorithm: 'md5', string: docAbsolutePath});
-              let fileCount;
+          .catch(async error => {
+          // a file with the same name already exist in the folder
+          if ('code' in error && error.code === 'EEXIST'){
+            // compute the count to add to file name
+            const docPathHash = await vi.hashString({algorithm: 'md5', string: docAbsolutePath});
+            let fileCount;
 
-              if (docPathHash in vi.duplicatedFilePathCount) {
-                fileCount = vi.duplicatedFilePathCount[docPathHash] + 1;
-                vi.$store.commit(
-                  'export/SET_DUPLICATED_FILE_PATH_COUNT',
-                  [docPathHash, fileCount]
-                );
-              }
-              else {
-                fileCount = 1;
-                vi.$store.commit(
-                  'export/SET_DUPLICATED_FILE_PATH_COUNT',
-                  [docPathHash, fileCount]
-                );
-              }
-              return fs.promises.writeFile(
-                vi.getDocAbsolutePath(
-                  docDirAbsolutePath,
-                  serializedDocument.title,
-                  serializedDocument.ext,
-                  fileCount
-                ),
-                nodeFileBuffer,
-                {flag: 'wx'}
+            if (docPathHash in vi.duplicatedFilePathCount) {
+              fileCount = vi.duplicatedFilePathCount[docPathHash] + 1;
+              vi.$store.commit(
+                'export/SET_DUPLICATED_FILE_PATH_COUNT',
+                [docPathHash, fileCount]
               );
             }
             else {
-              return Promise.reject(error);
+              fileCount = 1;
+              vi.$store.commit(
+                'export/SET_DUPLICATED_FILE_PATH_COUNT',
+                [docPathHash, fileCount]
+              );
             }
-          });
+            return fs.promises.writeFile(
+              vi.getDocAbsolutePath(
+                docDirAbsolutePath,
+                serializedDocument.title,
+                serializedDocument.ext,
+                fileCount
+              ),
+              nodeFileBuffer,
+              {flag: 'wx'}
+            );
+          }
+          else {
+            return Promise.reject(error);
+          }});
+        })
+        .then(() => {
+          return Promise.resolve(docAbsolutePath)
         })
       },
 
@@ -338,13 +392,14 @@
               {export_interrupted_mention}),
             buttons: ['Ok', this.$t('exportTab.displayErrorReportButtonValue')],
             defaultId: 0
-          }).then( ({response}) => {
-            if (response === 1){ // Second button clicked
-              this.displayExportErrorReport();
-            }
-            // Move docs in error list to able to retry an export
-            this.$store.commit('export/MOVE_DOCS_FROM_ERROR_TO_EXPORT');
+          })
+        .then( ({response}) => {
+          if (response === 1){ // Second button clicked
+            this.displayExportErrorReport();
           }
+          // Move docs in error list to able to retry an export
+          this.$store.commit('export/MOVE_DOCS_FROM_ERROR_TO_EXPORT');
+        }
         );
       },
 
