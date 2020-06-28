@@ -9,10 +9,10 @@ const state = {
   exportFolderName: null,
   docsToExport: [],
   exportDocsInError: [],
-  docsMetadataToExport: {},
   duplicatedFilePathCount: {},
   savedExportSource: {name: 'Root', id: null},
-  savedExportDestination: null
+  savedExportDestination: null,
+  metadataExportSkipped: false
 };
 
 const mutations = {
@@ -20,12 +20,16 @@ const mutations = {
     state.savedExportSource = folder;
   },
 
+  SET_EXPORT_DESTINATION(state, folderPath) {
+    state.savedExportDestination = folderPath;
+  },
+
   SET_EXPORT_FOLDER_NAME(state) {
     state.exportFolderName = new Date().toISOString().replace(/[:.]/g, '-');
   },
 
-  SET_EXPORT_DESTINATION(state, folderPath) {
-    state.savedExportDestination = folderPath;
+  SKIP_METADATA_EXPORT(state) {
+    state.metadataExportSkipped = true;
   },
 
   SET_DOCS_TO_EXPORT(state, serializedDocuments) {
@@ -56,8 +60,8 @@ const mutations = {
     state.docsToExport = [];
     state.exportDocsInError = [];
     state.filePathDuplicatedCount = {};
-    // state.docsMetadataToExport = {};
     state.savedExportSource = {name: 'Root', id: null};
+    state.metadataExportSkipped = false;
   },
 };
 

@@ -84,7 +84,7 @@
 
       ...mapState('auth', ['accessToken']),
       ...mapState('export', ['savedExportSource', 'savedExportDestination', 'exportFolderName', 'docsToExport',
-        'exportDocsInError', 'duplicatedFilePathCount']),
+        'exportDocsInError', 'duplicatedFilePathCount', 'metadataExportSkipped']),
       ...mapState('config', ['apiHostName'])
     },
 
@@ -120,32 +120,34 @@
         let csvWriteStream;
         let csvFormatStream;
         let totalCount = 0;
-        let skipMetaExport = false;
 
         try {
           // Create export parent folder
-          try {
-            vi.$store.commit('export/SET_EXPORT_FOLDER_NAME');
-            fs.mkdirSync(path.join(this.savedExportDestination, this.exportFolderName), {recursive: true})
-          }
-          catch (e) {
-            log.error('aborting export, initial folder creation failed', e);
-            const error = new Error('Initial folder creation failed');
-            error.name = 'PMIError';
-            throw error;
+          // (unless its is already created from a previous session recovered)
+          if (!this.exportFolderName){
+            try {
+              vi.$store.commit('export/SET_EXPORT_FOLDER_NAME');
+              fs.mkdirSync(path.join(this.savedExportDestination, this.exportFolderName), {recursive: true})
+            }
+            catch (e) {
+              log.error('aborting export, initial folder creation failed', e);
+              const error = new Error('Initial folder creation failed');
+              error.name = 'PMIError';
+              throw error;
+            }
           }
 
           // Create CSV file to store docs metadata
           try {
             csvWriteStream = fs.createWriteStream(
               [this.savedExportDestination, this.exportFolderName, 'import.csv'].join('/'),
-              {flags: 'a'}
+              {flags: 'a'} // create file if it doesn't exist or append to it
             );
             csvFormatStream = format({ headers: true });
             csvFormatStream.pipe(csvWriteStream);
           } catch (e) {
-            log.error('ignoring metadata export, an error occurred during csv file init:\n', e);
-            skipMetaExport = true;
+            log.error('ignoring metadata export, an error occurred during CSV file initialization:\n', e);
+            vi.$store.commit('export/SKIP_METADATA_EXPORT');
           }
 
           // List and store all documents to export
@@ -212,7 +214,7 @@
             if (downloadError) continue;
 
             // Append doc metadata to import.csv file
-            if(!skipMetaExport){
+            if(!this.metadataExportSkipped){
               csvFormatStream.write({
                 path: docAbsolutePath,
                 name: serializedDocument.title,
@@ -230,7 +232,9 @@
           }
         }
         finally {
-          csvFormatStream.end();
+          if(!this.metadataExportSkipped) {
+            csvFormatStream.end();
+          }
           log.debug('export end');
           this.$emit('event-export-end', this.docsToExport.length); // close progressModal
           this.notifyExportEnd(totalCount);
@@ -379,7 +383,7 @@
         })
       },
 
-      displayExportErrorPrompt(errorCount, export_interrupted_mention='') {
+      displayExportErrorPrompt(errorCount, optionalMention='') {
         const win = remote.getCurrentWindow();
 
         log.error('theses files could not be exported:', this.exportDocsInError);
@@ -389,7 +393,7 @@
             title: this.$tc('exportTab.errorExportTitle', this.exportDocsInError.length),
             message: this.$tc('exportTab.errorExportMessage', this.exportDocsInError.length),
             detail: this.$tc('exportTab.errorExportDetail', this.exportDocsInError.length,
-              {export_interrupted_mention}),
+              {optionalMention}),
             buttons: ['Ok', this.$t('exportTab.displayErrorReportButtonValue')],
             defaultId: 0
           })
@@ -406,13 +410,22 @@
       notifyExportEnd (totalCount){
         const errorCount = this.exportDocsInError.length; // reset by export/RESET_EXPORT_DATA mutation
         const win = remote.getCurrentWindow();
-        const export_interrupted_mention = this.actionInterrupted ? this.$t('exportTab.exportInterruptedMention') : '';
+        const mentionsList = [
+          this.actionInterrupted ? this.$t('exportTab.exportInterruptedMention') : '',
+          this.metadataExportSkipped ? this.$t('exportTab.metadataNotExportedMention') : ''
+        ]
+        .filter(mention => mention !== '');
+
+        let joinedMentions = mentionsList.join(this.$t('exportTab.and'));
+        if (joinedMentions !== ''){
+          joinedMentions = ` (${joinedMentions})`
+        }
 
         // Do not display success or error messages when user get disconnected
         // (it will be shown at the end of the resumed export after reconnection)
         if(this.accessToken){
           if (errorCount) {
-            this.displayExportErrorPrompt(errorCount, export_interrupted_mention);
+            this.displayExportErrorPrompt(errorCount, joinedMentions);
           } else {
             remote.dialog.showMessageBox(win,
               {
@@ -420,7 +433,7 @@
                 title: this.$t('exportTab.successExportTitle'),
                 message: this.$tc(
                   'exportTab.successExportMessage',
-                  totalCount - this.docsToExport.length, {export_interrupted_mention}
+                  totalCount - this.docsToExport.length, {joined_mentions: joinedMentions}
                   ),
                 buttons: ['Ok'],
                 defaultId: 0
