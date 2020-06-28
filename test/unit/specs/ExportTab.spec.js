@@ -13,6 +13,8 @@ import storeConfig from "../../../src/renderer/store";
 import ExportTab from "../../../src/renderer/components/HomePage/ExportTab";
 import * as tv from "../../tools/testValues";
 import {remote} from "electron";
+import {PassThrough} from "stream";
+import * as fastCsv from '@fast-csv/format';
 import {reportTools} from "../../../src/renderer/htmlReport";
 import fs from "fs";
 import cloneDeep from "lodash.clonedeep";
@@ -229,6 +231,7 @@ describe("ExporTab methods", () => {
   let setDuplicatedFilePathCountMock;
   let moveDocsFromErrorToExportMock;
   let setExportDestinationMock;
+  let setExportFolderNameMock;
   let mockedSavedExportSourceMockValue;
   let savedExportSourceMock;
   let exportDocsInErrorMock;
@@ -239,6 +242,7 @@ describe("ExporTab methods", () => {
   let promiseMkdirMock;
   let savedExportDestinationMock;
   let exportFolderNameMock;
+  let metadataExportSkippedMock;
   let duplicatedFilePathCountMock;
   let resetDataExportStartMock;
   let showOpenDialogMock;
@@ -254,6 +258,9 @@ describe("ExporTab methods", () => {
   let showMessageBoxMock;
   let htmlReportSaveMock;
   let htmlReportConstructorMock;
+  let mkdirSyncMock;
+  let skipMetadataExportMock;
+  let createWriteStreamMock;
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
@@ -262,6 +269,8 @@ describe("ExporTab methods", () => {
     setDuplicatedFilePathCountMock = sm.mock();
     moveDocsFromErrorToExportMock = sm.mock();
     setExportDestinationMock = sm.mock();
+    setExportFolderNameMock = sm.mock();
+    skipMetadataExportMock = sm.mock();
     mockedSavedExportSourceMockValue = {id: 1, name: 'fakeExportSource'};
     savedExportSourceMock = sm.mock().returnWith(mockedSavedExportSourceMockValue);
     exportDocsInErrorMock = sm.mock().returnWith([]);
@@ -272,6 +281,7 @@ describe("ExporTab methods", () => {
     promiseMkdirMock = sm.mock(fs.promises, "mkdir").resolveWith('');
     savedExportDestinationMock = sm.mock().returnWith('/fakeExportDestination');
     exportFolderNameMock = sm.mock().returnWith('fake-export-folder');
+    metadataExportSkippedMock = sm.mock().returnWith(false);
     duplicatedFilePathCountMock = sm.mock().returnWith({});
     resetDataExportStartMock = sm.mock();
     showOpenDialogMock = sm.mock(remote.dialog, "showOpenDialog").resolveWith({canceled: false, filePaths: ['fakePath']});
@@ -284,12 +294,17 @@ describe("ExporTab methods", () => {
     hashFileMock = sm.mock().resolveWith('fakeMd5');
     hashStringMock = sm.mock().resolveWith('fakeMd5');
     promiseWriteFileMock = sm.mock(fs.promises, "writeFile").resolveWith('');
+    mkdirSyncMock = sm.mock(fs, "mkdirSync");
+    createWriteStreamMock = sm.mock(fs, "createWriteStream").returnWith(new PassThrough());
+    createWriteStreamMock = sm.mock(fastCsv, "format").returnWith(new PassThrough());
     showMessageBoxMock = sm.mock(remote.dialog, "showMessageBox").resolveWith('');
     htmlReportSaveMock = sm.mock().returnWith('fakeReportPath');
     htmlReportConstructorMock = sm.mock(reportTools, 'HtmlReport').returnWith({save: htmlReportSaveMock});
 
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.export.mutations.SET_EXPORT_DESTINATION = setExportDestinationMock;
+    storeConfigCopy.modules.export.mutations.SET_EXPORT_FOLDER_NAME = setExportFolderNameMock;
+    storeConfigCopy.modules.export.mutations.SKIP_METADATA_EXPORT = skipMetadataExportMock;
     storeConfigCopy.modules.export.mutations.SET_DOCS_TO_EXPORT = setDocsToExportMock;
     storeConfigCopy.modules.export.mutations.SET_DUPLICATED_FILE_PATH_COUNT = setDuplicatedFilePathCountMock;
     storeConfigCopy.modules.export.mutations.MOVE_DOCS_FROM_ERROR_TO_EXPORT = moveDocsFromErrorToExportMock;
@@ -332,6 +347,10 @@ describe("ExporTab methods", () => {
         duplicatedFilePathCount: {
           cache: false,
           get: duplicatedFilePathCountMock
+        },
+        metadataExportSkipped: {
+          cache: false,
+          get: metadataExportSkippedMock
         },
       },
       methods: {

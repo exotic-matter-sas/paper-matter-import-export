@@ -141,7 +141,7 @@
           try {
             csvWriteStream = fs.createWriteStream(
               [this.savedExportDestination, this.exportFolderName, 'import.csv'].join('/'),
-              {flags: 'a'} // create file if it doesn't exist or append to it
+              {flags: 'a'} // create file if it doesn't exist and/or append to it
             );
             csvFormatStream = format({ headers: true });
             csvFormatStream.pipe(csvWriteStream);
