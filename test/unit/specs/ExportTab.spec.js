@@ -14,7 +14,7 @@ import ExportTab from "../../../src/renderer/components/HomePage/ExportTab";
 import * as tv from "../../tools/testValues";
 import {remote} from "electron";
 import {PassThrough} from "stream";
-import * as fastCsv from '@fast-csv/format';
+import * as fastCsv from '@fast-csv/format'; // to import format into a namespace to be able to mock it
 import {reportTools} from "../../../src/renderer/htmlReport";
 import fs from "fs";
 import cloneDeep from "lodash.clonedeep";

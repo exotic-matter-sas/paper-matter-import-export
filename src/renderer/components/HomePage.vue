@@ -7,14 +7,18 @@
   <b-container fluid class="d-flex flex-column">
     <ul class="nav nav-tabs row bg-dark align-items-center" role="tablist">
       <li class="nav-item col">
-        <a class="active nav-link text-center" id="import-tab" data-toggle="tab" href="#import" role="tab"
-           aria-controls="home" aria-selected="true" @click.prevent="action = 'import'">
+        <a class="nav-link text-center" id="import-tab"
+           :class="{active: this.action === 'import'}"
+           data-toggle="tab" href="#import" role="tab"
+           @click.prevent="$store.commit('config/SET_ACTION', 'import')">
           {{$t('homePage.importTabLabel')}}
         </a>
       </li>
       <li class="nav-item col">
-        <a class="nav-link text-center" id="export-tab" data-toggle="tab" href="#export" role="tab"
-           aria-controls="profile" aria-selected="false" @click.prevent="action = 'export'">
+        <a class="nav-link text-center" id="export-tab"
+           :class="{active: this.action === 'export'}"
+           data-toggle="tab" href="#export" role="tab"
+           @click.prevent="$store.commit('config/SET_ACTION', 'export')">
           {{$t('homePage.exportTabLabel')}}
         </a>
       </li>
@@ -27,14 +31,16 @@
       </li>
     </ul>
     <div class="tab-content row flex-grow-1 mb-3">
-      <div class="tab-pane show active col" id="import" role="tabpanel" aria-labelledby="import-tab">
+      <div class="tab-pane show col" :class="{active: this.action === 'import'}" id="import"
+           role="tabpanel" aria-labelledby="import-tab">
         <ImportTab
           :actionInterrupted="actionInterrupted"
           @event-importing="updateActionProgress"
           @event-import-end="hideImportProgress"
           @event-pick-folder="pickingFolder = true"/>
       </div>
-      <div class="tab-pane col" id="export" role="tabpanel" aria-labelledby="export-tab">
+      <div class="tab-pane col" :class="{active: this.action === 'export'}"
+           id="export" role="tabpanel" aria-labelledby="export-tab">
         <ExportTab
           :actionInterrupted="actionInterrupted"
           @event-exporting="updateActionProgress"
@@ -43,12 +49,14 @@
           @event-pick-folder="pickingFolder = true"/>
       </div>
     </div>
-    <ProgressModal v-if="actionOnGoing"
-                   :action="action"
-                   :currentStep="currentStep"
-                   :current-count="currentCount"
-                   :totalCount="totalCount"
-                   @event-import-interrupt="interruptAction"/>
+
+    <ProgressModal
+      v-if="ongoingAction"
+      :action="action"
+      :currentStep="currentStep"
+      :current-count="currentCount"
+      :totalCount="totalCount"
+      @event-import-interrupt="interruptAction"/>
     <FolderPickerModal
       id="folder-picker-modal"
       v-if="pickingFolder"
@@ -81,8 +89,7 @@
     data() {
       return {
         windowHeight: 386,
-        action: 'import', // default active tab
-        actionOnGoing: false,
+        ongoingAction: false,
         currentStep: 1,
         currentCount: 0,
         totalCount: 0,
@@ -104,6 +111,7 @@
       folderPickerDefaultDestination () {
         return this.action === 'import' ? this.savedImportDestination : this.savedExportSource
       },
+      ...mapState('config', ['action']),
       ...mapState('auth', ['accountName']),
       ...mapState('import', ['savedImportDestination']),
       ...mapState('export', ['savedExportSource']),
@@ -120,7 +128,7 @@
       },
 
       updateActionProgress({currentCount, totalCount}) {
-        this.actionOnGoing = true;
+        this.ongoingAction = true;
         this.currentCount = currentCount;
         this.totalCount = totalCount;
       },
@@ -130,7 +138,7 @@
       },
 
       hideImportProgress() {
-          this.actionOnGoing = false;
+          this.ongoingAction = false;
           this.currentStep = 1;
           this.totalCount = 0;
           this.actionInterrupted = false;

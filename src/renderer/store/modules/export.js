@@ -62,6 +62,7 @@ const mutations = {
     state.filePathDuplicatedCount = {};
     state.savedExportSource = {name: 'Root', id: null};
     state.metadataExportSkipped = false;
+    state.savedExportDestination = null;
   },
 };
 
