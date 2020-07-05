@@ -6,6 +6,8 @@
 export default {
   en: {
     rootFolderName: 'Root',
+    onYourComputer: 'On your computer',
+    onYourPaperMatterOrg: 'On your Paper Matter organization',
     bFormFile: {
       BrowseLabel: 'Browse'
     },
@@ -73,6 +75,7 @@ export default {
     exportTab: {
       sourcesFormGroupLabel: 'Source',
       destinationFormGroupLabel: 'Destination',
+      folderInputPlaceholder: 'Choose a destination folder...',
       setDestinationFolderPromptTitle: 'Select destination folder for export',
       setDestinationFolderPromptMessage: 'A new folder will be created inside selected destination',
       destinationFormGroupDescription: 'Source folder will be exported into the destination (empty folders wont be exported)',
@@ -141,6 +144,8 @@ export default {
   },
   fr: {
     rootFolderName: 'Racine',
+    onYourComputer: 'Sur votre ordinateur',
+    onYourPaperMatterOrg: 'Dans votre organisation Paper Matter',
     bFormFile: {
       BrowseLabel: 'Parcourir'
     },
@@ -208,6 +213,7 @@ export default {
     exportTab: {
       sourcesFormGroupLabel: 'Source',
       destinationFormGroupLabel: 'Destination',
+      folderInputPlaceholder: 'Choisissez un dossier à importer...',
       setDestinationFolderPromptTitle: 'Sélectionnez le dossier de destination de l\'export',
       setDestinationFolderPromptMessage: 'Un nouveau dossier sera créé dans cette destination',
       destinationFormGroupDescription: 'Le dossier source sera exporté vers la destination (les dossiers vides ne seront pas exportés)',

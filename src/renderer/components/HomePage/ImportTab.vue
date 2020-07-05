@@ -7,7 +7,11 @@
   <b-container id="import-tab-content" class="pt-2">
     <b-row>
       <b-col>
-        <b-form-group :label="$t('importTab.sourcesFormGroupLabel')" >
+        <b-form-group>
+          <template slot="label">
+            <font-awesome-icon icon="laptop" :title="$t('onYourComputer')"/>
+            {{ $t('importTab.sourcesFormGroupLabel') }}
+          </template>
           <b-form-file
             multiple
             v-model="files"
@@ -33,8 +37,11 @@
     </b-row>
     <b-row>
       <b-col>
-        <b-form-group :label="$t('importTab.destinationFormGroupLabel')"
-                      :description="$t('importTab.destinationFormGroupDescription')">
+        <b-form-group :description="$t('importTab.destinationFormGroupDescription')">
+          <template slot="label">
+            <img src="~@/assets/pm_favicon_32.png" :title="$t('onYourPaperMatterOrg')" />
+            {{ $t('importTab.destinationFormGroupLabel') }}
+          </template>
           <label class="d-block " id="update-destination" :title="folderDestinationName" @click.prevent="$emit('event-pick-folder')">
             <font-awesome-icon icon="folder"/>{{folderDestinationName}}
             <div>{{ $t('bFormFile.BrowseLabel') }}</div>

@@ -7,7 +7,11 @@
   <b-container id="export-tab-content" class="pt-2">
     <b-row>
       <b-col>
-        <b-form-group :label="$t('exportTab.sourcesFormGroupLabel')">
+        <b-form-group>
+            <template slot="label">
+              <img src="~@/assets/pm_favicon_32.png" :title="$t('onYourPaperMatterOrg')" />
+              {{ $t('exportTab.sourcesFormGroupLabel') }}
+            </template>
             <label class="d-block" id="update-source" :title="folderSourceName">
                    <!--TODO re-enable when we could export a specific folder @click.prevent="$emit('event-pick-folder')"-->
               <font-awesome-icon icon="folder"/>{{folderSourceName}}
@@ -18,11 +22,19 @@
     </b-row>
     <b-row>
       <b-col>
-        <b-form-group :label="$t('exportTab.destinationFormGroupLabel')"
-                      :description="$t('exportTab.destinationFormGroupDescription')">
-          <label class="d-block" id="update-destination" :title="savedExportDestination"
+        <b-form-group :description="$t('exportTab.destinationFormGroupDescription')">
+          <template slot="label">
+            <font-awesome-icon icon="laptop" :title="$t('onYourComputer')"/>
+            {{ $t('exportTab.destinationFormGroupLabel') }}
+          </template>
+          <label class="d-block border border-success rounded" id="update-destination" :title="savedExportDestination"
                  @click.prevent="setDestinationFolder">
-            <font-awesome-icon icon="folder"/>{{savedExportDestination}}
+            <span v-if="savedExportDestination">
+              {{savedExportDestination}}
+            </span>
+            <span v-else>
+              {{ $t('exportTab.folderInputPlaceholder') }}
+            </span>
             <div>{{ $t('bFormFile.BrowseLabel') }}</div>
           </label>
         </b-form-group>

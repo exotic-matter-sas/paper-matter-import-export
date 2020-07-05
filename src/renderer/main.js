@@ -17,6 +17,7 @@ import {
   faFolder,
   faFolderOpen,
   faFolderPlus,
+  faLaptop
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faPlusSquare,
@@ -36,7 +37,7 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.config.productionTip = false;
 
 // Font Awesome icons definition
-library.add(faFolder, faFolderOpen, faFolderPlus, faPlusSquare, faMinusSquare);
+library.add(faFolder, faFolderOpen, faFolderPlus, faPlusSquare, faMinusSquare, faLaptop);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 // register Bootstrap vue components
 Vue.use(BootstrapVue);
