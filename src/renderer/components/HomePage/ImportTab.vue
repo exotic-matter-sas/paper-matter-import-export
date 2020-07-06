@@ -59,7 +59,7 @@
           split
           variant="primary"
           class="w-100"
-          :disabled="(files.length === 0 && filesInsideFolder.length === 0 && docsToImport.length === 0) || importing"
+          :disabled="actionDisabled"
           @click.prevent="prepareImport(metadataFileDetected)"
           menu-class="w-100"
           dropup
@@ -97,7 +97,10 @@
     props: {
       actionInterrupted: {
         type: Boolean
-      }
+      },
+      performRetry: {
+        type: Boolean
+      },
     },
 
     data(){
@@ -113,25 +116,6 @@
       }
     },
 
-    mounted() {
-      // if last import wasn't properly completed
-      if (this.docsToImport.length > 0){
-        log.info('last import wasn\'t fully completed, inform user that he can resume it');
-        const win = remote.getCurrentWindow();
-        remote.dialog.showMessageBox(win,
-          {
-            type: 'info',
-            title: this.$t('importTab.warningResumeLastImportTitle'),
-            message: this.$t('importTab.warningResumeLastImportMessage'),
-            detail: this.$tc('importTab.warningResumeLastImportDetail', this.docsToImport.length),
-            buttons: ['Ok'],
-            defaultId: 0
-          });
-      } else if (this.importDocsInError.length > 0) {
-        this.displayImportErrorPrompt(this.importDocsInError.length)
-      }
-    },
-
     watch: {
       filesInsideFolder: function (newVal, oldVal) {
         if (newVal !== oldVal && newVal != null) {
@@ -142,10 +126,26 @@
             this.metadataFileDetected = false;
           }
         }
+      },
+
+      performRetry: function (newVal, oldVal) {
+        if (newVal) {
+          console.log('this.actionDisabled', this.actionDisabled);
+          if (!this.actionDisabled) {
+            this.proceedToImport();
+          }
+          this.$emit('update:performRetry', false);
+        }
       }
     },
 
     computed: {
+      actionDisabled () {
+        // import can't be run if there is no files to import or an import is already running
+        return (this.files.length === 0 && this.filesInsideFolder.length === 0 && this.docsToImport.length === 0)
+          || this.importing;
+      },
+
       folderDestinationName () {
         return this.savedImportDestination && this.savedImportDestination.name !== 'Root' ?
           this.savedImportDestination.name : this.$t('rootFolderName')
@@ -495,6 +495,11 @@
 <style scoped lang="scss">
   @import '../../customBootstrap.scss';
 
+  svg,img {
+    vertical-align: -0.125em;
+    height: 16px;
+  }
+
   #update-destination{
     color: map_get($theme-colors, 'primary');
     position:relative;
@@ -523,7 +528,6 @@
 
     svg {
       margin-right: 0.5em;
-      vertical-align: -0.125em;
     }
   }
 </style>

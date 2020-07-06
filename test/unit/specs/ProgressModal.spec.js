@@ -151,7 +151,7 @@ describe("ProgressModal mounted", () => {
     showModalMock.reset();
   });
 
-  it("modal is shown and proper values are set", () => {
+  it("modal is shown", () => {
     expect(showModalMock.callCount).to.equal(1);
     expect(showModalMock.lastCall.arg).to.equal('progress-modal');
   });

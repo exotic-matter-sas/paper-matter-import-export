@@ -147,8 +147,7 @@ describe("EditServerAddressModal methods", () => {
     wrapper.vm.save(bvModalEvtMock);
 
     expect(setApiHostNameMock.callCount).to.equal(1);
-    expect(setApiHostNameMock.lastCall.args[0]).to.eql(
-      {apiHostName: 'https://papermatter.app'});
+    expect(setApiHostNameMock.lastCall.args[1]).to.eql("https://example.com");
     expect(bvModalEvtMock.preventDefault.callCount).to.equal(0);
   });
 

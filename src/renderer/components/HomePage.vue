@@ -35,6 +35,7 @@
            role="tabpanel" aria-labelledby="import-tab">
         <ImportTab
           :actionInterrupted="actionInterrupted"
+          :performRetry.sync="performImportRetry"
           @event-importing="updateActionProgress"
           @event-import-end="hideImportProgress"
           @event-pick-folder="pickingFolder = true"/>
@@ -43,6 +44,7 @@
            id="export" role="tabpanel" aria-labelledby="export-tab">
         <ExportTab
           :actionInterrupted="actionInterrupted"
+          :performRetry.sync="performExportRetry"
           @event-exporting="updateActionProgress"
           @event-step-end="currentStep++"
           @event-export-end="hideImportProgress"
@@ -56,7 +58,7 @@
       :currentStep="currentStep"
       :current-count="currentCount"
       :totalCount="totalCount"
-      @event-import-interrupt="interruptAction"/>
+      @event-import-interrupt="actionInterrupted = true"/>
     <FolderPickerModal
       id="folder-picker-modal"
       v-if="pickingFolder"
@@ -64,6 +66,12 @@
       :default-destination="folderPickerDefaultDestination"
       @event-save-picked-folder="saveFolderPickerSelection"
       @event-folder-picker-modal-hidden="pickingFolder = false"/>
+    <RetryModal
+      v-if="askForActionRetry"
+      :action="action"
+      @event-retry-action="performActionRetry"
+      @event-cancel-retry="resetAllData"
+      @event-folder-picker-modal-hidden="askForActionRetry = false"/>
   </b-container>
 </template>
 
@@ -74,16 +82,18 @@
   import ProgressModal from "./HomePage/ProgressModal";
   import {mapState} from "vuex";
   import FolderPickerModal from "./HomePage/FolderPickerModal";
+  import RetryModal from "./HomePage/RetryModal";
 
   const log = require('electron-log');
 
   export default {
     name: 'home',
     components: {
-        ImportTab,
-        ExportTab,
-        ProgressModal,
-        FolderPickerModal,
+      ImportTab,
+      ExportTab,
+      ProgressModal,
+      FolderPickerModal,
+      RetryModal
     },
 
     data() {
@@ -94,7 +104,10 @@
         currentCount: 0,
         totalCount: 0,
         actionInterrupted: false,
-        pickingFolder: false
+        pickingFolder: false,
+        askForActionRetry: false,
+        performImportRetry: false,
+        performExportRetry: false,
       }
     },
 
@@ -102,6 +115,13 @@
       // to resize window to page content
       const window = remote.getCurrentWindow();
       window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
+
+      // check if an action need to be retried or resumed
+      if (this.docsToImport.length > 0 || this.importDocsInError.length > 0 ||
+        this.docsToExport.length > 0 || this.exportDocsInError.length > 0) {
+        this.askForActionRetry = true;
+        log.info('last action wasn\'t fully completed, ask user if he want to retry or resume it');
+      }
     },
 
     computed: {
@@ -113,8 +133,8 @@
       },
       ...mapState('config', ['action']),
       ...mapState('auth', ['accountName']),
-      ...mapState('import', ['savedImportDestination']),
-      ...mapState('export', ['savedExportSource']),
+      ...mapState('import', ['docsToImport', 'importDocsInError', 'savedImportDestination']),
+      ...mapState('export', ['docsToExport', 'exportDocsInError', 'savedExportSource']),
     },
 
     methods: {
@@ -133,16 +153,21 @@
         this.totalCount = totalCount;
       },
 
-      interruptAction() {
-          this.actionInterrupted = true;
+      hideImportProgress() {
+        this.ongoingAction = false;
+        this.currentStep = 1;
+        this.totalCount = 0;
+        this.actionInterrupted = false;
       },
 
-      hideImportProgress() {
-          this.ongoingAction = false;
-          this.currentStep = 1;
-          this.totalCount = 0;
-          this.actionInterrupted = false;
+      performActionRetry() {
+        this.action === 'import' ? this.performImportRetry = true : this.performExportRetry = true;
       },
+
+      resetAllData() {
+        this.$store.commit('import/RESET_IMPORT_DATA');
+        this.$store.commit('export/RESET_EXPORT_DATA');
+      }
     }
   }
 </script>

@@ -93,7 +93,8 @@ export default {
       displayErrorReportButtonValue: 'Display detailed report',
       exportInterruptedMention: 'export has been interrupted',
       metadataNotExportedMention: 'documents metadata couldn\'t be exported',
-      and: ' and '
+      and: ' and ',
+      displayFolderButtonValue: 'Display folder'
     },
     folderPickerModal: {
       importTitle: 'Select destination folder',
@@ -140,7 +141,21 @@ export default {
       warningDocumentsMissingMetadataTitle: 'Confirm metadata selection',
       warningDocumentsMissingMetadataMessage: 'Some documents have no metadata associated',
       warningDocumentsMissingMetadataDetail: '| Metadata are missing for one document, do you want to proceed anyway? | Metadata are missing for {n} documents, do you want to proceed anyway?',
-    }
+    },
+    retryModal: {
+      import: 'import',
+      importInfinitive: 'import',
+      imported: 'imported',
+      export: 'export',
+      exportInfinitive: 'export',
+      exported: 'exported',
+      retryTitle: ' | One document left to {action_infinitive} | {n} documents left to {action_infinitive}',
+      resumeSubTitle: 'A technical issue prevent last {action} to complete, would you like to resume it?',
+      retrySubTitle: ' | An error prevent a document to be {action_ed}, would you like to retry to {action} it? | Errors prevent some documents to be {action_ed}, would you like to retry to {action} them?',
+      abortButtonValue: 'Abort',
+      retryButtonValue: 'Retry {action}',
+      resumeButtonValue: 'Resume {action}'
+    },
   },
   fr: {
     rootFolderName: 'Racine',
@@ -208,7 +223,7 @@ export default {
       errorImportTitle: '| Une erreur s\'est produite durant l\'import | Des erreurs se sont produites durant l\'import',
       errorImportMessage: '| Un document n\'a pu être importé : | {n} documents n\'ont pu être importés :',
       errorImportDetail: '| Vous pouvez retenter de l\'importer en cliquant sur le bouton Importer{import_interrupted_mention}. | Vous pouvez retenter de les importer en cliquant sur le bouton Importer{import_interrupted_mention}.',
-      displayErrorReportButtonValue: 'Display detailed report'
+      displayErrorReportButtonValue: 'Afficher le rapoort détaillé'
     },
     exportTab: {
       sourcesFormGroupLabel: 'Source',
@@ -231,7 +246,8 @@ export default {
       displayErrorReportButtonValue: 'Afficher le rapport détaillé',
       exportInterruptedMention: 'export a été interrompu',
       metadataNotExportedMention: 'les métadonnées des documents n\'ont pu être exportées',
-      and: ' et '
+      and: ' et ',
+      displayFolderButtonValue: 'Afficher le dossier'
     },
     folderPickerModal: {
       importTitle: 'Sélectionnez le dossier de destination',
@@ -278,6 +294,20 @@ export default {
       warningDocumentsMissingMetadataTitle: 'Confirmez la sélection des métadonnées',
       warningDocumentsMissingMetadataMessage: 'Certains documents n\'ont pas de métadonnées associées',
       warningDocumentsMissingMetadataDetail: '| Les métadonnées sont manquantes pour un document, voulez-vous poursuivre ? | Les métadonnées sont manquantes pour {n} documents, voulez-vous poursuivre ?',
-    }
+    },
+    retryModal: {
+      import: 'import',
+      importInfinitive: 'importer',
+      imported: 'importé',
+      export: 'export',
+      exportInfinitive: 'exporter',
+      exported: 'exporté',
+      retryTitle: ' | Un document restant à {action_infinitive} | {n} documents restants à {action_infinitive}',
+      resumeSubTitle: 'Un problème technique a empêché l\'{action} de se terminer, voulez-vous le reprendre ?',
+      retrySubTitle: ' | Une erreur a empêché un document d\'être {action_ed}, voulez-vous réessayer de l\'{action_infinitive} ? | Des erreurs ont empêché des documents d\'être {action_ed}, voulez-vous réssayer de les {action_infinitive} ?',
+      abortButtonValue: 'Abandonner',
+      retryButtonValue: 'Retenter l\'{action}',
+      resumeButtonValue: 'Reprendre l\'{action}'
+    },
   }
 }

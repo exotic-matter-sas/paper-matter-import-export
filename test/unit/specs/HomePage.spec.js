@@ -16,7 +16,7 @@ import HomePage from "../../../src/renderer/components/HomePage";
 
 import {remote} from "electron";
 import {USER_PROPS} from "../../tools/testValues";
-import flushPromises from "flush-promises";
+import * as tv from "../../tools/testValues.js";
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -72,11 +72,16 @@ describe("HomePage mounted", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
+  let computed;
 
   let fakeWidth;
   let setContentSizeMock;
   let getContentSizeMock;
   let getCurrentWindowMock;
+  let docsToImportMock;
+  let importDocsInErrorMock;
+  let docsToExportMock;
+  let exportDocsInErrorMock;
 
   beforeEach(() => {
     fakeWidth = 100;
@@ -85,23 +90,99 @@ describe("HomePage mounted", () => {
     getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
       {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
     );
+    docsToImportMock = sm.mock().returnWith([]);
+    importDocsInErrorMock = sm.mock().returnWith([]);
+    docsToExportMock = sm.mock().returnWith([]);
+    exportDocsInErrorMock = sm.mock().returnWith([]);
     storeConfigCopy = cloneDeep(storeConfig);
     store = new Vuex.Store(storeConfigCopy);
-    wrapper = shallowMount(HomePage, {
-      localVue,
-      store,
-    });
+    computed = {
+      docsToImport: {
+        cache: false,
+        get: docsToImportMock
+      },
+      importDocsInError: {
+        cache: false,
+        get: importDocsInErrorMock
+      },
+      docsToExport: {
+        cache: false,
+        get: docsToExportMock
+      },
+      exportDocsInError: {
+        cache: false,
+        get: exportDocsInErrorMock
+      },
+    }
   });
 
   afterEach(() => {
     sm.restore();
+    docsToImportMock.actions = [];
+    importDocsInErrorMock.actions = [];
+    docsToExportMock.actions = [];
+    exportDocsInErrorMock.actions = [];
   });
 
   it("electron remote.setContentSize is called to set window size", () => {
+    wrapper = shallowMount(HomePage, {
+      localVue,
+      store,
+      computed
+    });
+
     expect(getCurrentWindowMock.callCount).to.equal(1);
     expect(setContentSizeMock.callCount).to.equal(1);
     expect(setContentSizeMock.lastCall.args[0]).to.equal(fakeWidth); // come from getContentSize return, first item
     expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
+  });
+
+  it("askForActionRetry is set if it left docsToImport", () => {
+    docsToImportMock.actions = [];
+    docsToImportMock.returnWith([tv.DOCUMENT_PROPS]);
+    wrapper = shallowMount(HomePage, {
+      localVue,
+      store,
+      computed
+    });
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
+  });
+
+  it("askForActionRetry is set if there is importDocsInError", () => {
+    importDocsInErrorMock.actions = [];
+    importDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS]);
+    wrapper = shallowMount(HomePage, {
+      localVue,
+      store,
+      computed
+    });
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
+  });
+
+  it("askForActionRetry is set if it left docsToExportMock", () => {
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith([tv.DOCUMENT_PROPS]);
+    wrapper = shallowMount(HomePage, {
+      localVue,
+      store,
+      computed
+    });
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
+  });
+
+  it("askForActionRetry is set if there is exportDocsInErrorMock", () => {
+    exportDocsInErrorMock.actions = [];
+    exportDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS]);
+    wrapper = shallowMount(HomePage, {
+      localVue,
+      store,
+      computed
+    });
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
   });
 });
 
@@ -112,24 +193,39 @@ describe("HomePage methods", () => {
   let disconnectUserMock;
   let setImportDestinationMock;
   let setExportSourceMock;
+  let resetImportdataMock;
+  let resetExportDataMock;
+  let actionMock;
 
   beforeEach(() => {
     disconnectUserMock = sm.mock();
     setImportDestinationMock = sm.mock();
     setExportSourceMock = sm.mock();
+    resetImportdataMock = sm.mock();
+    resetExportDataMock = sm.mock();
+    actionMock = sm.mock().returnWith('import');
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
     storeConfigCopy.modules.import.mutations.SET_IMPORT_DESTINATION = setImportDestinationMock;
     storeConfigCopy.modules.export.mutations.SET_EXPORT_SOURCE = setExportSourceMock;
+    storeConfigCopy.modules.import.mutations.RESET_IMPORT_DATA = resetImportdataMock;
+    storeConfigCopy.modules.export.mutations.RESET_EXPORT_DATA = resetExportDataMock;
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(HomePage, {
       localVue,
       store,
+      computed: {
+        action: {
+          cache: false,
+          get: actionMock
+        },
+      }
     });
   });
 
   afterEach(() => {
     sm.restore();
+    actionMock.actions = [];
   });
 
   it("disconnectUser call disconnectUser action", () => {
@@ -140,16 +236,15 @@ describe("HomePage methods", () => {
 
   it("saveFolderPickerSelection commit data to proper store", async () => {
     let fakeDestinationFolder = 'fakeDestinationFolder';
-    // given current tab is import
-    wrapper.setData({action: 'import'});
-
+    // given current tab is import (default action)
     wrapper.vm.saveFolderPickerSelection(fakeDestinationFolder);
 
     expect(setImportDestinationMock.callCount).to.equal(1);
     expect(setImportDestinationMock.lastCall.args[1]).to.equal(fakeDestinationFolder);
 
     // given current tab is export
-    wrapper.setData({action: 'export'});
+    actionMock.actions = [];
+    actionMock.returnWith('export');
 
     wrapper.vm.saveFolderPickerSelection(fakeDestinationFolder);
 
@@ -162,23 +257,39 @@ describe("HomePage methods", () => {
     const fakeTotalCount = 42;
     wrapper.vm.updateActionProgress({currentCount: fakeCurrentCount, totalCount: fakeTotalCount});
 
-    expect(wrapper.vm.actionOnGoing).to.equal(true);
+    expect(wrapper.vm.ongoingAction).to.equal(true);
     expect(wrapper.vm.currentCount).to.equal(fakeCurrentCount);
     expect(wrapper.vm.totalCount).to.equal(fakeTotalCount);
-  });
-
-  it("interruptAction call set actionInterrupted to true", () => {
-    wrapper.vm.interruptAction();
-
-    expect(wrapper.vm.actionInterrupted).to.equal(true);
   });
 
   it("hideImportProgress set proper values", () => {
     wrapper.vm.hideImportProgress();
 
-    expect(wrapper.vm.actionOnGoing).to.equal(false);
+    expect(wrapper.vm.ongoingAction).to.equal(false);
     expect(wrapper.vm.currentStep).to.equal(1);
     expect(wrapper.vm.totalCount).to.equal(0);
     expect(wrapper.vm.actionInterrupted).to.equal(false);
+  });
+
+  it("performActionRetry set proper values", () => {
+    // given action is import
+    wrapper.setData({action: 'import'});
+
+    wrapper.vm.performActionRetry();
+
+    expect(wrapper.vm.performImportRetry).to.equal(true);
+
+    wrapper.setData({action: 'export'});
+
+    wrapper.vm.performActionRetry();
+
+    expect(wrapper.vm.performImportRetry).to.equal(true);
+  });
+
+  it("resetAllData set proper values", () => {
+    wrapper.vm.resetAllData();
+
+    expect(resetImportdataMock.callCount).to.eql(1);
+    expect(resetExportDataMock.callCount).to.eql(1);
   });
 });

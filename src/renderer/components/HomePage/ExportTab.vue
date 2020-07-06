@@ -66,26 +66,10 @@
     props: {
       actionInterrupted: {
         type: Boolean
-      }
-    },
-
-    mounted() {
-      // if last export wasn't properly completed
-      if (this.docsToExport.length > 0){
-        log.info('last export wasn\'t fully completed, inform user that he can resume it');
-        const win = remote.getCurrentWindow();
-        remote.dialog.showMessageBox(win,
-          {
-            type: 'info',
-            title: this.$t('exportTab.warningResumeLastExportTitle'),
-            message: this.$t('exportTab.warningResumeLastExportMessage'),
-            detail: this.$tc('exportTab.warningResumeLastExportDetail', this.docsToExport.length),
-            buttons: ['Ok'],
-            defaultId: 0
-          });
-      } else if (this.exportDocsInError.length > 0) {
-        this.displayExportErrorPrompt(this.exportDocsInError.length)
-      }
+      },
+      performRetry: {
+        type: Boolean
+      },
     },
 
     computed: {
@@ -152,7 +136,7 @@
           // Create CSV file to store docs metadata
           try {
             csvWriteStream = fs.createWriteStream(
-              [this.savedExportDestination, this.exportFolderName, 'import.csv'].join('/'),
+              path.join(this.savedExportDestination, this.exportFolderName, 'import.csv'),
               {flags: 'a'} // create file if it doesn't exist and/or append to it
             );
             csvFormatStream = format({ headers: true });
@@ -304,11 +288,11 @@
         // if doc is in a sub folder
         if (docDirPathArray.length) {
           docDirAbsolutePathArray.push(
-            docDirPathArray.map(({name}) => name).join('/')
+            path.join(...docDirPathArray.map(({name}) => name))
           );
         }
 
-        return docDirAbsolutePathArray.join('/');
+        return path.join(...docDirAbsolutePathArray);
       },
 
       getDocAbsolutePath(docDirAbsolutePath, fileName, fileExt, fileNameCount = null) {
@@ -323,7 +307,7 @@
           fileName + counter + fileExt
         ];
 
-        return docAbsolutePathArray.join('/');
+        return path.join(...docAbsolutePathArray);
       },
 
       downloadAndIntegrityCheckDocument(serializedDocument, docDirAbsolutePath){
@@ -390,6 +374,11 @@
             return Promise.reject(error);
           }});
         })
+        // update file date to match document date
+        .then(() => {
+          const documentDate = new Date(serializedDocument.created);
+          return fs.promises.utimes(docAbsolutePath, documentDate, documentDate);
+        })
         .then(() => {
           return Promise.resolve(docAbsolutePath)
         })
@@ -447,9 +436,13 @@
                   'exportTab.successExportMessage',
                   totalCount - this.docsToExport.length, {joined_mentions: joinedMentions}
                   ),
-                buttons: ['Ok'],
+                buttons: ['Ok', this.$t('exportTab.displayFolderButtonValue')],
                 defaultId: 0
-              });
+              }).then( ({response}) => {
+              if (response === 1){
+                this.$electron.shell.openItem(path.join(this.savedExportDestination, this.exportFolderName));
+              }
+            });
           }
         } else {
           remote.dialog.showMessageBox(win,
@@ -483,7 +476,12 @@
 <style scoped lang="scss">
   @import '../../customBootstrap.scss';
 
-  #update-source, #update-destination{
+  svg,img {
+    vertical-align: -0.125em;
+    height: 16px;
+  }
+
+  label{
     color: map_get($theme-colors, 'primary');
     position:relative;
     padding: 0.375rem 0.75rem;
@@ -511,8 +509,11 @@
 
     svg {
       margin-right: 0.5em;
-      vertical-align: -0.125em;
     }
+  }
+
+  #update-destination {
+    color: $gray-700;
   }
 </style>
 
