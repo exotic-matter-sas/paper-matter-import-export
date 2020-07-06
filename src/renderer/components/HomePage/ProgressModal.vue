@@ -67,8 +67,8 @@
       </b-row>
     </b-container>
     <template slot="modal-footer">
-      <b-button id="stop-button" variant="outline-danger" @click.prevent="interruptAction" class="w-100">
-        {{ $t('progressModal.stopButtonValue') }}
+      <b-button id="interrupt-button" variant="outline-danger" @click.prevent="interruptAction" class="w-100">
+        {{ $t('progressModal.interruptButtonValue') }}
       </b-button>
     </template>
   </b-modal>

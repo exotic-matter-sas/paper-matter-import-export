@@ -112,7 +112,7 @@ export default {
       exportTitle2: 'Downloading documents...',
       exportSubTitle2: 'Step 2/2',
       errorCountLabel: ' | One error | {n} errors',
-      stopButtonValue: 'Stop'
+      interruptButtonValue: 'Interrupt'
     },
     documentsMetadataModal: {
       title: 'Documents metadata',
@@ -250,7 +250,7 @@ export default {
       exportTitle2: 'Téléchargement des documents...',
       exportSubTitle2: 'Étape 2/2',
       errorCountLabel: ' | Une erreur | {n} erreurs',
-      stopButtonValue: 'Stop'
+      interruptButtonValue: 'Interompre'
     },
     documentsMetadataModal: {
       title: 'Métadonnées des documents',
