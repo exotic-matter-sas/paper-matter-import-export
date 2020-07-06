@@ -9,10 +9,12 @@
       <b-col>
         <b-form-group>
             <template slot="label">
-              <img src="~@/assets/pm_favicon_32.png" :title="$t('onYourPaperMatterOrg')" />
-              {{ $t('exportTab.sourcesFormGroupLabel') }}
+              <span :title="$t('yourPaperMatterOrg')">
+                <img src="~@/assets/pm_favicon_32.png"/>
+                {{ $t('exportTab.sourcesFormGroupLabel') }}
+              </span>
             </template>
-            <label class="d-block" id="update-source" :title="folderSourceName">
+            <label class="d-block" id="update-source" :title="$t('exportTab.sourceOnlyRootTitle')">
                    <!--TODO re-enable when we could export a specific folder @click.prevent="$emit('event-pick-folder')"-->
               <font-awesome-icon icon="folder"/>{{folderSourceName}}
               <!--TODO re-enable when we could export a specific folder <div>{{ $t('bFormFile.BrowseLabel') }}</div>-->
@@ -24,8 +26,10 @@
       <b-col>
         <b-form-group :description="$t('exportTab.destinationFormGroupDescription')">
           <template slot="label">
-            <font-awesome-icon icon="laptop" :title="$t('onYourComputer')"/>
-            {{ $t('exportTab.destinationFormGroupLabel') }}
+            <span :title="$t('yourComputer')">
+              <font-awesome-icon icon="laptop"/>
+              {{ $t('exportTab.destinationFormGroupLabel') }}
+            </span>
           </template>
           <label class="d-block border border-success rounded" id="update-destination" :title="savedExportDestination"
                  @click.prevent="setDestinationFolder">

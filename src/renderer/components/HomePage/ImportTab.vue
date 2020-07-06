@@ -9,8 +9,10 @@
       <b-col>
         <b-form-group>
           <template slot="label">
-            <font-awesome-icon icon="laptop" :title="$t('onYourComputer')"/>
-            {{ $t('importTab.sourcesFormGroupLabel') }}
+            <span :title="$t('yourComputer')">
+              <font-awesome-icon icon="laptop"/>
+              {{ $t('importTab.sourcesFormGroupLabel') }}
+            </span>
           </template>
           <b-form-file
             multiple
@@ -39,8 +41,10 @@
       <b-col>
         <b-form-group :description="$t('importTab.destinationFormGroupDescription')">
           <template slot="label">
-            <img src="~@/assets/pm_favicon_32.png" :title="$t('onYourPaperMatterOrg')" />
-            {{ $t('importTab.destinationFormGroupLabel') }}
+            <span :title="$t('onYourPaperMatterOrg')" >
+              <img src="~@/assets/pm_favicon_32.png"/>
+              {{ $t('importTab.destinationFormGroupLabel') }}
+            </span>
           </template>
           <label class="d-block " id="update-destination" :title="folderDestinationName" @click.prevent="$emit('event-pick-folder')">
             <font-awesome-icon icon="folder"/>{{folderDestinationName}}

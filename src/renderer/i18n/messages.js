@@ -6,8 +6,8 @@
 export default {
   en: {
     rootFolderName: 'Root',
-    onYourComputer: 'On your computer',
-    onYourPaperMatterOrg: 'On your Paper Matter organization',
+    yourComputer: 'Your computer',
+    yourPaperMatterOrg: 'Your Paper Matter organization',
     bFormFile: {
       BrowseLabel: 'Browse'
     },
@@ -94,7 +94,8 @@ export default {
       exportInterruptedMention: 'export has been interrupted',
       metadataNotExportedMention: 'documents metadata couldn\'t be exported',
       and: ' and ',
-      displayFolderButtonValue: 'Display folder'
+      displayFolderButtonValue: 'Display folder',
+      sourceOnlyRootTitle: 'Only root folder could be exported for now'
     },
     folderPickerModal: {
       importTitle: 'Select destination folder',
@@ -159,8 +160,8 @@ export default {
   },
   fr: {
     rootFolderName: 'Racine',
-    onYourComputer: 'Sur votre ordinateur',
-    onYourPaperMatterOrg: 'Dans votre organisation Paper Matter',
+    yourComputer: 'Votre ordinateur',
+    yourPaperMatterOrg: 'Votre organisation Paper Matter',
     bFormFile: {
       BrowseLabel: 'Parcourir'
     },
@@ -247,7 +248,8 @@ export default {
       exportInterruptedMention: 'export a été interrompu',
       metadataNotExportedMention: 'les métadonnées des documents n\'ont pu être exportées',
       and: ' et ',
-      displayFolderButtonValue: 'Afficher le dossier'
+      displayFolderButtonValue: 'Afficher le dossier',
+      sourceOnlyRootTitle: 'Seul le dossier racine peut être exporté actuellement'
     },
     folderPickerModal: {
       importTitle: 'Sélectionnez le dossier de destination',
