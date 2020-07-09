@@ -944,7 +944,7 @@ describe("ImportTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ displayImportErrorPrompt: ImportTab.methods.displayImportErrorPrompt });
 
-    await wrapper.vm.displayImportErrorPrompt();
+    await wrapper.vm.displayImportErrorPrompt(1);
 
     // api is call to list folders inside parent
     expect(showMessageBoxMock.callCount).to.be.equal(1);
@@ -957,7 +957,7 @@ describe("ImportTab methods", () => {
     showMessageBoxMock.actions = [];
     showMessageBoxMock.resolveWith({response: 1}); // confirmation button clicked on the message box
 
-    await wrapper.vm.displayImportErrorPrompt();
+    await wrapper.vm.displayImportErrorPrompt(1);
 
     // api is call to list folders inside parent
     expect(displayImportErrorReportMock.callCount).to.be.equal(1);

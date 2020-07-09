@@ -8,6 +8,7 @@ export default {
     rootFolderName: 'Root',
     yourComputer: 'Your computer',
     yourPaperMatterOrg: 'Your Paper Matter organization',
+    reportAnIssue: 'Report an issue',
     bFormFile: {
       BrowseLabel: 'Browse'
     },
@@ -62,14 +63,13 @@ export default {
       warningResumeLastImportTitle: 'You can resume last import',
       warningResumeLastImportMessage: 'Last import wasn\'t fully completed.',
       warningResumeLastImportDetail: '| There is one file left to import, you can finish the import by clicking the Import button. | There is {n} files left to import, you can finish the import by clicking the Import button.',
-      importInterruptedMention: ' (import has been interrupted)',
       successImportTitle: 'Documents successfully imported',
-      successImportMessage: '| One document imported without error{import_interrupted_mention}. | {n} documents imported without error{import_interrupted_mention}.',
+      successImportMessage: '| One document imported without error. | {n} documents imported without error.',
       warningImportInterruptedTitle: 'Import interrupted',
       warningImportInterruptedMessage: 'You have been disconnected, please log again to resume your import',
       errorImportTitle: '| One error occurred during import | Errors occurred during import',
       errorImportMessage: '| One document couldn\'t be imported: | {n} documents couldn\'t be imported:',
-      errorImportDetail: '| You can retry to import it by clicking the Import button{import_interrupted_mention}. | You can retry to import them by clicking the Import button{import_interrupted_mention}.',
+      errorImportDetail: '| You can retry to import it by clicking the Import button. | You can retry to import them by clicking the Import button.',
       displayErrorReportButtonValue: 'Display detailed report'
     },
     exportTab: {
@@ -87,15 +87,31 @@ export default {
       errorExportMessage: '| One document couldn\'t be exported: | {n} documents couldn\'t be exported:',
       errorExportDetail: '| You can retry to export it by clicking the Export button{joined_mentions}. | You can retry to export them by clicking the Export button{joined_mentions}.',
       successExportTitle: 'Documents successfully exported',
-      successExportMessage: '| One document exported without error{joined_mentions}. | {n} documents exported without error{joined_mentions}.',
+      successExportMessage: 'No document exported | One document exported without error{joined_mentions}. | {n} documents exported without error{joined_mentions}.',
       warningExportInterruptedTitle: 'Export interrupted',
       warningExportInterruptedMessage: 'You have been disconnected, please log again to resume your export',
       displayErrorReportButtonValue: 'Display detailed report',
-      exportInterruptedMention: 'export has been interrupted',
       metadataNotExportedMention: 'documents metadata couldn\'t be exported',
       and: ' and ',
       displayFolderButtonValue: 'Display folder',
-      sourceOnlyRootTitle: 'Only root folder could be exported for now'
+      sourceOnlyRootTitle: 'Only root folder could be exported for now',
+      expectedFatalErrors: {
+        exportFolderCreationFailed: {
+          title: 'Error when creating export folder',
+          message: 'Can\'t create export folder, please check that you can save file into the selected destination',
+          detail: 'Or try to select another destination',
+        },
+        documentsListingFailed: {
+          title: 'Error when listing your documents',
+          message: 'Can\'t list your documents, please check you can properly list them on your Paper Matter app',
+          detail: 'Or retry your export later',
+        },
+      },
+      unexpectedFatalErrors: {
+        title: 'Unexpected error when exporting',
+        message: 'Unexpected error, please retry to export',
+        detail: 'If the error persist, please report the issue by clicking the button bellow',
+      }
     },
     folderPickerModal: {
       importTitle: 'Select destination folder',
@@ -151,7 +167,7 @@ export default {
       exportInfinitive: 'export',
       exported: 'exported',
       retryTitle: ' | One document left to {action_infinitive} | {n} documents left to {action_infinitive}',
-      resumeSubTitle: 'A technical issue prevent last {action} to complete, would you like to resume it?',
+      resumeSubTitle: 'Last {action} wasn\'t completed, would you like to resume it?',
       retrySubTitle: ' | An error prevent a document to be {action_ed}, would you like to retry to {action} it? | Errors prevent some documents to be {action_ed}, would you like to retry to {action} them?',
       abortButtonValue: 'Abort',
       retryButtonValue: 'Retry {action}',
@@ -162,6 +178,7 @@ export default {
     rootFolderName: 'Racine',
     yourComputer: 'Votre ordinateur',
     yourPaperMatterOrg: 'Votre organisation Paper Matter',
+    reportAnIssue: 'Signaler un bug',
     bFormFile: {
       BrowseLabel: 'Parcourir'
     },
@@ -216,14 +233,13 @@ export default {
       warningResumeLastImportTitle: 'Vous pouvez reprendre le dernier import',
       warningResumeLastImportMessage: 'Le dernier import n\'a pas été terminé.',
       warningResumeLastImportDetail: '| Il y a un fichier restant à importer, vous pouvez terminer l\'import en cliquant sur le bouton Importer. | Il y a {n} fichiers restant à importer, vous pouvez terminer l\'import en cliquant sur le bouton Importer.',
-      importInterruptedMention: ' (l\'import a été interrompu)',
       successImportTitle: 'Documents importés avec succès',
-      successImportMessage: '|  Un document importé sans erreur{import_interrupted_mention}. | {n} documents importés sans erreurs{import_interrupted_mention}.',
+      successImportMessage: '|  Un document importé sans erreur. | {n} documents importés sans erreurs.',
       warningImportInterruptedTitle: 'Import interrompu',
       warningImportInterruptedMessage: 'Vous avez été déconnecté, veuillez vous reconnecter pour poursuivre l\'import',
       errorImportTitle: '| Une erreur s\'est produite durant l\'import | Des erreurs se sont produites durant l\'import',
       errorImportMessage: '| Un document n\'a pu être importé : | {n} documents n\'ont pu être importés :',
-      errorImportDetail: '| Vous pouvez retenter de l\'importer en cliquant sur le bouton Importer{import_interrupted_mention}. | Vous pouvez retenter de les importer en cliquant sur le bouton Importer{import_interrupted_mention}.',
+      errorImportDetail: '| Vous pouvez retenter de l\'importer en cliquant sur le bouton Importer. | Vous pouvez retenter de les importer en cliquant sur le bouton Importer.',
       displayErrorReportButtonValue: 'Afficher le rapoort détaillé'
     },
     exportTab: {
@@ -241,15 +257,31 @@ export default {
       errorExportMessage: '| Un document n\'a pu être exporté : | {n} documents n\'ont pu être exportés :',
       errorExportDetail: '| Vous pouvez retenter de l\'exporter en cliquant sur le bouton Exporter{joined_mentions}. | Vous pouvez retenter de les exporter en cliquant sur le bouton Exporter{joined_mentions}.',
       successExportTitle: 'Documents exportés avec succès',
-      successExportMessage: '| Un document exporté sans erreur{joined_mentions}. | {n} documents exportés sans erreur{joined_mentions}.',
+      successExportMessage: 'Aucun document exporté | Un document exporté sans erreur{joined_mentions}. | {n} documents exportés sans erreur{joined_mentions}.',
       warningExportInterruptedTitle: 'Export interrompu',
       warningExportInterruptedMessage: 'vous avez été déconnecté, veuillez vous reconnecter pour reprendre l\'export',
       displayErrorReportButtonValue: 'Afficher le rapport détaillé',
-      exportInterruptedMention: 'export a été interrompu',
       metadataNotExportedMention: 'les métadonnées des documents n\'ont pu être exportées',
       and: ' et ',
       displayFolderButtonValue: 'Afficher le dossier',
-      sourceOnlyRootTitle: 'Seul le dossier racine peut être exporté actuellement'
+      sourceOnlyRootTitle: 'Seul le dossier racine peut être exporté actuellement',
+      expectedFatalErrors: {
+        exportFolderCreationFailed: {
+          title: 'Erreur lors de la création du dossier d\'export',
+          message: 'Le dossier d\'export n\'a pu être créé, veuillez vérifier que vous pouvez enregistrer des fichiers dans la destination sélectionnée',
+          detail: 'Ou essayer de sélectionner une autre destination',
+        },
+        documentsListingFailed: {
+          title: 'Erreur lors du listage de vos documents',
+          message: 'Vos documents n\'ont pu être listés, veuillez vérifier que vous pouvez correctement les lister sur votre app Paper Matter',
+          detail: 'Ou retentez l\'export plus tard',
+        },
+      },
+      unexpectedFatalErrors: {
+        title: 'Erreur imprévue lors de l\'export',
+        message: 'Erreur imprévue, veuillez retenter l\'export',
+        detail: 'Si l\'erreur persiste, veuilliez signaler ce bug en cliquant sur le bouton ci-dessous',
+      }
     },
     folderPickerModal: {
       importTitle: 'Sélectionnez le dossier de destination',
@@ -305,7 +337,7 @@ export default {
       exportInfinitive: 'exporter',
       exported: 'exporté',
       retryTitle: ' | Un document restant à {action_infinitive} | {n} documents restants à {action_infinitive}',
-      resumeSubTitle: 'Un problème technique a empêché l\'{action} de se terminer, voulez-vous le reprendre ?',
+      resumeSubTitle: 'Le dernier {action} n\'a pas été terminé, voulez-vous le reprendre ?',
       retrySubTitle: ' | Une erreur a empêché un document d\'être {action_ed}, voulez-vous réessayer de l\'{action_infinitive} ? | Des erreurs ont empêché des documents d\'être {action_ed}, voulez-vous réssayer de les {action_infinitive} ?',
       abortButtonValue: 'Abandonner',
       retryButtonValue: 'Retenter l\'{action}',

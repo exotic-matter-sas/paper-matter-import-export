@@ -46,7 +46,7 @@
     </b-row>
 
     <b-button class="w-100" id="export-button" variant="primary"
-              :disabled="!savedExportDestination"
+              :disabled="actionDisabled"
               @click.prevent="proceedToExport">
       {{ $t('exportTab.exportButtonValue')}}
     </b-button>
@@ -63,6 +63,7 @@
   const fs = require('fs');
   const os = require('os');
   const path = require('path');
+  const win = remote.getCurrentWindow();
 
   export default {
     name: 'export-tab',
@@ -76,10 +77,25 @@
       },
     },
 
+    watch: {
+      performRetry: function (newVal, oldVal) {
+        if (newVal) {
+          if (!this.actionDisabled) {
+            this.proceedToExport();
+          }
+          this.$emit('update:performRetry', false);
+        }
+      }
+    },
+
     computed: {
       folderSourceName () {
         return this.savedExportSource && this.savedExportSource.name !== 'Root' ?
           this.savedExportSource.name : this.$t('rootFolderName')
+      },
+
+      actionDisabled () {
+        return !this.savedExportDestination;
       },
 
       ...mapState('auth', ['accessToken']),
@@ -91,7 +107,6 @@
     methods: {
       setDestinationFolder () {
         const vi = this;
-        const win = remote.getCurrentWindow();
 
         remote.dialog.showOpenDialog(win,
           {
@@ -119,7 +134,7 @@
         const vi = this;
         let csvWriteStream;
         let csvFormatStream;
-        let totalCount = 0;
+        let totalCount = this.docsToExport.length;
 
         try {
           // Create export parent folder
@@ -131,8 +146,8 @@
             }
             catch (e) {
               log.error('aborting export, initial folder creation failed', e);
-              const error = new Error('Initial folder creation failed');
-              error.name = 'PMIError';
+              const error = new Error('exportFolderCreationFailed');
+              error.name = 'PMISetupError';
               throw error;
             }
           }
@@ -164,15 +179,19 @@
                 )
               );
               totalCount = allDocuments.length;
-              vi.$emit('event-step-end') // to display second step progressbar
             })
             .catch(e => {
               log.error('aborting export, error occurred during documents listing:\n', e);
-              const error = new Error('Document listing failed');
-              error.name = 'PMIError';
-              throw error;
+
+              // interruptedByUser error silently fail, error message won't be shown
+              if (e.message !== 'interruptedByUser') {
+                const error = new Error('documentsListingFailed');
+                error.name = 'PMISetupError';
+                throw error;
+              }
             });
           }
+          vi.$emit('event-step-end'); // to display second step progressbar
 
           // Export each listed document to file and associated metadata to csv file
           let serializedDocument;
@@ -224,20 +243,27 @@
 
             vi.$store.commit('export/CONSUME_FIRST_DOC_TO_EXPORT')
           }
+
+          log.debug('export end');
+          vi.$emit('event-export-end', vi.docsToExport.length); // close progressModal
+          vi.notifyExportEnd(totalCount, path.join(vi.savedExportDestination, vi.exportFolderName));
         }
         catch (e) {
-          // Unexpected error
-          if (e.name !== 'PMIError'){
-            log.error('Export aborted due to an unexpected error:\n', e)
-          }
+          log.error('Export aborted due to a fatal error:\n', e);
+          this.displayFatalError(e);
         }
         finally {
-          if(!this.metadataExportSkipped) {
+          try {
+            // If export is complete and there is no error reset some states for next export
+            if(this.docsToExport.length === 0 && this.exportDocsInError.length === 0){
+              vi.$store.commit('export/RESET_EXPORT_DATA_FOR_NEXT_RUN');
+            }
+            // close writeStream
             csvFormatStream.end();
           }
-          log.debug('export end');
-          this.$emit('event-export-end', this.docsToExport.length); // close progressModal
-          this.notifyExportEnd(totalCount);
+          catch (e) {
+            // ignore errors
+          }
         }
       },
 
@@ -268,14 +294,14 @@
               );
             }
             else {
-              let errorMessage;
+              let error;
               if (vi.actionInterrupted) {
-                errorMessage = 'Export interrupted by user';
+                error = new Error('interruptedByUser');
               }
               else {
-                errorMessage = 'User need to login to get a new access token';
+                error = new Error('accessTokenMissing');
               }
-              return Promise.reject(errorMessage);
+              return Promise.reject(error);
             }
 
           }
@@ -388,9 +414,45 @@
         })
       },
 
-      displayExportErrorPrompt(errorCount, optionalMention='') {
-        const win = remote.getCurrentWindow();
+      displayFatalError(error) {
+        let errorTitle;
+        let errorMessage;
+        let errorDetail;
+        let buttons = ['Ok'];
+        // Error occurred during export setup
+        if (error.name === 'PMISetupError'){
+          errorTitle = this.$t(`exportTab.expectedFatalErrors.${error.message}.title`);
+          errorMessage = this.$t(`exportTab.expectedFatalErrors.${error.message}.message`);
+          errorDetail = this.$t(`exportTab.expectedFatalErrors.${error.message}.detail`);
+        }
+        // Unexpected error occurred during setup or while loop
+        else {
+          errorTitle = this.$t(`exportTab.unexpectedFatalErrors.title`);
+          errorMessage = this.$t(`exportTab.unexpectedFatalErrors.message`);
+          errorDetail = this.$t(`exportTab.unexpectedFatalErrors.detail`);
+          buttons.push(this.$t(`reportAnIssue`));
+        }
 
+        // Display error prompt
+        remote.dialog.showMessageBox(win,
+          {
+            type: 'error',
+            title: errorTitle,
+            message: errorMessage,
+            detail: errorDetail,
+            buttons: buttons,
+            defaultId: 0
+          })
+          .then(({response}) => {
+          if (response === 1){ // Second button clicked
+            this.$electron.shell.openExternal(
+              'https://github.com/exotic-matter-sas/paper-matter-import-export/issues/new'
+            );
+          }
+        });
+      },
+
+      displayExportErrorPrompt(errorCount, optionalMention='') {
         log.error('theses files could not be exported:', this.exportDocsInError);
         remote.dialog.showMessageBox(win,
           {
@@ -402,21 +464,18 @@
             buttons: ['Ok', this.$t('exportTab.displayErrorReportButtonValue')],
             defaultId: 0
           })
-        .then( ({response}) => {
+        .then(({response}) => {
           if (response === 1){ // Second button clicked
             this.displayExportErrorReport();
           }
           // Move docs in error list to able to retry an export
           this.$store.commit('export/MOVE_DOCS_FROM_ERROR_TO_EXPORT');
-        }
-        );
+        });
       },
 
-      notifyExportEnd (totalCount){
+      notifyExportEnd (totalCount, exportFolderPath){
         const errorCount = this.exportDocsInError.length; // reset by export/RESET_EXPORT_DATA mutation
-        const win = remote.getCurrentWindow();
         const mentionsList = [
-          this.actionInterrupted ? this.$t('exportTab.exportInterruptedMention') : '',
           this.metadataExportSkipped ? this.$t('exportTab.metadataNotExportedMention') : ''
         ]
         .filter(mention => mention !== '');
@@ -444,7 +503,7 @@
                 defaultId: 0
               }).then( ({response}) => {
               if (response === 1){
-                this.$electron.shell.openItem(path.join(this.savedExportDestination, this.exportFolderName));
+                this.$electron.shell.openItem(exportFolderPath);
               }
             });
           }

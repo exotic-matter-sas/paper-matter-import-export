@@ -64,8 +64,9 @@ describe("ExportTab template", () => {
     wrapper = shallowMount(ExportTab, {
       localVue,
       store,
-      propsData: {
-        exportInterrupted: false
+      propsData:{
+        actionInterrupted: false,
+        performRetry: false
       },
     });
   });
@@ -81,22 +82,102 @@ describe("ExportTab template", () => {
   });
 });
 
-describe("ExportTab computed", () => {
+describe("ExportTab watchers", () => {
   // define all var needed for the test here
   let wrapper;
+  let storeConfigCopy;
   let store;
-  let savedExportSourceMock;
-  let showMessageBoxMock;
+  let proceedToExportMock;
+  let actionDisabledMock;
 
   beforeEach(() => {
-    // set vars here: vue wrapper args, fake values, mock
-    store = new Vuex.Store(storeConfig);
-    savedExportSourceMock = sm.mock();
-    showMessageBoxMock = sm.mock(remote.dialog, "showMessageBox").returnWith('');
+    proceedToExportMock = sm.mock();
+    actionDisabledMock = sm.mock();
+    storeConfigCopy = cloneDeep(storeConfig);
+    store = new Vuex.Store(storeConfigCopy);
+    wrapper = shallowMount(ExportTab, {
+      localVue,
+      store,
+      propsData:{
+        actionInterrupted: false,
+        performRetry: false
+      },
+      methods: {
+        proceedToExport: proceedToExportMock
+      },
+      computed: {
+        actionDisabled: {
+          cache: false,
+          get: actionDisabledMock
+        }
+      }
+    });
   });
 
   afterEach(() => {
     sm.restore();
+  });
+
+  it("performRetry call proceedToExport if actionDisabled is false", async () => {
+    actionDisabledMock.actions= [];
+    actionDisabledMock.returnWith(false);
+
+    wrapper.setData({performRetry:true});
+    await flushPromises();
+
+    expect(proceedToExportMock.callCount).to.equal(1);
+  });
+
+  it("performRetry doesn\'t call proceedToExport if actionDisabled is true", async () => {
+    actionDisabledMock.actions= [];
+    actionDisabledMock.returnWith(true);
+
+    wrapper.setData({performRetry:true});
+    await flushPromises();
+
+    expect(proceedToExportMock.callCount).to.equal(0);
+  });
+
+  it("performRetry emit update:performRetry", async () => {
+    const testedEvent = "update:performRetry";
+    wrapper.setData({performRetry:true});
+    await flushPromises();
+
+    expect(wrapper.emitted(testedEvent)).to.not.be.undefined;
+    expect(wrapper.emitted(testedEvent).length).to.equal(1);
+    expect(wrapper.emitted(testedEvent)[0]).to.be.eql([false]);
+  });
+});
+
+describe("ExportTab computed", () => {
+  // define all var needed for the test here
+  let wrapper;
+  let store;
+  let savedExportDestinationMock;
+  let savedExportSourceMock;
+  let showMessageBoxMock;
+  let computed;
+
+  beforeEach(() => {
+    savedExportDestinationMock = sm.mock();
+    savedExportSourceMock = sm.mock();
+    showMessageBoxMock = sm.mock(remote.dialog, "showMessageBox").returnWith('');
+    store = new Vuex.Store(storeConfig);
+    computed = {
+      savedExportDestination: {
+        cache: false,
+        get: savedExportDestinationMock
+      },
+      savedExportSource: {
+        cache: false,
+        get: savedExportSourceMock
+      },
+    };
+  });
+
+  afterEach(() => {
+    sm.restore();
+    savedExportDestinationMock.actions = [];
     savedExportSourceMock.actions = [];
   });
 
@@ -109,9 +190,7 @@ describe("ExportTab computed", () => {
         actionInterrupted: false,
         performRetry: false
       },
-      computed: {
-        savedExportSource: savedExportSourceMock,
-      }
+      computed
     });
 
     let testedValue = wrapper.vm.folderSourceName;
@@ -122,7 +201,6 @@ describe("ExportTab computed", () => {
   it("folderSourceName return proper value when folder is NOT Root", () => {
     const fakeFolderName = 'FakeFolder';
     savedExportSourceMock.returnWith({name: fakeFolderName, id: null});
-    // mock returnWith isn't working if done after shallowMount, due to Vue computed cache perhaps?
     wrapper = shallowMount(ExportTab, {
       localVue,
       store,
@@ -130,9 +208,7 @@ describe("ExportTab computed", () => {
         actionInterrupted: false,
         performRetry: false
       },
-      computed: {
-        savedExportSource: savedExportSourceMock,
-      }
+      computed
     });
 
     let testedValue = wrapper.vm.folderSourceName;
@@ -168,7 +244,7 @@ describe("ExporTab methods", () => {
   let showOpenDialogMock;
   let getDocDirAbsolutePathMock;
   let getDocAbsolutePathMock;
-  let downloadDocumentAndCheckIntegrityMock;
+  let downloadAndIntegrityCheckDocumentMock;
   let displayExportErrorReportMock;
   let notifyExportEndMock;
   let displayExportErrorPromptMock;
@@ -182,6 +258,7 @@ describe("ExporTab methods", () => {
   let mkdirSyncMock;
   let skipMetadataExportMock;
   let createWriteStreamMock;
+  let displayFatalErrorMock;
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
@@ -208,7 +285,8 @@ describe("ExporTab methods", () => {
     showOpenDialogMock = sm.mock(remote.dialog, "showOpenDialog").resolveWith({canceled: false, filePaths: ['fakePath']});
     getDocDirAbsolutePathMock = sm.mock().returnWith('/fake/absolute/path');
     getDocAbsolutePathMock = sm.mock().returnWith('/fake/absolute/path/Document title.pdf');
-    downloadDocumentAndCheckIntegrityMock = sm.mock().resolveWith('');
+    downloadAndIntegrityCheckDocumentMock = sm.mock().resolveWith('');
+    displayFatalErrorMock = sm.mock();
     displayExportErrorPromptMock = sm.mock();
     displayExportErrorReportMock = sm.mock();
     notifyExportEndMock = sm.mock();
@@ -281,7 +359,8 @@ describe("ExporTab methods", () => {
         listAllDocuments: listAllDocumentsMock,
         getDocDirAbsolutePath: getDocDirAbsolutePathMock,
         getDocAbsolutePath: getDocAbsolutePathMock,
-        downloadAndIntegrityCheckDocument: downloadDocumentAndCheckIntegrityMock,
+        downloadAndIntegrityCheckDocument: downloadAndIntegrityCheckDocumentMock,
+        displayFatalError: displayFatalErrorMock,
         displayExportErrorPrompt: displayExportErrorPromptMock,
         displayExportErrorReport: displayExportErrorReportMock,
         notifyExportEnd: notifyExportEndMock
@@ -306,6 +385,7 @@ describe("ExporTab methods", () => {
     openItemMock.reset();
     showMessageBoxMock.reset();
     showMessageBoxMock.actions = [];
+    openExternalMock.reset();
   });
 
   it("setDestinationFolder call electron showOpenDialog", async () => {
@@ -644,6 +724,29 @@ describe("ExporTab methods", () => {
     ]);
   });
 
+  it("displayFatalError call remote.dialog.showMessageBox", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ displayFatalError: ExportTab.methods.displayFatalError });
+
+    await wrapper.vm.displayFatalError({name: 'PMISetupError'});
+
+    // api is call to list folders inside parent
+    expect(showMessageBoxMock.callCount).to.be.equal(1);
+    expect(showMessageBoxMock.lastCall.args[1]).to.includes({type: 'error'});
+  });
+
+  it("displayFatalError call openExternal if needed", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ displayFatalError: ExportTab.methods.displayFatalError });
+    showMessageBoxMock.actions = [];
+    showMessageBoxMock.resolveWith({response: 1}); // report issue button clicked on the message box
+
+    await wrapper.vm.displayFatalError({name: 'UnexpectedError'});
+
+    expect(openExternalMock.callCount).to.be.equal(1);
+    expect(openExternalMock.lastCall.arg).to.includes('github.com');
+  });
+
   it("displayExportErrorPrompt call remote.dialog.showMessageBox", async () => {
     // restore original method to test it
     wrapper.setMethods({ displayExportErrorPrompt: ExportTab.methods.displayExportErrorPrompt });
@@ -663,7 +766,6 @@ describe("ExporTab methods", () => {
 
     await wrapper.vm.displayExportErrorPrompt();
 
-    // api is call to list folders inside parent
     expect(displayExportErrorReportMock.callCount).to.be.equal(1);
     expect(moveDocsFromErrorToExportMock.callCount).to.be.equal(1);
   });
@@ -676,7 +778,7 @@ describe("ExporTab methods", () => {
     accessTokenMock.actions = [];
     accessTokenMock.returnWith('');
 
-    wrapper.vm.notifyExportEnd();
+    wrapper.vm.notifyExportEnd(1, '/fakeExportDestination/fake-export-folder');
 
     // a message indicate user that import have been interrupted and can be resumed
     expect(displayExportErrorPromptMock.callCount).to.be.equal(0);
@@ -693,7 +795,7 @@ describe("ExporTab methods", () => {
     showMessageBoxMock.actions = [];
     showMessageBoxMock.resolveWith({response: 1}); // user click on folder button
 
-    wrapper.vm.notifyExportEnd();
+    wrapper.vm.notifyExportEnd(1, '/fakeExportDestination/fake-export-folder');
     await flushPromises();
 
     // success message is displayed
@@ -713,7 +815,7 @@ describe("ExporTab methods", () => {
     exportDocsInErrorMock.actions = [];
     exportDocsInErrorMock.returnWith(['doc1']);
 
-    wrapper.vm.notifyExportEnd();
+    wrapper.vm.notifyExportEnd(1, '/fakeExportDestination/fake-export-folder');
 
     // error message is displayed
     expect(displayExportErrorPromptMock.callCount).to.be.equal(1);

@@ -55,11 +55,17 @@ const mutations = {
     state.docsToExport = state.exportDocsInError.splice(0);
   },
 
+  RESET_EXPORT_DATA_FOR_NEXT_RUN(state) {
+    state.exportFolderName = null;
+    state.duplicatedFilePathCount = {};
+    state.metadataExportSkipped = false;
+  },
+
   RESET_EXPORT_DATA(state) {
     state.exportFolderName = null;
     state.docsToExport = [];
     state.exportDocsInError = [];
-    state.filePathDuplicatedCount = {};
+    state.duplicatedFilePathCount = {};
     state.savedExportSource = {name: 'Root', id: null};
     state.metadataExportSkipped = false;
     state.savedExportDestination = null;

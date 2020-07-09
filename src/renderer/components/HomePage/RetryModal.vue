@@ -4,13 +4,15 @@
   -->
 
 <template>
-  <b-modal id="retry-modal" centered hide-header no-close-on-esc no-close-on-backdrop>
+  <b-modal id="retry-modal" centered hide-header no-close-on-esc no-close-on-backdrop
+           @hidden="$emit('event-retry-modal-hidden')">
     <b-container fluid>
       <b-row class="align-items-center">
         <b-col>
           <b-row>
             <h1 class="text-warning">
-              {{ $tc('retryModal.retryTitle', 2, {action_infinitive: $t(`retryModal.${action}Infinitive`)}) }}
+              {{ $tc('retryModal.retryTitle', itemsLeftCount, {action_infinitive: $t(`retryModal.${action}Infinitive`)})
+              }}
             </h1>
           </b-row>
           <b-row>
@@ -19,7 +21,7 @@
                 {{ $t('retryModal.resumeSubTitle', {action: $t(`retryModal.${action}`)}) }}
               </span>
               <span v-else>
-                {{ $tc('retryModal.retrySubTitle', 2, {
+                {{ $tc('retryModal.retrySubTitle', itemsLeftCount, {
                 action_infinitive: $t(`retryModal.${action}Infinitive`),
                 action_ed: $t(`retryModal.${action}ed`)
                 }) }}
@@ -30,10 +32,10 @@
       </b-row>
     </b-container>
     <template slot="modal-footer">
-      <b-button variant="secondary" @click.prevent="abortRetry">
+      <b-button variant="danger" @click.prevent="abortRetry">
         {{ $t('retryModal.abortButtonValue') }}
       </b-button>
-      <b-button variant="primary" @click.prevent="this.$emit('event-retry-action')">
+      <b-button variant="warning" @click.prevent="retryAction">
         <span v-if="actionNotCompleted">
           {{ $t('retryModal.resumeButtonValue', {action: $t(`retryModal.${action}`)}) }}
         </span>
@@ -75,14 +77,27 @@
         }
       },
 
+      itemsLeftCount () {
+        if (this.actionNotCompleted) {
+          return this.action === "import" ? this.docsToImport.length : this.docsToExport.length
+        } else {
+          return this.action === "import" ? this.importDocsInError.length : this.exportDocsInError.length
+        }
+      },
+
       ...mapState('import', ['docsToImport', 'importDocsInError']),
       ...mapState('export', ['docsToExport', 'exportDocsInError'])
     },
 
     methods: {
-      abortRetry () {
+      retryAction () {
+        this.$emit('event-retry-action');
         this.$bvModal.hide('retry-modal');
+      },
+
+      abortRetry () {
         this.$emit('event-abort-retry');
+        this.$bvModal.hide('retry-modal');
       }
     }
   }

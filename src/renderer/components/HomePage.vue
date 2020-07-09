@@ -37,7 +37,7 @@
           :actionInterrupted="actionInterrupted"
           :performRetry.sync="performImportRetry"
           @event-importing="updateActionProgress"
-          @event-import-end="hideImportProgress"
+          @event-import-end="resetActionProgress(); displayRetryModalIfNeeded()"
           @event-pick-folder="pickingFolder = true"/>
       </div>
       <div class="tab-pane col" :class="{active: this.action === 'export'}"
@@ -47,7 +47,7 @@
           :performRetry.sync="performExportRetry"
           @event-exporting="updateActionProgress"
           @event-step-end="currentStep++"
-          @event-export-end="hideImportProgress"
+          @event-export-end="resetActionProgress(); displayRetryModalIfNeeded()"
           @event-pick-folder="pickingFolder = true"/>
       </div>
     </div>
@@ -69,9 +69,10 @@
     <RetryModal
       v-if="askForActionRetry"
       :action="action"
+      :actionInterrupted="actionInterrupted"
       @event-retry-action="performActionRetry"
-      @event-cancel-retry="resetAllData"
-      @event-folder-picker-modal-hidden="askForActionRetry = false"/>
+      @event-abort-retry="resetAllData"
+      @event-retry-modal-hidden="askForActionRetry = false"/>
   </b-container>
 </template>
 
@@ -116,12 +117,7 @@
       const window = remote.getCurrentWindow();
       window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
 
-      // check if an action need to be retried or resumed
-      if (this.docsToImport.length > 0 || this.importDocsInError.length > 0 ||
-        this.docsToExport.length > 0 || this.exportDocsInError.length > 0) {
-        this.askForActionRetry = true;
-        log.info('last action wasn\'t fully completed, ask user if he want to retry or resume it');
-      }
+      this.displayRetryModalIfNeeded();
     },
 
     computed: {
@@ -153,11 +149,20 @@
         this.totalCount = totalCount;
       },
 
-      hideImportProgress() {
+      resetActionProgress() {
         this.ongoingAction = false;
         this.currentStep = 1;
         this.totalCount = 0;
         this.actionInterrupted = false;
+      },
+
+      displayRetryModalIfNeeded(){
+        // check if an action need to be retried or resumed
+        if (this.docsToImport.length > 0 || this.importDocsInError.length > 0 ||
+          this.docsToExport.length > 0 || this.exportDocsInError.length > 0) {
+          this.askForActionRetry = true;
+          log.info('last action wasn\'t fully completed, ask user if he want to retry or resume it');
+        }
       },
 
       performActionRetry() {

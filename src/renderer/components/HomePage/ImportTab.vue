@@ -41,7 +41,7 @@
       <b-col>
         <b-form-group :description="$t('importTab.destinationFormGroupDescription')">
           <template slot="label">
-            <span :title="$t('onYourPaperMatterOrg')" >
+            <span :title="$t('yourPaperMatterOrg')" >
               <img src="~@/assets/pm_favicon_32.png"/>
               {{ $t('importTab.destinationFormGroupLabel') }}
             </span>
@@ -134,7 +134,6 @@
 
       performRetry: function (newVal, oldVal) {
         if (newVal) {
-          console.log('this.actionDisabled', this.actionDisabled);
           if (!this.actionDisabled) {
             this.proceedToImport();
           }
@@ -427,16 +426,16 @@
         });
       },
 
-      displayImportErrorPrompt(errorCount, import_interrupted_mention='') {
+      displayImportErrorPrompt(errorCount) {
         const win = remote.getCurrentWindow();
 
-        log.error('theses files could not be imported:', this.importDocsInError);
+        log.error('theses files could not be imported:\n', this.importDocsInError);
         remote.dialog.showMessageBox(win,
           {
             type: 'error',
-            title: this.$tc('importTab.errorImportTitle', this.importDocsInError.length),
-            message: this.$tc('importTab.errorImportMessage', this.importDocsInError.length),
-            detail: this.$tc('importTab.errorImportDetail', this.importDocsInError.length, {import_interrupted_mention}),
+            title: this.$tc('importTab.errorImportTitle', errorCount),
+            message: this.$tc('importTab.errorImportMessage', errorCount),
+            detail: this.$tc('importTab.errorImportDetail', errorCount),
             buttons: ['Ok', this.$t('importTab.displayErrorReportButtonValue')],
             defaultId: 0
           }).then( ({response}) => {
@@ -452,20 +451,19 @@
       notifyImportEnd (totalCount){
         const errorCount = this.importDocsInError.length; // reset by import/RESET_IMPORT_DATA mutation
         const win = remote.getCurrentWindow();
-        const import_interrupted_mention = this.actionInterrupted ? this.$t('importTab.importInterruptedMention') : '';
 
         // Do not display success or error messages when user get disconnected
         // (it will be shown at the end of the resumed import after reconnection)
         if(this.accessToken){
           if (errorCount) {
-            this.displayImportErrorPrompt(errorCount, import_interrupted_mention);
+            this.displayImportErrorPrompt(errorCount);
           } else {
             remote.dialog.showMessageBox(win,
               {
                 type: 'info',
                 title: this.$t('importTab.successImportTitle'),
                 message: this.$tc('importTab.successImportMessage',
-                  totalCount - this.docsToImport.length, {import_interrupted_mention}),
+                  totalCount - this.docsToImport.length),
                 buttons: ['Ok'],
                 defaultId: 0
               });

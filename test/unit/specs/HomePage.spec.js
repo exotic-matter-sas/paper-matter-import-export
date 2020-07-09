@@ -78,10 +78,6 @@ describe("HomePage mounted", () => {
   let setContentSizeMock;
   let getContentSizeMock;
   let getCurrentWindowMock;
-  let docsToImportMock;
-  let importDocsInErrorMock;
-  let docsToExportMock;
-  let exportDocsInErrorMock;
 
   beforeEach(() => {
     fakeWidth = 100;
@@ -90,38 +86,12 @@ describe("HomePage mounted", () => {
     getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
       {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
     );
-    docsToImportMock = sm.mock().returnWith([]);
-    importDocsInErrorMock = sm.mock().returnWith([]);
-    docsToExportMock = sm.mock().returnWith([]);
-    exportDocsInErrorMock = sm.mock().returnWith([]);
     storeConfigCopy = cloneDeep(storeConfig);
     store = new Vuex.Store(storeConfigCopy);
-    computed = {
-      docsToImport: {
-        cache: false,
-        get: docsToImportMock
-      },
-      importDocsInError: {
-        cache: false,
-        get: importDocsInErrorMock
-      },
-      docsToExport: {
-        cache: false,
-        get: docsToExportMock
-      },
-      exportDocsInError: {
-        cache: false,
-        get: exportDocsInErrorMock
-      },
-    }
   });
 
   afterEach(() => {
     sm.restore();
-    docsToImportMock.actions = [];
-    importDocsInErrorMock.actions = [];
-    docsToExportMock.actions = [];
-    exportDocsInErrorMock.actions = [];
   });
 
   it("electron remote.setContentSize is called to set window size", () => {
@@ -136,54 +106,6 @@ describe("HomePage mounted", () => {
     expect(setContentSizeMock.lastCall.args[0]).to.equal(fakeWidth); // come from getContentSize return, first item
     expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
   });
-
-  it("askForActionRetry is set if it left docsToImport", () => {
-    docsToImportMock.actions = [];
-    docsToImportMock.returnWith([tv.DOCUMENT_PROPS]);
-    wrapper = shallowMount(HomePage, {
-      localVue,
-      store,
-      computed
-    });
-
-    expect(wrapper.vm.askForActionRetry).to.equal(true);
-  });
-
-  it("askForActionRetry is set if there is importDocsInError", () => {
-    importDocsInErrorMock.actions = [];
-    importDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS]);
-    wrapper = shallowMount(HomePage, {
-      localVue,
-      store,
-      computed
-    });
-
-    expect(wrapper.vm.askForActionRetry).to.equal(true);
-  });
-
-  it("askForActionRetry is set if it left docsToExportMock", () => {
-    docsToExportMock.actions = [];
-    docsToExportMock.returnWith([tv.DOCUMENT_PROPS]);
-    wrapper = shallowMount(HomePage, {
-      localVue,
-      store,
-      computed
-    });
-
-    expect(wrapper.vm.askForActionRetry).to.equal(true);
-  });
-
-  it("askForActionRetry is set if there is exportDocsInErrorMock", () => {
-    exportDocsInErrorMock.actions = [];
-    exportDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS]);
-    wrapper = shallowMount(HomePage, {
-      localVue,
-      store,
-      computed
-    });
-
-    expect(wrapper.vm.askForActionRetry).to.equal(true);
-  });
 });
 
 describe("HomePage methods", () => {
@@ -196,6 +118,11 @@ describe("HomePage methods", () => {
   let resetImportdataMock;
   let resetExportDataMock;
   let actionMock;
+  let docsToImportMock;
+  let importDocsInErrorMock;
+  let docsToExportMock;
+  let exportDocsInErrorMock;
+  let displayRetryModalIfNeededMock;
 
   beforeEach(() => {
     disconnectUserMock = sm.mock();
@@ -203,7 +130,12 @@ describe("HomePage methods", () => {
     setExportSourceMock = sm.mock();
     resetImportdataMock = sm.mock();
     resetExportDataMock = sm.mock();
+    displayRetryModalIfNeededMock = sm.mock();
     actionMock = sm.mock().returnWith('import');
+    docsToImportMock = sm.mock().returnWith([]);
+    importDocsInErrorMock = sm.mock().returnWith([]);
+    docsToExportMock = sm.mock().returnWith([]);
+    exportDocsInErrorMock = sm.mock().returnWith([]);
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
     storeConfigCopy.modules.import.mutations.SET_IMPORT_DESTINATION = setImportDestinationMock;
@@ -219,6 +151,25 @@ describe("HomePage methods", () => {
           cache: false,
           get: actionMock
         },
+        docsToImport: {
+          cache: false,
+          get: docsToImportMock
+        },
+        importDocsInError: {
+          cache: false,
+          get: importDocsInErrorMock
+        },
+        docsToExport: {
+          cache: false,
+          get: docsToExportMock
+        },
+        exportDocsInError: {
+          cache: false,
+          get: exportDocsInErrorMock
+        },
+      },
+      methods: {
+        displayRetryModalIfNeeded: displayRetryModalIfNeededMock,
       }
     });
   });
@@ -226,6 +177,10 @@ describe("HomePage methods", () => {
   afterEach(() => {
     sm.restore();
     actionMock.actions = [];
+    docsToImportMock.actions = [];
+    importDocsInErrorMock.actions = [];
+    docsToExportMock.actions = [];
+    exportDocsInErrorMock.actions = [];
   });
 
   it("disconnectUser call disconnectUser action", () => {
@@ -262,8 +217,8 @@ describe("HomePage methods", () => {
     expect(wrapper.vm.totalCount).to.equal(fakeTotalCount);
   });
 
-  it("hideImportProgress set proper values", () => {
-    wrapper.vm.hideImportProgress();
+  it("resetActionProgress set proper values", () => {
+    wrapper.vm.resetActionProgress();
 
     expect(wrapper.vm.ongoingAction).to.equal(false);
     expect(wrapper.vm.currentStep).to.equal(1);
@@ -284,6 +239,50 @@ describe("HomePage methods", () => {
     wrapper.vm.performActionRetry();
 
     expect(wrapper.vm.performImportRetry).to.equal(true);
+  });
+
+  it("displayRetryModalIfNeeded set askForActionRetry if it left docsToImport", () => {
+    importDocsInErrorMock.actions = [];
+    importDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS]);
+    // restore original method to test it
+    wrapper.setMethods({ displayRetryModalIfNeeded: HomePage.methods.displayRetryModalIfNeeded });
+
+    wrapper.vm.displayRetryModalIfNeeded();
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
+  });
+
+  it("displayRetryModalIfNeeded set askForActionRetry if there is importDocsInError", () => {
+    importDocsInErrorMock.actions = [];
+    importDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS]);
+    // restore original method to test it
+    wrapper.setMethods({ displayRetryModalIfNeeded: HomePage.methods.displayRetryModalIfNeeded });
+
+    wrapper.vm.displayRetryModalIfNeeded();
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
+  });
+
+  it("displayRetryModalIfNeeded set askForActionRetry if it left docsToExportMock", () => {
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith([tv.DOCUMENT_PROPS]);
+    // restore original method to test it
+    wrapper.setMethods({ displayRetryModalIfNeeded: HomePage.methods.displayRetryModalIfNeeded });
+
+    wrapper.vm.displayRetryModalIfNeeded();
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
+  });
+
+  it("displayRetryModalIfNeeded set askForActionRetry if there is exportDocsInErrorMock", () => {
+    exportDocsInErrorMock.actions = [];
+    exportDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS]);
+    // restore original method to test it
+    wrapper.setMethods({ displayRetryModalIfNeeded: HomePage.methods.displayRetryModalIfNeeded });
+
+    wrapper.vm.displayRetryModalIfNeeded();
+
+    expect(wrapper.vm.askForActionRetry).to.equal(true);
   });
 
   it("resetAllData set proper values", () => {

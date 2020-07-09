@@ -7,13 +7,10 @@ import { createLocalVue, shallowMount } from "@vue/test-utils";
 import sm from "simple-mock"
 
 import BootstrapVue from "bootstrap-vue";
-import flushPromises from "flush-promises";
 import Vuex from "vuex";
 import storeConfig from "../../../src/renderer/store";
-import cloneDeep from "lodash.clonedeep";
 
 
-import {remote} from "electron";
 import * as tv from "../../tools/testValues.js";
 import RetryModal from "../../../src/renderer/components/HomePage/RetryModal";
 
@@ -41,10 +38,12 @@ describe("RetryModal template", () => {
   let wrapper;
   let store;
   let actionNotCompletedMock;
+  let itemsLeftMock;
 
   beforeEach(() => {
     // set vars common to the describe block here (vue wrapper args, fake values, mocks)
     actionNotCompletedMock = sm.mock().returnWith(true);
+    itemsLeftMock = sm.mock().returnWith(42);
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(RetryModal, {
       localVue,
@@ -56,6 +55,10 @@ describe("RetryModal template", () => {
         actionNotCompleted: {
           cache: false,
           get: actionNotCompletedMock
+        },
+        itemsLeftCount: {
+          cache: false,
+          get: itemsLeftMock
         },
       }
     });
@@ -70,6 +73,11 @@ describe("RetryModal template", () => {
     const elementSelector = "#retry-modal";
     const elem = wrapper.find(elementSelector);
     expect(elem.is(elementSelector)).to.equal(true);
+  });
+
+  it("renders properly component data", () => {
+    // it contains itemsLeftCount value
+    expect(wrapper.text()).to.contains(42);
   });
 });
 
@@ -113,13 +121,21 @@ describe("RetryModal computed", () => {
   // define all vars common to the describe block here
   let wrapper;
   let store;
+  let actionNotCompletedMock;
+  let itemsLeftCountMock;
   let docsToImportMock;
   let docsToExportMock;
+  let importDocsInErrorMock;
+  let exportDocsInErrorMock;
 
   beforeEach(() => {
     // set vars common to the describe block here (vue wrapper args, fake values, mocks)
+    actionNotCompletedMock = sm.mock();
+    itemsLeftCountMock = sm.mock();
     docsToImportMock = sm.mock().returnWith([]);
     docsToExportMock = sm.mock().returnWith([]);
+    importDocsInErrorMock = sm.mock().returnWith([]);
+    exportDocsInErrorMock = sm.mock().returnWith([]);
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(RetryModal, {
       localVue,
@@ -130,7 +146,11 @@ describe("RetryModal computed", () => {
       computed: {
         actionNotCompleted: {
           cache: false,
-          get: RetryModal.computed.actionNotCompleted
+          get: actionNotCompletedMock
+        },
+        itemsLeftCount: {
+          cache: false,
+          get: itemsLeftCountMock
         },
         docsToImport: {
           cache: false,
@@ -139,6 +159,14 @@ describe("RetryModal computed", () => {
         docsToExport: {
           cache: false,
           get: docsToExportMock
+        },
+        importDocsInError: {
+          cache: false,
+          get: importDocsInErrorMock
+        },
+        exportDocsInError: {
+          cache: false,
+          get: exportDocsInErrorMock
         }
       }
     });
@@ -148,11 +176,19 @@ describe("RetryModal computed", () => {
     sm.restore();
     docsToImportMock.actions = [];
     docsToExportMock.actions = [];
+    importDocsInErrorMock.actions = [];
+    exportDocsInErrorMock.actions = [];
+    actionNotCompletedMock.actions = [];
   });
 
   it("actionNotCompleted return proper value", () => {
+    // restore original computed to test it
+    actionNotCompletedMock.callFn(RetryModal.computed.actionNotCompleted);
+
     // given there is no docsToImport
     wrapper.setData({action: 'import'});
+    docsToImportMock.actions = [];
+    docsToImportMock.returnWith([]);
 
     let testedValue = wrapper.vm.actionNotCompleted;
 
@@ -176,16 +212,70 @@ describe("RetryModal computed", () => {
 
     expect(testedValue).to.equal(true);
   });
+
+  it("itemsLeftCount return proper value", () => {
+    // restore original computed to test it
+    itemsLeftCountMock.callFn(RetryModal.computed.itemsLeftCount);
+
+    // given actionNotCompleted and action is import
+    wrapper.setData({action: 'import'});
+    docsToImportMock.actions = [];
+    docsToImportMock.returnWith([tv.DOCUMENT_PROPS]);
+    actionNotCompletedMock.actions= [];
+    actionNotCompletedMock.returnWith(true);
+
+    let testedValue = wrapper.vm.itemsLeftCount;
+
+    expect(testedValue).to.equal(1);
+
+    // given actionNotCompleted and action is export
+    wrapper.setData({action: 'export'});
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS]);
+    actionNotCompletedMock.actions= [];
+    actionNotCompletedMock.returnWith(true);
+
+    testedValue = wrapper.vm.itemsLeftCount;
+
+    expect(testedValue).to.equal(2);
+
+    // given actionNotCompleted is false and action is import
+    wrapper.setData({action: 'import'});
+    importDocsInErrorMock.actions = [];
+    importDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS]);
+    actionNotCompletedMock.actions= [];
+    actionNotCompletedMock.returnWith(false);
+
+    testedValue = wrapper.vm.itemsLeftCount;
+
+    expect(testedValue).to.equal(3);
+
+    // given actionNotCompleted is false and action is export
+    wrapper.setData({action: 'export'});
+    exportDocsInErrorMock.actions = [];
+    exportDocsInErrorMock.returnWith(
+      [tv.DOCUMENT_PROPS,tv.DOCUMENT_PROPS,tv.DOCUMENT_PROPS,tv.DOCUMENT_PROPS]);
+    actionNotCompletedMock.actions= [];
+    actionNotCompletedMock.returnWith(false);
+
+    testedValue = wrapper.vm.itemsLeftCount;
+
+    expect(testedValue).to.equal(4);
+  });
 });
 
 describe("RetryModal methods", () => {
   // define all vars common to the describe block here
   let wrapper;
   let store;
+  let docsToImportMock;
+  let docsToExportMock;
   let actionNotCompletedMock;
 
   beforeEach(() => {
     // set vars common to the describe block here (vue wrapper args, fake values, mocks)
+    docsToImportMock = sm.mock().returnWith([]);
+    docsToExportMock = sm.mock().returnWith([]);
     actionNotCompletedMock = sm.mock().returnWith(true);
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(RetryModal, {
@@ -198,6 +288,14 @@ describe("RetryModal methods", () => {
         actionNotCompleted: {
           cache: false,
           get: actionNotCompletedMock
+        },
+        docsToImport: {
+          cache: false,
+          get: docsToImportMock
+        },
+        docsToExport: {
+          cache: false,
+          get: docsToExportMock
         },
       }
     });
