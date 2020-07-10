@@ -225,7 +225,9 @@ describe("ExporTab methods", () => {
   let docsToExportMock;
   let setDocsToExportMock;
   let setDuplicatedFilePathCountMock;
+  let moveFirstDocFromExportToErrorMock;
   let moveDocsFromErrorToExportMock;
+  let consumeFirstDocToExportMock;
   let setExportDestinationMock;
   let setExportFolderNameMock;
   let mockedSavedExportSourceMockValue;
@@ -258,7 +260,10 @@ describe("ExporTab methods", () => {
   let mkdirSyncMock;
   let skipMetadataExportMock;
   let createWriteStreamMock;
+  let mockedCsvFormatStreamMockValue;
+  let csvFormatStreamMock;
   let displayFatalErrorMock;
+  let resetExportDataForNextRun;
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
@@ -266,6 +271,8 @@ describe("ExporTab methods", () => {
     setDocsToExportMock = sm.mock();
     setDuplicatedFilePathCountMock = sm.mock();
     moveDocsFromErrorToExportMock = sm.mock();
+    moveFirstDocFromExportToErrorMock = sm.mock();
+    consumeFirstDocToExportMock = sm.mock();
     setExportDestinationMock = sm.mock();
     setExportFolderNameMock = sm.mock();
     skipMetadataExportMock = sm.mock();
@@ -285,7 +292,7 @@ describe("ExporTab methods", () => {
     showOpenDialogMock = sm.mock(remote.dialog, "showOpenDialog").resolveWith({canceled: false, filePaths: ['fakePath']});
     getDocDirAbsolutePathMock = sm.mock().returnWith('/fake/absolute/path');
     getDocAbsolutePathMock = sm.mock().returnWith('/fake/absolute/path/Document title.pdf');
-    downloadAndIntegrityCheckDocumentMock = sm.mock().resolveWith('');
+    downloadAndIntegrityCheckDocumentMock = sm.mock().resolveWith('/fake/absolute/path');
     displayFatalErrorMock = sm.mock();
     displayExportErrorPromptMock = sm.mock();
     displayExportErrorReportMock = sm.mock();
@@ -294,12 +301,14 @@ describe("ExporTab methods", () => {
     hashStringMock = sm.mock().resolveWith('fakeMd5');
     promiseWriteFileMock = sm.mock(fs.promises, "writeFile").resolveWith('');
     promiseUtimesMock = sm.mock(fs.promises, "utimes").resolveWith('');
-    mkdirSyncMock = sm.mock(fs, "mkdirSync");
+    mkdirSyncMock = sm.mock(fs, "mkdirSync").returnWith('');
     createWriteStreamMock = sm.mock(fs, "createWriteStream").returnWith(new PassThrough());
-    createWriteStreamMock = sm.mock(fastCsv, "format").returnWith(new PassThrough());
+    mockedCsvFormatStreamMockValue = {pipe: sm.mock(), write: sm.mock(), end: sm.mock()};
+    csvFormatStreamMock = sm.mock(fastCsv, "format").returnWith(mockedCsvFormatStreamMockValue);
     showMessageBoxMock = sm.mock(remote.dialog, "showMessageBox").resolveWith('');
     htmlReportSaveMock = sm.mock().returnWith('fakeReportPath');
     htmlReportConstructorMock = sm.mock(reportTools, 'HtmlReport').returnWith({save: htmlReportSaveMock});
+    resetExportDataForNextRun = sm.mock();
 
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.export.mutations.SET_EXPORT_DESTINATION = setExportDestinationMock;
@@ -308,6 +317,9 @@ describe("ExporTab methods", () => {
     storeConfigCopy.modules.export.mutations.SET_DOCS_TO_EXPORT = setDocsToExportMock;
     storeConfigCopy.modules.export.mutations.SET_DUPLICATED_FILE_PATH_COUNT = setDuplicatedFilePathCountMock;
     storeConfigCopy.modules.export.mutations.MOVE_DOCS_FROM_ERROR_TO_EXPORT = moveDocsFromErrorToExportMock;
+    storeConfigCopy.modules.export.mutations.MOVE_FIRST_DOC_FROM_EXPORT_TO_ERROR = moveFirstDocFromExportToErrorMock;
+    storeConfigCopy.modules.export.mutations.CONSUME_FIRST_DOC_TO_EXPORT = consumeFirstDocToExportMock;
+    storeConfigCopy.modules.export.mutations.RESET_EXPORT_DATA_FOR_NEXT_RUN = resetExportDataForNextRun;
     storeConfigCopy.modules.tools.actions.hashFile = hashFileMock;
     storeConfigCopy.modules.tools.actions.hashString = hashStringMock;
     store = new Vuex.Store(storeConfigCopy);
@@ -386,6 +398,9 @@ describe("ExporTab methods", () => {
     showMessageBoxMock.reset();
     showMessageBoxMock.actions = [];
     openExternalMock.reset();
+    mkdirSyncMock.actions = [];
+    metadataExportSkippedMock.actions = [];
+    displayFatalErrorMock.reset();
   });
 
   it("setDestinationFolder call electron showOpenDialog", async () => {
@@ -413,16 +428,163 @@ describe("ExporTab methods", () => {
     expect(setExportDestinationMock.callCount).to.eql(0);
   });
 
-  it("proceedToExport call methods properly", async () => {
+  it("proceedToExport emit event-exporting and event-export-end", async () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    const testedEvent1 = "event-exporting";
+    const testedEvent2 = "event-export-end";
 
     await wrapper.vm.proceedToExport();
 
-    // then
-    expect(listAllDocumentsMock.callCount).to.eql(1);
-    // Documents are committed to store properly
-    expect(setDocsToExportMock.callCount).to.eql(1);
+    expect(wrapper.emitted(testedEvent1)).to.not.be.undefined;
+    expect(wrapper.emitted(testedEvent1).length).to.equal(1);
+    expect(wrapper.emitted(testedEvent1)[0]).to.be.eql([{
+      "currentCount": 0,
+      "totalCount": 1
+    }]);
+    expect(wrapper.emitted(testedEvent2)).to.not.be.undefined;
+    expect(wrapper.emitted(testedEvent2).length).to.equal(1);
+  });
+
+  it("proceedToExport call mkdirSync to create export folder if needed", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+    exportFolderNameMock.actions = [];
+    exportFolderNameMock.returnWith(null);
+    // Mock behavior of setExportFolderName by updating exportFolderNameMock return value
+    setExportFolderNameMock.callFn(() => {
+      exportFolderNameMock.actions = [];
+      exportFolderNameMock.returnWith('fake-export-folder');
+    });
+
+    await wrapper.vm.proceedToExport();
+
+    expect(mkdirSyncMock.callCount).to.equal(1);
+    expect(mkdirSyncMock.lastCall.args).to.eql(['/fakeExportDestination/fake-export-folder', {recursive: true}]);
+  });
+
+  it("proceedToExport handle mkdirSync error", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+    exportFolderNameMock.actions = [];
+    exportFolderNameMock.returnWith(null);
+    // Mock behavior of setExportFolderName by updating exportFolderNameMock return value
+    setExportFolderNameMock.callFn(() => {
+      exportFolderNameMock.actions = [];
+      exportFolderNameMock.returnWith('fake-export-folder');
+    });
+
+    // given mkdirSync throw an error
+    mkdirSyncMock.actions = [];
+    mkdirSyncMock.throwWith(new Error('boom!'));
+
+    await wrapper.vm.proceedToExport();
+
+    expect(displayFatalErrorMock.callCount).to.equal(1);
+    expect(displayFatalErrorMock.lastCall.arg).to.contains({
+      message: 'exportFolderCreationFailed',
+      name: 'PMISetupError'
+    });
+  });
+
+  it("proceedToExport call createWriteStream and format to create metadata csv file", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    await wrapper.vm.proceedToExport();
+
+    expect(createWriteStreamMock.callCount).to.equal(1);
+    expect(createWriteStreamMock.lastCall.arg).to.eql('/fakeExportDestination/fake-export-folder/import.csv');
+    expect(csvFormatStreamMock.callCount).to.equal(1);
+    expect(csvFormatStreamMock.lastCall.arg).to.eql({ headers: true });
+    expect(mockedCsvFormatStreamMockValue.pipe.callCount).to.equal(1);
+    expect(mockedCsvFormatStreamMockValue.pipe.lastCall.arg).to.be.an.instanceof(PassThrough);
+  });
+
+  it("proceedToExport handle error during csv file creation", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+    // Mock behavior of skipMetadataExportMock
+    skipMetadataExportMock.callFn(() => {
+      metadataExportSkippedMock.actions = [];
+      metadataExportSkippedMock.returnWith(true);
+    });
+
+    // given mkdirSync throw an error
+    createWriteStreamMock.actions = [];
+    createWriteStreamMock.throwWith(new Error('boom!'));
+
+    await wrapper.vm.proceedToExport();
+
+    expect(skipMetadataExportMock.callCount).to.equal(1);
+  });
+
+  it("proceedToExport call listAllDocuments if needed", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+
+    // if there haven't already documentsToExport
+    await wrapper.vm.proceedToExport();
+
+    // then listDocuments is called
+    expect(listAllDocumentsMock.callCount).to.equal(1);
+    expect(setDocsToExportMock.callCount).to.equal(1);
     expect(setDocsToExportMock.lastCall.args[1]).to.eql([
       {
         pid: tv.DOCUMENT_PROPS.pid,
@@ -443,7 +605,291 @@ describe("ExporTab methods", () => {
         ext: tv.DOCUMENT_PROPS_VARIANT.ext
       }
     ]);
-  }); //TODO complete
+
+    // if there already documentsToExport
+    listAllDocumentsMock.reset();
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    // then listDocuments is NOT called
+    expect(listAllDocumentsMock.callCount).to.equal(0);
+  });
+
+  it("proceedToExport handle listAllDocuments error", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+
+    // given listAllDocumentsMock throw an interruptedByUser error
+    listAllDocumentsMock.actions = [];
+    listAllDocumentsMock.rejectWith(new Error('interruptedByUser'));
+
+    await wrapper.vm.proceedToExport();
+
+    // then error is silently catched
+    expect(displayFatalErrorMock.callCount).to.equal(0);
+
+    // given listAllDocumentsMock throw another error
+    listAllDocumentsMock.actions = [];
+    listAllDocumentsMock.rejectWith(new Error('boom!'));
+
+    await wrapper.vm.proceedToExport();
+
+    // then error is reported to user
+    expect(displayFatalErrorMock.callCount).to.equal(1);
+    expect(displayFatalErrorMock.lastCall.arg).to.contains({
+      message: 'documentsListingFailed',
+      name: 'PMISetupError'
+    });
+  });
+
+  it("proceedToExport call fs.promises.mkdir to create document folder", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    await wrapper.vm.proceedToExport();
+
+    expect(promiseMkdirMock.callCount).to.equal(2);
+    expect(promiseMkdirMock.calls[0].args).to.eql(['/fake/absolute/path', {recursive: true}]);
+    expect(promiseMkdirMock.calls[1].args).to.eql(['/fake/absolute/path', {recursive: true}]);
+  });
+
+  it("proceedToExport handle fs.promises.mkdir error", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of moveFirstDocFromExportToError by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    moveFirstDocFromExportToErrorMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+    // given promiseMkdir reject
+    promiseMkdirMock.actions = [];
+    promiseMkdirMock.rejectWith(new Error('boom!'));
+
+    await wrapper.vm.proceedToExport();
+
+    expect(moveFirstDocFromExportToErrorMock.callCount).to.equal(2);
+    expect(moveFirstDocFromExportToErrorMock.calls[0].args[1]).to.eql('Parent folder creation failed');
+    expect(moveFirstDocFromExportToErrorMock.calls[1].args[1]).to.eql('Parent folder creation failed');
+    // next code is not called as documents get skipped due to error
+    expect(downloadAndIntegrityCheckDocumentMock.callCount).to.equal(0);
+  });
+
+  it("proceedToExport call downloadAndIntegrityCheckDocument", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    await wrapper.vm.proceedToExport();
+
+    expect(downloadAndIntegrityCheckDocumentMock.callCount).to.equal(2);
+    expect(downloadAndIntegrityCheckDocumentMock.calls[0].args).to.eql([
+      tv.DOCUMENT_PROPS,
+      '/fake/absolute/path'
+    ]);
+    expect(downloadAndIntegrityCheckDocumentMock.calls[1].args).to.eql([
+      tv.DOCUMENT_PROPS_VARIANT,
+      '/fake/absolute/path'
+    ]);
+  });
+
+  it("proceedToExport handle downloadAndIntegrityCheckDocument error", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of moveFirstDocFromExportToErrorMock by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    moveFirstDocFromExportToErrorMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    downloadAndIntegrityCheckDocumentMock.actions = [];
+    downloadAndIntegrityCheckDocumentMock.rejectWith(new Error('boom!'));
+
+    await wrapper.vm.proceedToExport();
+
+    expect(moveFirstDocFromExportToErrorMock.callCount).to.equal(2);
+    expect(moveFirstDocFromExportToErrorMock.calls[0].args[1]).to.eql('Download failed');
+    expect(moveFirstDocFromExportToErrorMock.calls[1].args[1]).to.eql('Download failed');
+    // next code is not called as documents get skipped due to error
+    expect(consumeFirstDocToExportMock.callCount).to.equal(0);
+  });
+
+  it("proceedToExport write metadata to csvFormatStream if needed and close stream", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    // given metadataExportSkipped is false
+
+    await wrapper.vm.proceedToExport();
+
+    expect(mockedCsvFormatStreamMockValue.write.callCount).to.equal(2);
+    expect(mockedCsvFormatStreamMockValue.write.calls[0].arg).to.eql({
+      path: '/fake/absolute/path',
+      name: tv.DOCUMENT_PROPS.title,
+      notes: tv.DOCUMENT_PROPS.note
+    });
+    expect(mockedCsvFormatStreamMockValue.write.calls[1].arg).to.eql({
+      path: '/fake/absolute/path',
+      name: tv.DOCUMENT_PROPS_VARIANT.title,
+      notes: tv.DOCUMENT_PROPS_VARIANT.note
+    });
+
+    // given metadataExportSkipped is true
+    metadataExportSkippedMock.actions = [];
+    metadataExportSkippedMock.returnWith(true);
+    mockedCsvFormatStreamMockValue.write.reset();
+
+    await wrapper.vm.proceedToExport();
+
+    expect(mockedCsvFormatStreamMockValue.write.callCount).to.equal(0);
+  });
+
+  it("proceedToExport commit CONSUME_FIRST_DOC_TO_EXPORT for each doc", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    await wrapper.vm.proceedToExport();
+
+    expect(consumeFirstDocToExportMock.callCount).to.equal(2);
+  });
+
+  it("proceedToExport call notifyExportEnd", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    await wrapper.vm.proceedToExport();
+
+    // call only one time at the end
+    expect(notifyExportEndMock.callCount).to.equal(1);
+    expect(notifyExportEndMock.lastCall.args).to.eql([2, '/fakeExportDestination/fake-export-folder']);
+  });
+
+  it("proceedToExport commit RESET_EXPORT_DATA_FOR_NEXT_RUN if needed", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    // given there is no documents in error
+    await wrapper.vm.proceedToExport();
+
+    // call only one time at the end
+    expect(resetExportDataForNextRun.callCount).to.equal(1);
+
+    // given there is error
+    resetExportDataForNextRun.reset();
+    exportDocsInErrorMock.actions = [];
+    exportDocsInErrorMock.returnWith(['boom!']);
+
+    await wrapper.vm.proceedToExport();
+
+    // not called to allow to retry export
+    expect(resetExportDataForNextRun.callCount).to.equal(0);
+  });
+
+  it("proceedToExport end csvFormatStream", async () => {
+    // restore original method to test it
+    wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
+    // set new return value for docsToExportMock
+    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    docsToExportMock.actions = [];
+    docsToExportMock.returnWith(mockedDocsToExportValue);
+    // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
+    // without this, proceedToExport while would cause an infinite loop
+    consumeFirstDocToExportMock.callFn(() => {
+      docsToExportMock.actions = [];
+      mockedDocsToExportValue.shift();
+      docsToExportMock.returnWith(mockedDocsToExportValue);
+    });
+
+    await wrapper.vm.proceedToExport();
+
+    // call only one time at the end
+    expect(mockedCsvFormatStreamMockValue.end.callCount).to.equal(1);
+  });
 
   it("listAllDocuments call API properly and emit proper events", async () => {
     const testedEvent = 'event-exporting';
@@ -707,7 +1153,6 @@ describe("ExporTab methods", () => {
     expect(promiseWriteFileMock.callCount).to.eql(1);
     expect(testedResult.code).to.eql('boom!');
   });
-
 
   it("downloadAndIntegrityCheckDocument call utimes", async () => {
     // restore original method to test it

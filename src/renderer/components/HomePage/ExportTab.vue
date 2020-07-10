@@ -172,7 +172,7 @@
             .then(allDocuments => {
               vi.$store.commit(
                 'export/SET_DOCS_TO_EXPORT',
-                // storing only useful fields of documents to export
+                // storing only useful fields for documents to export
                 allDocuments.map(
                   ({pid, title, note, created, path, md5, ext}) =>
                     ({pid, title, note, created, path, md5, ext})
@@ -209,7 +209,6 @@
 
             // Create folder path for document if needed
             let folderCreationError = false;
-
             await fs.promises.mkdir(docDirAbsolutePath, {recursive: true})
             .catch(e => {
               log.error('skipping document, parent folder creation failed:\n', e);
