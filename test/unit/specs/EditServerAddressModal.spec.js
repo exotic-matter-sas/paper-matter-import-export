@@ -108,17 +108,17 @@ describe("EditServerAddressModal methods", () => {
   let storeConfigCopy;
   let store;
   let bvModalEvtMock;
-  let updateApiHostNameMock;
+  let setApiHostNameMock;
   let mockedApiHostName;
   let apiHostNameMock;
 
   beforeEach(() => {
     bvModalEvtMock = {preventDefault: sm.mock()};
-    updateApiHostNameMock = sm.mock();
+    setApiHostNameMock = sm.mock();
     mockedApiHostName = "https://example.com";
     apiHostNameMock = sm.mock().returnWith("https://example.com");
     storeConfigCopy = cloneDeep(storeConfig);
-    storeConfigCopy.modules.config.mutations.UPDATE_API_HOST_NAME = updateApiHostNameMock;
+    storeConfigCopy.modules.config.mutations.SET_API_HOST_NAME = setApiHostNameMock;
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(EditServerAddressModal, {
       localVue,
@@ -143,12 +143,11 @@ describe("EditServerAddressModal methods", () => {
     expect(wrapper.vm.serverAddress).to.be.equal(defaultApiHostName);
   });
 
-  it("save commit UPDATE_API_HOST_NAME if host name properly formatted", () => {
+  it("save commit SET_API_HOST_NAME if host name properly formatted", () => {
     wrapper.vm.save(bvModalEvtMock);
 
-    expect(updateApiHostNameMock.callCount).to.equal(1);
-    expect(updateApiHostNameMock.lastCall.args[0]).to.eql(
-      {apiHostName: 'https://papermatter.app'});
+    expect(setApiHostNameMock.callCount).to.equal(1);
+    expect(setApiHostNameMock.lastCall.args[1]).to.eql("https://example.com");
     expect(bvModalEvtMock.preventDefault.callCount).to.equal(0);
   });
 
@@ -164,7 +163,7 @@ describe("EditServerAddressModal methods", () => {
 
     wrapper.vm.save(bvModalEvtMock);
 
-    expect(updateApiHostNameMock.callCount).to.equal(0);
+    expect(setApiHostNameMock.callCount).to.equal(0);
     expect(wrapper.vm.updateError).to.equal(true);
     expect(bvModalEvtMock.preventDefault.callCount).to.equal(1);
   });

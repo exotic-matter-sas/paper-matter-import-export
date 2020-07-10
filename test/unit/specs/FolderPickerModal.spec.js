@@ -12,6 +12,7 @@ import storeConfig from "../../../src/renderer/store";
 import cloneDeep from "lodash.clonedeep";
 
 import FolderPickerModal from "../../../src/renderer/components/HomePage/FolderPickerModal";
+import flushPromises from "flush-promises";
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -32,6 +33,8 @@ localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
+const fakeModalTitle = 'fakeModalTitle';
+
 
 describe("FolderPickerModal template", () => {
   // define all var needed for the test here
@@ -45,7 +48,7 @@ describe("FolderPickerModal template", () => {
       localVue,
       store,
       propsData: {
-        action: 'import'
+        title: fakeModalTitle
       }
     });
   });
@@ -60,31 +63,29 @@ describe("FolderPickerModal template", () => {
     const elem = wrapper.find(elementSelector);
     expect(elem.is(elementSelector)).to.equal(true);
   });
+
+
+  it("renders properly component data", () => {
+    expect(wrapper.text()).to.contains(fakeModalTitle);
+  });
 });
 
 describe("FolderPickerModal mounted", () => {
   let wrapper;
   let store;
-  let savedImportDestinationMock;
-  let mockedSavedImportDestination;
+  let fakeDefaultDestination;
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
-    mockedSavedImportDestination = 'fakeImportDestination';
-    savedImportDestinationMock = sm.mock().returnWith(mockedSavedImportDestination);
+    fakeDefaultDestination = 'fakeDefaultDestination';
 
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(FolderPickerModal, {
       localVue,
       store,
       propsData: {
-        action: 'import'
-      },
-      computed: {
-        savedImportDestination: {
-          cache: false,
-          get: savedImportDestinationMock
-        },
+        title: fakeModalTitle,
+        defaultDestination: fakeDefaultDestination
       }
     });
   });
@@ -92,38 +93,32 @@ describe("FolderPickerModal mounted", () => {
   afterEach(() => {
     sm.restore();
     showModalMock.reset();
-    savedImportDestinationMock.actions = [];
   });
 
   it("modal is shown and proper values are set", () => {
     expect(showModalMock.callCount).to.equal(1);
     expect(showModalMock.lastCall.args[0]).to.equal('folder-picker-modal');
-    expect(wrapper.vm.unSavedImportDestination).to.equal(mockedSavedImportDestination);
+    expect(wrapper.vm.unsavedDestination).to.equal(fakeDefaultDestination);
   });
 });
 
 describe("FolderPickerModal methods", () => {
   let wrapper;
   let store;
-  let storeConfigCopy;
-  let setImportDestinationMock;
-  let mockedSavedImportDestination;
+  let fakeDefaultDestination;
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
-    setImportDestinationMock = sm.mock();
-    mockedSavedImportDestination = 'fakeImportDestination';
+    fakeDefaultDestination = 'fakeDefaultDestination';
 
-    // Copy store config to mock some mutations and actions
-    storeConfigCopy = cloneDeep(storeConfig);
-    storeConfigCopy.modules.import.mutations.SET_IMPORT_DESTINATION = setImportDestinationMock;
-    store = new Vuex.Store(storeConfigCopy);
+    store = new Vuex.Store(storeConfig);
 
     wrapper = shallowMount(FolderPickerModal, {
       localVue,
       store,
       propsData: {
-        action: 'import'
+        title: fakeModalTitle,
+        defaultDestination: fakeDefaultDestination
       },
     });
   });
@@ -133,19 +128,20 @@ describe("FolderPickerModal methods", () => {
     hideModalMock.reset();
   });
 
-  it("saveFolderPick commit import destination to store", () => {
-    wrapper.setData({unSavedImportDestination: mockedSavedImportDestination});
+  it("savePickedFolder emit event-save-picked-folder", () => {
+    const testedEvent = "event-save-picked-folder";
 
-    wrapper.vm.saveFolderPick();
+    // when
+    wrapper.vm.savePickedFolder();
 
-    expect(setImportDestinationMock.callCount).to.be.equal(1);
-    expect(setImportDestinationMock.lastCall.args[1]).to.be.equal(mockedSavedImportDestination);
+    // then
+    expect(wrapper.emitted(testedEvent)).to.not.be.undefined;
+    expect(wrapper.emitted(testedEvent).length).to.equal(1);
+    expect(wrapper.emitted(testedEvent)[0]).to.be.eql([fakeDefaultDestination]);
   });
 
-  it("saveFolderPick call $bvModal.hide", () => {
-    wrapper.setData({unSavedImportDestination: mockedSavedImportDestination});
-
-    wrapper.vm.saveFolderPick();
+  it("savePickedFolder call $bvModal.hide", () => {
+    wrapper.vm.savePickedFolder();
 
     expect(hideModalMock.callCount).to.be.equal(1);
     expect(hideModalMock.lastCall.arg).to.be.equal('folder-picker-modal');

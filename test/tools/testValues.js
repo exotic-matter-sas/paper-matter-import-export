@@ -91,6 +91,9 @@ export const DOCUMENT_PROPS = {
   thumbnail_available: true,
   ftl_folder: null,
   path: [],
+  md5: 'fakeMd5',
+  type: 'application/pdf',
+  ext: '.pdf',
 };
 
 export const DOCUMENT_PROPS_VARIANT = {
@@ -101,6 +104,9 @@ export const DOCUMENT_PROPS_VARIANT = {
   thumbnail_available: true,
   ftl_folder: null,
   path: [],
+  md5: 'fakeMd5-1001',
+  type: 'application/pdf',
+  ext: '.pdf',
 };
 
 export const DOCUMENT_PROPS_WITH_FOLDER = {
@@ -111,11 +117,22 @@ export const DOCUMENT_PROPS_WITH_FOLDER = {
   thumbnail_available: true,
   ftl_folder: 123,
   path: [],
+  md5: 'fakeMd5-2000',
+  type: "application/pdf",
+  ext: '.pdf',
 };
 
-export const DOCUMENT_PROPS_WITH_FOLDER_MOVED = {
-  ftl_folder: 321,
-  ...DOCUMENT_PROPS_WITH_FOLDER,
+export const DOCUMENT_PROPS_WITH_FOLDER_PATH = {
+  pid: "2001",
+  title: "Document title",
+  note: "Document note",
+  created: new Date("2019-04-18T10:59:00").toString(),
+  thumbnail_available: true,
+  ftl_folder: 124,
+  path: [{id: 1, name: 'Folder 1'}, {id: 2, name: 'Folder 2'}, {id: 3, name: 'Folder 3'}],
+  md5: 'fakeMd5-2000',
+  type: "application/pdf",
+  ext: '.pdf',
 };
 
 export const DOCUMENT_NO_THUMB_PROPS = {
@@ -125,7 +142,9 @@ export const DOCUMENT_NO_THUMB_PROPS = {
   created: new Date("2019-04-18T10:59:00").toString(),
   thumbnail_available: false,
   path: [],
+  md5: 'fakeMd5-3000',
   type: "application/pdf",
+  ext: '.pdf',
 };
 
 export const DOCUMENT_NO_THUMB_PROPS_2 = {
@@ -135,5 +154,7 @@ export const DOCUMENT_NO_THUMB_PROPS_2 = {
   created: new Date("2019-04-18T10:59:00").toString(),
   thumbnail_available: false,
   path: [],
+  md5: 'fakeMd5-3001',
   type: "application/pdf",
+  ext: '.pdf',
 };

@@ -10,7 +10,7 @@
       <font-awesome-icon v-else :icon="isOpen ? ['far', 'minus-square'] : ['far', 'plus-square']"/>
     </b-link>
     <b-link @click.prevent="folderSelected" @dblclick.prevent="toggle" class="d-block"
-            :class="{'font-weight-bold': item.has_descendant, selected: unSavedImportDestination && unSavedImportDestination.id === item.id}">
+            :class="{'font-weight-bold': item.has_descendant, selected: unsavedDestination && unsavedDestination.id === item.id}">
       <span class="target-folder-name mx-2" :title="item.name">
         <font-awesome-icon :icon="isOpen || item.is_root ? 'folder-open' : 'folder'"/>
         {{ item.name }}
@@ -22,7 +22,7 @@
         v-for="folder in item.children"
         :key="folder.id"
         :item="folder"
-        :unSavedImportDestination="unSavedImportDestination"
+        :unsavedDestination="unsavedDestination"
         :store="store"
         :i18n="i18n"
         @event-folder-selected="(folder) => {$emit('event-folder-selected', folder)}">
@@ -45,9 +45,9 @@
         type: Object,
         required: true
       },
-      unSavedImportDestination: {type: Object},
-      store: {type: Object}, // using props to get store reference instead of normal usage as a workaround
-      i18n: {type: Object} // using props to get t method reference instead of normal usage as a workaround
+      unsavedDestination: {type: Object, required: true},
+      store: {type: Object, required: true}, // using props to get store reference instead of normal usage as a workaround
+      i18n: {type: Object, required: true} // using props to get t method reference instead of normal usage as a workaround
     },
 
     data() {

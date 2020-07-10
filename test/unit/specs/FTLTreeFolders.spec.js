@@ -37,7 +37,7 @@ describe("FTLTreeFolders template", () => {
     wrapper = shallowMount(FTLTreeFolders, {
       localVue,
       propsData: {
-        unSavedImportDestination: {},
+        unsavedDestination: {},
         store: {
           state: {
             auth: {
@@ -76,7 +76,7 @@ describe("FTLTreeFolders mounted", () => {
     wrapper = shallowMount(FTLTreeFolders, {
       localVue,
       propsData: {
-        unSavedImportDestination: {},
+        unsavedDestination: {},
         store: {
           state: {
             auth: {
@@ -137,7 +137,7 @@ describe("FTLTreeFolders mounted", () => {
     wrapper = shallowMount(FTLTreeFolders, {
       localVue,
       propsData: {
-        unSavedImportDestination: {},
+        unsavedDestination: {},
         store: {
           state: {
             auth: {

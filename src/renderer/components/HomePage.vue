@@ -7,12 +7,18 @@
   <b-container fluid class="d-flex flex-column">
     <ul class="nav nav-tabs row bg-dark align-items-center" role="tablist">
       <li class="nav-item col">
-        <a class="nav-link active text-center" id="import-tab" data-toggle="tab" href="#import" role="tab" aria-controls="home" aria-selected="true">
+        <a class="nav-link text-center" id="import-tab"
+           :class="{active: this.action === 'import'}"
+           data-toggle="tab" href="#import" role="tab"
+           @click.prevent="$store.commit('config/SET_ACTION', 'import')">
           {{$t('homePage.importTabLabel')}}
         </a>
       </li>
       <li class="nav-item col">
-        <a class="nav-link text-center" id="export-tab" data-toggle="tab" href="#export" role="tab" aria-controls="profile" aria-selected="false">
+        <a class="nav-link text-center" id="export-tab"
+           :class="{active: this.action === 'export'}"
+           data-toggle="tab" href="#export" role="tab"
+           @click.prevent="$store.commit('config/SET_ACTION', 'export')">
           {{$t('homePage.exportTabLabel')}}
         </a>
       </li>
@@ -25,22 +31,48 @@
       </li>
     </ul>
     <div class="tab-content row flex-grow-1 mb-3">
-      <div class="tab-pane show active col" id="import" role="tabpanel" aria-labelledby="import-tab">
+      <div class="tab-pane show col" :class="{active: this.action === 'import'}" id="import"
+           role="tabpanel" aria-labelledby="import-tab">
         <ImportTab
-          :importInterrupted="importInterrupted"
-          @event-import-started="displayImportProgress"
-          @event-import-end="hideImportProgress"
+          :actionInterrupted="actionInterrupted"
+          :performRetry.sync="performImportRetry"
+          @event-importing="updateActionProgress"
+          @event-import-end="resetActionProgress(); displayRetryModalIfNeeded()"
           @event-pick-folder="pickingFolder = true"/>
       </div>
-      <div class="tab-pane col" id="export" role="tabpanel" aria-labelledby="export-tab">
-        <ExportTab/>
+      <div class="tab-pane col" :class="{active: this.action === 'export'}"
+           id="export" role="tabpanel" aria-labelledby="export-tab">
+        <ExportTab
+          :actionInterrupted="actionInterrupted"
+          :performRetry.sync="performExportRetry"
+          @event-exporting="updateActionProgress"
+          @event-step-end="currentStep++"
+          @event-export-end="resetActionProgress(); displayRetryModalIfNeeded()"
+          @event-pick-folder="pickingFolder = true"/>
       </div>
     </div>
-    <ProgressModal v-if="actionOnGoing" :action="actionType" :totalCount="totalCount"
-      @event-import-interrupt="interruptImport"/>
-    <FolderPickerModal id="folder-picker-modal" v-if="pickingFolder" :action="actionType"
-      @event-import-interrupt="interruptImport"
+
+    <ProgressModal
+      v-if="ongoingAction"
+      :action="action"
+      :currentStep="currentStep"
+      :current-count="currentCount"
+      :totalCount="totalCount"
+      @event-import-interrupt="actionInterrupted = true"/>
+    <FolderPickerModal
+      id="folder-picker-modal"
+      v-if="pickingFolder"
+      :title="folderPickerModalTitle"
+      :default-destination="folderPickerDefaultDestination"
+      @event-save-picked-folder="saveFolderPickerSelection"
       @event-folder-picker-modal-hidden="pickingFolder = false"/>
+    <RetryModal
+      v-if="askForActionRetry"
+      :action="action"
+      :actionInterrupted="actionInterrupted"
+      @event-retry-action="performActionRetry"
+      @event-abort-retry="resetAllData"
+      @event-retry-modal-hidden="askForActionRetry = false"/>
   </b-container>
 </template>
 
@@ -51,26 +83,32 @@
   import ProgressModal from "./HomePage/ProgressModal";
   import {mapState} from "vuex";
   import FolderPickerModal from "./HomePage/FolderPickerModal";
+  import RetryModal from "./HomePage/RetryModal";
 
   const log = require('electron-log');
 
   export default {
     name: 'home',
     components: {
-        ImportTab,
-        ExportTab,
-        ProgressModal,
-        FolderPickerModal,
+      ImportTab,
+      ExportTab,
+      ProgressModal,
+      FolderPickerModal,
+      RetryModal
     },
 
     data() {
       return {
         windowHeight: 386,
-        actionType: 'import', // TODO make this value dynamic based on active tab
-        actionOnGoing: false,
+        ongoingAction: false,
+        currentStep: 1,
+        currentCount: 0,
         totalCount: 0,
-        importInterrupted: false,
-        pickingFolder: false
+        actionInterrupted: false,
+        pickingFolder: false,
+        askForActionRetry: false,
+        performImportRetry: false,
+        performExportRetry: false,
       }
     },
 
@@ -78,10 +116,21 @@
       // to resize window to page content
       const window = remote.getCurrentWindow();
       window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
+
+      this.displayRetryModalIfNeeded();
     },
 
     computed: {
-      ...mapState('auth', ['accountName'])
+      folderPickerModalTitle () {
+        return this.action === 'import' ? this.$t('folderPickerModal.importTitle') : this.$t('folderPickerModal.exportTitle')
+      },
+      folderPickerDefaultDestination () {
+        return this.action === 'import' ? this.savedImportDestination : this.savedExportSource
+      },
+      ...mapState('config', ['action']),
+      ...mapState('auth', ['accountName']),
+      ...mapState('import', ['docsToImport', 'importDocsInError', 'savedImportDestination']),
+      ...mapState('export', ['docsToExport', 'exportDocsInError', 'savedExportSource']),
     },
 
     methods: {
@@ -89,18 +138,41 @@
         this.$store.dispatch('auth/disconnectUser', 'user disconnect himself');
       },
 
-      displayImportProgress(totalCount) {
-          this.actionOnGoing = true;
-          this.totalCount = totalCount;
+      saveFolderPickerSelection (destinationFolder) {
+        this.action === 'import' ? this.$store.commit('import/SET_IMPORT_DESTINATION', destinationFolder):
+          this.$store.commit('export/SET_EXPORT_SOURCE', destinationFolder);
       },
-      interruptImport() {
-          this.importInterrupted = true;
+
+      updateActionProgress({currentCount, totalCount}) {
+        this.ongoingAction = true;
+        this.currentCount = currentCount;
+        this.totalCount = totalCount;
       },
-      hideImportProgress() {
-          this.actionOnGoing = false;
-          this.totalCount = 0;
-          this.importInterrupted = false;
+
+      resetActionProgress() {
+        this.ongoingAction = false;
+        this.currentStep = 1;
+        this.totalCount = 0;
+        this.actionInterrupted = false;
       },
+
+      displayRetryModalIfNeeded(){
+        // check if an action need to be retried or resumed
+        if (this.docsToImport.length > 0 || this.importDocsInError.length > 0 ||
+          this.docsToExport.length > 0 || this.exportDocsInError.length > 0) {
+          this.askForActionRetry = true;
+          log.info('last action wasn\'t fully completed, ask user if he want to retry or resume it');
+        }
+      },
+
+      performActionRetry() {
+        this.action === 'import' ? this.performImportRetry = true : this.performExportRetry = true;
+      },
+
+      resetAllData() {
+        this.$store.commit('import/RESET_IMPORT_DATA');
+        this.$store.commit('export/RESET_EXPORT_DATA');
+      }
     }
   }
 </script>

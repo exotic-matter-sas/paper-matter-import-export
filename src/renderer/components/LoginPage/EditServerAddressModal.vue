@@ -65,7 +65,7 @@
           const parsedAddress = new URL(this.serverAddress);
 
           this.$store.commit(
-            'config/UPDATE_API_HOST_NAME',
+            'config/SET_API_HOST_NAME',
             `${parsedAddress.protocol}//${parsedAddress.host}`
           );
 

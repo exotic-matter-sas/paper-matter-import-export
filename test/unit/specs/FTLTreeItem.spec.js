@@ -39,7 +39,7 @@ describe("FTLTreeItem template", () => {
     wrapper = shallowMount(FTLTreeItem, {
       localVue,
       propsData: {
-        unSavedImportDestination: {},
+        unsavedDestination: {},
         item: {
           id: tv.FOLDER_TREE_ITEM.id,
           name: tv.FOLDER_TREE_ITEM.name,
@@ -97,7 +97,7 @@ describe("FTLTreeItem methods", () => {
     wrapper = shallowMount(FTLTreeItem, {
       localVue,
       propsData: {
-        unSavedImportDestination: {},
+        unsavedDestination: {},
         item: mockedItem,
         store: {
           state: {
@@ -264,7 +264,7 @@ describe("FTLTreeItem methods", () => {
       localVue,
       propsData: {
         item: mockedItem,
-        unSavedImportDestination: {},
+        unsavedDestination: {},
         store: {
           state: {
             auth: {
