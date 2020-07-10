@@ -48,6 +48,7 @@ _With [Karma](https://karma-runner.github.io/latest/index.html) test runner, [Mo
  2. Create a draft release on Github
    * tag should be on master and named with `version` prefixed with a `v` (eg. `v1.0.0`)
    * name should be `version` (eg. `1.0.0`)
+ 3. :warning: Wait for builded app to be upload by CI to the draft release :warning:
  3. Publish and tag release on Github 
 
 #### Debug app build locally
