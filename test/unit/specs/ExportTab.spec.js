@@ -979,11 +979,21 @@ describe("ExporTab methods", () => {
   it("getDocDirAbsolutePath return proper value", () => {
     // restore original method to test it
     wrapper.setMethods({ getDocDirAbsolutePath: ExportTab.methods.getDocDirAbsolutePath });
+    // given user export default source (Root)
 
-    const testedResult = wrapper.vm.getDocDirAbsolutePath(tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.path);
+    let testedResult = wrapper.vm.getDocDirAbsolutePath(tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.path);
 
     // then
     expect(testedResult).to.equal('/fakeExportDestination/fake-export-folder/Folder 1/Folder 2/Folder 3');
+
+    // given user export a specific folder
+    savedExportSourceMock.actions = [];
+    savedExportSourceMock.returnWith( {id: 2, name: 'Folder 2'});
+
+    testedResult = wrapper.vm.getDocDirAbsolutePath(tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.path);
+
+    // then
+    expect(testedResult).to.equal('/fakeExportDestination/fake-export-folder/Folder 3');
   });
 
   it("getDocAbsolutePath return proper value", () => {

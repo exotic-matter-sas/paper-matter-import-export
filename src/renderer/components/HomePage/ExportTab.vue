@@ -318,7 +318,7 @@
         // If user export a specific folder, docDirPathArray need to be truncated
         // for source folder and its parents not to be created inside destination
         if (docDirPathArray.length > 0 && this.savedExportSource.id !== null) {
-          // reverse array to go thought array from closest parent to farthest one
+          // reverse array to go through it from closest parent to farthest one
           docDirPathArray.reverse();
           let truncatedDocDirPathArray = [];
 
@@ -336,7 +336,7 @@
           docDirPathArray.reverse();
         }
 
-        // if doc is in a sub folder
+        // if doc is inside a sub folder
         if (docDirPathArray.length) {
           docDirAbsolutePathArray.push(
             path.join(...docDirPathArray.map(({name}) => name))
