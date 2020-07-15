@@ -276,7 +276,7 @@ describe("ExporTab methods", () => {
     setExportDestinationMock = sm.mock();
     setExportFolderNameMock = sm.mock();
     skipMetadataExportMock = sm.mock();
-    mockedSavedExportSourceMockValue = {id: 1, name: 'fakeExportSource'};
+    mockedSavedExportSourceMockValue = {id: null, name: 'Root'};
     savedExportSourceMock = sm.mock().returnWith(mockedSavedExportSourceMockValue);
     exportDocsInErrorMock = sm.mock().returnWith([]);
     accessTokenMock = sm.mock().returnWith('fakeAccessToken');
@@ -899,11 +899,11 @@ describe("ExporTab methods", () => {
     // given API return only one page of document
     listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], count: 2, next: null}});
 
-    let testedResult = await wrapper.vm.listAllDocuments();
+    let testedResult = await wrapper.vm.listAllDocuments(1, 0, null);
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(1);
-    expect(listDocumentsApiMock.lastCall.args).to.eql(['fakeAccessToken', 1]);
+    expect(listDocumentsApiMock.lastCall.args).to.eql(['fakeAccessToken', 1, null]);
     expect(testedResult).to.eql([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT]);
     expect(wrapper.emitted(testedEvent)).to.not.be.undefined;
     expect(wrapper.emitted(testedEvent).length).to.equal(1);
@@ -919,13 +919,13 @@ describe("ExporTab methods", () => {
     listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], count: 6, next: 'fakeUrl'}});
     listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], count: 6, next: null}});
 
-    testedResult = await wrapper.vm.listAllDocuments();
+    testedResult = await wrapper.vm.listAllDocuments(1, 0, null);
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(3);
-    expect(listDocumentsApiMock.calls[0].args).to.eql(['fakeAccessToken', 1]);
-    expect(listDocumentsApiMock.calls[1].args).to.eql(['fakeAccessToken', 2]);
-    expect(listDocumentsApiMock.calls[2].args).to.eql(['fakeAccessToken', 3]);
+    expect(listDocumentsApiMock.calls[0].args).to.eql(['fakeAccessToken', 1, null]);
+    expect(listDocumentsApiMock.calls[1].args).to.eql(['fakeAccessToken', 2, null]);
+    expect(listDocumentsApiMock.calls[2].args).to.eql(['fakeAccessToken', 3, null]);
     // it return the merged results of the 3 api calls
     expect(testedResult).to.eql([
       tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT,
@@ -955,7 +955,7 @@ describe("ExporTab methods", () => {
     listDocumentsApiMock.rejectWith('Boom!');
 
     let testedResult;
-    await await wrapper.vm.listAllDocuments().catch(error => testedResult = error);
+    await await wrapper.vm.listAllDocuments(1, 0, null).catch(error => testedResult = error);
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(1);
@@ -968,7 +968,7 @@ describe("ExporTab methods", () => {
     listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], next: 'fakeUrl'}});
     listDocumentsApiMock.rejectWith('Boom!');
 
-    await await wrapper.vm.listAllDocuments().catch(error => testedResult = error);
+    await await wrapper.vm.listAllDocuments(1, 0, null).catch(error => testedResult = error);
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(2);
