@@ -175,8 +175,8 @@
                 'export/SET_DOCS_TO_EXPORT',
                 // storing only useful fields for documents to export
                 allDocuments.map(
-                  ({pid, title, note, created, path, md5, ext}) =>
-                    ({pid, title, note, created, path, md5, ext})
+                  ({pid, title, note, created, path, md5, ext, download_url}) =>
+                    ({pid, title, note, created, path, md5, ext, download_url})
                 )
               );
               totalCount = allDocuments.length;
@@ -369,7 +369,7 @@
           serializedDocument.ext
         );
 
-        return vi.$api.downloadDocumentAsArrayBuffer(vi.accessToken, serializedDocument.pid)
+        return vi.$api.downloadDocumentAsArrayBuffer(vi.accessToken, serializedDocument.download_url)
         // compute and check md5
         .then(response => {
           const nodeFileBuffer = Buffer.from(response.data);
