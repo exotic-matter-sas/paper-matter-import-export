@@ -7,19 +7,19 @@ import axios from "axios";
 
 export default class ApiCient {
   constructor(hostName) {
-    this.http = axios.create({baseURL: hostName + '/app'})
+    this.http = axios.create({baseURL: hostName})
   }
 
   getAccessToken(email, password){
     return this.http.post(
-      '/api/token',
+      '/app/api/token',
       {email, password}
     )
   }
 
   refreshAccessToken(refreshToken){
     return this.http.post(
-      '/api/token/refresh',
+      '/app/api/token/refresh',
       {refresh: refreshToken}
     )
   }
@@ -27,7 +27,7 @@ export default class ApiCient {
 
   createFolder(accessToken, name, parent=null){
     return this.http.post(
-      '/api/v1/folders',
+      '/app/api/v1/folders',
       {name, parent},
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
@@ -37,7 +37,7 @@ export default class ApiCient {
     let queryString = parent !== null ? `?level=${parent}` : '';
 
     return this.http.get(
-      `/api/v1/folders${queryString}`,
+      `/app/api/v1/folders${queryString}`,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
   }
@@ -52,7 +52,7 @@ export default class ApiCient {
     }
 
     return this.http.post(
-      '/api/v1/documents/upload',
+      '/app/api/v1/documents/upload',
       formData,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
@@ -63,14 +63,14 @@ export default class ApiCient {
     queryString += page > 1 ? `&page=${page}` : '';
 
     return this.http.get(
-      `/api/v1/documents?flat${queryString}`,
+      `/app/api/v1/documents?flat${queryString}`,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
   }
 
-  downloadDocumentAsArrayBuffer(accessToken, docPid){
+  downloadDocumentAsArrayBuffer(accessToken, docUrl){
     return this.http.get(
-      `/uploads/${docPid}/`,
+      docUrl,
       {
         headers: {'Authorization': "Bearer " + accessToken},
         responseType: 'arraybuffer'
