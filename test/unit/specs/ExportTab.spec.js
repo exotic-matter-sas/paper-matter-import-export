@@ -593,7 +593,8 @@ describe("ExporTab methods", () => {
         created: tv.DOCUMENT_PROPS.created,
         path: tv.DOCUMENT_PROPS.path,
         md5: tv.DOCUMENT_PROPS.md5,
-        ext: tv.DOCUMENT_PROPS.ext
+        ext: tv.DOCUMENT_PROPS.ext,
+        download_url: tv.DOCUMENT_PROPS.download_url
       },
       {
         pid: tv.DOCUMENT_PROPS_VARIANT.pid,
@@ -602,7 +603,8 @@ describe("ExporTab methods", () => {
         created: tv.DOCUMENT_PROPS_VARIANT.created,
         path: tv.DOCUMENT_PROPS_VARIANT.path,
         md5: tv.DOCUMENT_PROPS_VARIANT.md5,
-        ext: tv.DOCUMENT_PROPS_VARIANT.ext
+        ext: tv.DOCUMENT_PROPS_VARIANT.ext,
+        download_url: tv.DOCUMENT_PROPS_VARIANT.download_url
       }
     ]);
 
@@ -1062,7 +1064,7 @@ describe("ExporTab methods", () => {
 
     // then
     expect(downloadDocumentAsArrayBufferMock.callCount).to.eql(1);
-    expect(downloadDocumentAsArrayBufferMock.lastCall.args).to.eql(['fakeAccessToken', tv.DOCUMENT_PROPS.pid]);
+    expect(downloadDocumentAsArrayBufferMock.lastCall.args).to.eql(['fakeAccessToken', tv.DOCUMENT_PROPS.download_url]);
   });
 
   it("downloadAndIntegrityCheckDocument call hashFile properly to make integrity check", async () => {

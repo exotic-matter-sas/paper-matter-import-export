@@ -94,6 +94,7 @@ export const DOCUMENT_PROPS = {
   md5: 'fakeMd5',
   type: 'application/pdf',
   ext: '.pdf',
+  download_url: 'fake/download/url/1000'
 };
 
 export const DOCUMENT_PROPS_VARIANT = {
@@ -107,6 +108,7 @@ export const DOCUMENT_PROPS_VARIANT = {
   md5: 'fakeMd5-1001',
   type: 'application/pdf',
   ext: '.pdf',
+  download_url: 'fake/download/url/1001'
 };
 
 export const DOCUMENT_PROPS_WITH_FOLDER = {
@@ -120,6 +122,7 @@ export const DOCUMENT_PROPS_WITH_FOLDER = {
   md5: 'fakeMd5-2000',
   type: "application/pdf",
   ext: '.pdf',
+  download_url: 'fake/download/url/2000'
 };
 
 export const DOCUMENT_PROPS_WITH_FOLDER_PATH = {
@@ -133,6 +136,7 @@ export const DOCUMENT_PROPS_WITH_FOLDER_PATH = {
   md5: 'fakeMd5-2000',
   type: "application/pdf",
   ext: '.pdf',
+  download_url: 'fake/download/url/2001'
 };
 
 export const DOCUMENT_NO_THUMB_PROPS = {
@@ -145,6 +149,7 @@ export const DOCUMENT_NO_THUMB_PROPS = {
   md5: 'fakeMd5-3000',
   type: "application/pdf",
   ext: '.pdf',
+  download_url: 'fake/download/url/3000'
 };
 
 export const DOCUMENT_NO_THUMB_PROPS_2 = {
@@ -157,4 +162,5 @@ export const DOCUMENT_NO_THUMB_PROPS_2 = {
   md5: 'fakeMd5-3001',
   type: "application/pdf",
   ext: '.pdf',
+  download_url: 'fake/download/url/3001'
 };
