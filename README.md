@@ -6,7 +6,7 @@
 
 ### Installation
 
-Please refer to this page to install client on Windows, Linux (deb) (and soon, hopefully, MacOSX) : [https://welcome.papermatter.app/import-export/](https://welcome.papermatter.app/import-export/)
+Please refer to this page to install client on Windows, Linux (deb), macOS : [https://welcome.papermatter.app/downloads/](https://welcome.papermatter.app/downloads/)
 
 ## For developers
 
@@ -30,7 +30,7 @@ During dev you can remote debug the app by copying the debugger url which appear
     Debugger listening on ws://127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0
     
 To attach debugger in Chrome, open this url:
- - chrome-devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=`127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0`
+ - devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=`127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0`
 
 _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/debugging-production.html_
 
@@ -44,11 +44,12 @@ _With [Karma](https://karma-runner.github.io/latest/index.html) test runner, [Mo
 
 ### Release and build process on CI
 
- 1. Update package.json `version` (eg. `1.0.0`)
- 2. Create a draft release on Github
+ 1. Create a draft release on Github
    * tag should be on master and named with `version` prefixed with a `v` (eg. `v1.0.0`)
    * name should be `version` (eg. `1.0.0`)
- 3. Publish and tag release on Github 
+ 2. Update package.json `version` (eg. `1.0.0`) and push
+ 3. :warning: Wait for built app to be uploaded by CI to draft release :warning:
+ 4. Publish and tag release on Github
 
 #### Debug app build locally
 

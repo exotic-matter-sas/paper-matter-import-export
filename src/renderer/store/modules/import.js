@@ -7,7 +7,7 @@ const namespaced = true;
 
 const state = {
   docsToImport: [],
-  docsInError: [],
+  importDocsInError: [],
   docsMetadataToImport: {},
   savedImportDestination: {name: 'Root', id: null}
 };
@@ -41,27 +41,19 @@ const mutations = {
   MOVE_FIRST_DOC_FROM_IMPORT_TO_ERROR(state, reason = null) {
     let serializedDocument = state.docsToImport.splice(0, 1)[0];
     serializedDocument.reason = reason; // add error reason to serialized document
-    state.docsInError.push(serializedDocument);
+    state.importDocsInError.push(serializedDocument);
   },
 
   MOVE_DOCS_FROM_ERROR_TO_IMPORT(state) {
-    state.docsToImport = state.docsInError.splice(0);
+    state.docsToImport = state.importDocsInError.splice(0);
   },
 
   RESET_IMPORT_DATA(state) {
     state.docsToImport = [];
-    state.docsInError = [];
+    state.importDocsInError = [];
     state.docsMetadataToImport = {};
     state.savedImportDestination = {name: 'Root', id: null};
   },
-};
-
-const getters = {
-  FTLTreeItemSelected(state) {
-    return (itemId) => {
-      return state.savedImportDestination && state.savedImportDestination.id === itemId;
-    }
-  }
 };
 
 const actions = {
@@ -95,6 +87,5 @@ export default {
   namespaced,
   state,
   mutations,
-  getters,
   actions
 }

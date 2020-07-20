@@ -77,7 +77,8 @@ describe("ImportTab template", () => {
       localVue,
       store,
       propsData:{
-        importInterrupted: false
+        actionInterrupted: false,
+        performRetry: false
       }
     });
   });
@@ -87,96 +88,9 @@ describe("ImportTab template", () => {
   });
 
   it("renders properly html element", () => {
-    const elementSelector = "#import-tab";
+    const elementSelector = "#import-tab-content";
     const elem = wrapper.find(elementSelector);
     expect(elem.is(elementSelector)).to.equal(true);
-  });
-});
-
-describe("ImportTab mounted", () => {
-  let wrapper;
-  let store;
-  let storeConfigCopy;
-  let docsToImportMock;
-  let docsInErrorMock;
-  let showMessageBoxMock;
-  let displayImportErrorPromptMock;
-
-  beforeEach(() => {
-    showMessageBoxMock = sm.mock(remote.dialog, "showMessageBox").returnWith('');
-    displayImportErrorPromptMock = sm.mock();
-    docsToImportMock = sm.mock();
-    docsInErrorMock = sm.mock();
-
-    storeConfigCopy = cloneDeep(storeConfig);
-    store = new Vuex.Store(storeConfigCopy);
-  });
-
-  afterEach(() => {
-    sm.restore();
-    docsToImportMock.actions = [];
-    docsInErrorMock.actions = [];
-  });
-
-  it("do not display resume message box or import error prompt if not needed", () => {
-    docsToImportMock.returnWith([]);
-    docsInErrorMock.returnWith([]);
-    // wrapper have to be define after computed values have been mocked
-    wrapper = shallowMount(ImportTab, {
-      localVue,
-      store,
-      computed: {
-        docsToImport: docsToImportMock,
-        docsInError: docsInErrorMock
-      },
-      methods: {
-        displayImportErrorPrompt: displayImportErrorPromptMock
-      }
-    });
-
-    expect(showMessageBoxMock.callCount).to.equal(0);
-    expect(displayImportErrorPromptMock.callCount).to.equal(0);
-  });
-
-  it("display resume message box if needed", () => {
-    docsToImportMock.returnWith(['doc1']);
-    docsInErrorMock.returnWith([]);
-    // wrapper have to be define after computed values have been mocked
-    wrapper = shallowMount(ImportTab, {
-      localVue,
-      store,
-      computed: {
-        docsToImport: docsToImportMock,
-        docsInError: docsInErrorMock
-      },
-      methods: {
-        displayImportErrorPrompt: displayImportErrorPromptMock
-      }
-    });
-
-    expect(showMessageBoxMock.callCount).to.equal(1);
-    expect(displayImportErrorPromptMock.callCount).to.equal(0);
-  });
-
-  it("display import error prompt needed", () => {
-    docsToImportMock.returnWith([]);
-    docsInErrorMock.returnWith(['doc1']);
-    // wrapper have to be define after computed values have been mocked
-    wrapper = shallowMount(ImportTab, {
-      localVue,
-      store,
-      computed: {
-        docsToImport: docsToImportMock,
-        docsInError: docsInErrorMock
-      },
-      methods: {
-        skipLoginIfAuthenticated: skipLoginIfAuthenticatedMock,
-        displayImportErrorPrompt: displayImportErrorPromptMock
-      }
-    });
-
-    expect(showMessageBoxMock.callCount).to.equal(0);
-    expect(displayImportErrorPromptMock.callCount).to.equal(1);
   });
 });
 
@@ -185,16 +99,29 @@ describe("ImportTab watchers", () => {
   let wrapper;
   let storeConfigCopy;
   let store;
+  let proceedToImportMock;
+  let actionDisabledMock;
 
   beforeEach(() => {
-    // set vars here: vue wrapper args, fake values, mock
+    proceedToImportMock = sm.mock();
+    actionDisabledMock = sm.mock();
     storeConfigCopy = cloneDeep(storeConfig);
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(ImportTab, {
       localVue,
       store,
       propsData:{
-        importInterrupted: false
+        actionInterrupted: false,
+        performRetry: false
+      },
+      methods: {
+        proceedToImport: proceedToImportMock
+      },
+      computed: {
+        actionDisabled: {
+          cache: false,
+          get: actionDisabledMock
+        }
       }
     });
   });
@@ -213,6 +140,36 @@ describe("ImportTab watchers", () => {
     await flushPromises();
 
     expect(wrapper.vm.metadataFileDetected).to.be.equal(false);
+  });
+
+  it("performRetry call proceedToImport if actionDisabled is false", async () => {
+    actionDisabledMock.actions= [];
+    actionDisabledMock.returnWith(false);
+
+    wrapper.setData({performRetry:true});
+    await flushPromises();
+
+    expect(proceedToImportMock.callCount).to.equal(1);
+  });
+
+  it("performRetry doesn\'t call proceedToImport if actionDisabled is true", async () => {
+    actionDisabledMock.actions= [];
+    actionDisabledMock.returnWith(true);
+
+    wrapper.setData({performRetry:true});
+    await flushPromises();
+
+    expect(proceedToImportMock.callCount).to.equal(0);
+  });
+
+  it("performRetry emit update:performRetry", async () => {
+    const testedEvent = "update:performRetry";
+    wrapper.setData({performRetry:true});
+    await flushPromises();
+
+    expect(wrapper.emitted(testedEvent)).to.not.be.undefined;
+    expect(wrapper.emitted(testedEvent).length).to.equal(1);
+    expect(wrapper.emitted(testedEvent)[0]).to.be.eql([false]);
   });
 });
 
@@ -246,7 +203,8 @@ describe("ImportTab computed", () => {
       localVue,
       store,
       propsData:{
-        importInterrupted: false
+        actionInterrupted: false,
+        performRetry: false
       },
       computed: {
         folderDestinationName: ImportTab.computed.folderDestinationName,
@@ -267,7 +225,8 @@ describe("ImportTab computed", () => {
       localVue,
       store,
       propsData:{
-        importInterrupted: false
+        actionInterrupted: false,
+        performRetry: false
       },
       computed: {
         filesInputPlaceholder: ImportTab.computed.filesInputPlaceholder,
@@ -287,7 +246,8 @@ describe("ImportTab computed", () => {
       localVue,
       store,
       propsData:{
-        importInterrupted: false
+        actionInterrupted: false,
+        performRetry: false
       },
       computed: {
         filesInputPlaceholder: ImportTab.computed.filesInputPlaceholder,
@@ -307,7 +267,8 @@ describe("ImportTab computed", () => {
       localVue,
       store,
       propsData:{
-        importInterrupted: false
+        actionInterrupted: false,
+        performRetry: false
       },
       computed: {
         filesInputPlaceholder: ImportTab.computed.filesInputPlaceholder,
@@ -318,6 +279,61 @@ describe("ImportTab computed", () => {
     let testedValue = wrapper.vm.filesInputPlaceholder;
 
     expect(testedValue).to.be.equal(`${tv.FILES_PROPS.name}, ${tv.FILES_PROPS_2.name}`);
+  });
+
+  it("actionDisabled return proper value", async () => {
+    docsToImportMock.returnWith([]);
+    wrapper = shallowMount(ImportTab, {
+      localVue,
+      store,
+      propsData:{
+        actionInterrupted: false,
+        performRetry: false
+      },
+      computed: {
+        filesInputPlaceholder: ImportTab.computed.filesInputPlaceholder,
+        docsToImport: {
+          cache: false,
+          get: docsToImportMock
+        },
+      }
+    });
+    // actionDisabled is true by default
+    wrapper.setData({files:[], filesInsideFolder: []});
+
+    let testedValue = wrapper.vm.actionDisabled;
+
+    expect(testedValue).to.be.equal(true);
+
+    // if a file is selected actionDisabled is false
+    wrapper.setData({files:[tv.FILES_PROPS], filesInsideFolder: [], importing: false});
+
+    testedValue = wrapper.vm.actionDisabled;
+
+    expect(testedValue).to.be.equal(false);
+
+    // if a file inside a folder is selected actionDisabled is false
+    wrapper.setData({files:[], filesInsideFolder: [tv.FILES_PROPS], importing: false});
+
+    testedValue = wrapper.vm.actionDisabled;
+
+    expect(testedValue).to.be.equal(false);
+
+    // if a import is ongoing actionDisabled is true
+    wrapper.setData({files:[tv.FILES_PROPS], filesInsideFolder: [tv.FILES_PROPS], importing: true});
+
+    testedValue = wrapper.vm.actionDisabled;
+
+    expect(testedValue).to.be.equal(true);
+
+    // if there is docsToImport from a previous session actionDisabled is false
+    docsToImportMock.actions = [];
+    docsToImportMock.returnWith([tv.DOCUMENT_PROPS]);
+    wrapper.setData({files:[], filesInsideFolder: [], importing: false});
+
+    testedValue = wrapper.vm.actionDisabled;
+
+    expect(testedValue).to.be.equal(false);
   });
 });
 
@@ -330,7 +346,7 @@ describe("ImportTab methods", () => {
   let hashFileMock;
   let docsToImportMock;
   let docsMetadataToImport;
-  let docsInErrorMock;
+  let importDocsInErrorMock;
   let accessTokenMock;
   let folderDestinationNameMock;
   let mockedSavedImportDestinationValue;
@@ -360,7 +376,7 @@ describe("ImportTab methods", () => {
     // set vars here: vue wrapper args, fake values, mock
     docsToImportMock = sm.mock().returnWith([]);
     docsMetadataToImport = sm.mock().returnWith({});
-    docsInErrorMock = sm.mock().returnWith([]);
+    importDocsInErrorMock = sm.mock().returnWith([]);
     mockedSavedImportDestinationValue = {id: 1, name: 'fakeImportDestination'};
     savedImportDestinationMock = sm.mock().returnWith(mockedSavedImportDestinationValue);
     accessTokenMock = sm.mock().returnWith('fakeAccessToken');
@@ -405,7 +421,8 @@ describe("ImportTab methods", () => {
       localVue,
       store,
       propsData: {
-        importInterrupted: false
+        actionInterrupted: false,
+        performRetry: false
       },
       computed: {
         docsToImport: {
@@ -420,9 +437,9 @@ describe("ImportTab methods", () => {
           cache: false,
           get: savedImportDestinationMock
         },
-        docsInError: {
+        importDocsInError: {
           cache: false,
-          get: docsInErrorMock
+          get: importDocsInErrorMock
         },
         accessToken: {
           cache: false,
@@ -539,20 +556,34 @@ describe("ImportTab methods", () => {
     expect(resetDataImportEndMock.callCount).to.equal(1);
   });
 
-  it("proceedToImport emit event-import-started and event-import-end", () => {
+  it("proceedToImport emit event-importing and event-import-end", async () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToImport: ImportTab.methods.proceedToImport });
-    const testedEvent1 = "event-import-started";
+    // set new return value for docsToImportMock
+    let mockedDocsToImportValue = [tv.FILES_PROPS];
+    docsToImportMock.actions = [];
+    docsToImportMock.returnWith(mockedDocsToImportValue);
+    // Mock behavior of consumeFirstDocToImport by consuming first mockedDocsToImportValue item at each call
+    // without this, proceedToImport while would cause an infinite loop
+    consumeFirstDocToImportMock.callFn(() => {
+      docsToImportMock.actions = [];
+      mockedDocsToImportValue.shift();
+      docsToImportMock.returnWith(mockedDocsToImportValue);
+    });
+
+    const testedEvent1 = "event-importing";
     const testedEvent2 = "event-import-end";
 
-    wrapper.vm.proceedToImport();
+    await wrapper.vm.proceedToImport();
 
     expect(wrapper.emitted(testedEvent1)).to.not.be.undefined;
     expect(wrapper.emitted(testedEvent1).length).to.equal(1);
-    expect(wrapper.emitted(testedEvent1)[0]).to.be.eql([0]); // docsToImport length
+    expect(wrapper.emitted(testedEvent1)[0]).to.be.eql([{
+      "currentCount": 0,
+      "totalCount": 1
+    }]);
     expect(wrapper.emitted(testedEvent2)).to.not.be.undefined;
     expect(wrapper.emitted(testedEvent2).length).to.equal(1);
-    expect(wrapper.emitted(testedEvent2)[0]).to.be.eql([0]); // docsToImport length
   });
 
   it("proceedToImport call getOrCreateDocumentFolder", async () => {
@@ -913,7 +944,7 @@ describe("ImportTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ displayImportErrorPrompt: ImportTab.methods.displayImportErrorPrompt });
 
-    await wrapper.vm.displayImportErrorPrompt();
+    await wrapper.vm.displayImportErrorPrompt(1);
 
     // api is call to list folders inside parent
     expect(showMessageBoxMock.callCount).to.be.equal(1);
@@ -926,7 +957,7 @@ describe("ImportTab methods", () => {
     showMessageBoxMock.actions = [];
     showMessageBoxMock.resolveWith({response: 1}); // confirmation button clicked on the message box
 
-    await wrapper.vm.displayImportErrorPrompt();
+    await wrapper.vm.displayImportErrorPrompt(1);
 
     // api is call to list folders inside parent
     expect(displayImportErrorReportMock.callCount).to.be.equal(1);
@@ -1020,8 +1051,8 @@ describe("ImportTab methods", () => {
   it("displayImportErrorReport instantiate Html report, save it and open it", async () => {
     // restore original method to test it
     wrapper.setMethods({ displayImportErrorReport: ImportTab.methods.displayImportErrorReport });
-    docsInErrorMock.actions = [];
-    docsInErrorMock.returnWith([
+    importDocsInErrorMock.actions = [];
+    importDocsInErrorMock.returnWith([
       {
         name: tv.FILES_PROPS.name,
         path: tv.FILES_PROPS.path,
@@ -1034,7 +1065,7 @@ describe("ImportTab methods", () => {
       },
     ]);
 
-    wrapper.vm.displayImportErrorReport(tv.FILES_PROPS);
+    wrapper.vm.displayImportErrorReport();
 
     // File object and md5 of file is returned
     expect(htmlReportConstructorMock.callCount).to.be.equal(1);
@@ -1067,8 +1098,8 @@ describe("ImportTab methods", () => {
     // when user is still logged and there is no error
     accessTokenMock.actions = [];
     accessTokenMock.returnWith('fakeAccessToken');
-    docsInErrorMock.actions = [];
-    docsInErrorMock.returnWith([]);
+    importDocsInErrorMock.actions = [];
+    importDocsInErrorMock.returnWith([]);
 
     wrapper.vm.notifyImportEnd();
 
@@ -1082,14 +1113,14 @@ describe("ImportTab methods", () => {
     // when user is still logged and there is at least one error
     accessTokenMock.actions = [];
     accessTokenMock.returnWith('fakeAccessToken');
-    docsInErrorMock.actions = [];
-    docsInErrorMock.returnWith(['doc1']);
+    importDocsInErrorMock.actions = [];
+    importDocsInErrorMock.returnWith(['doc1']);
 
     wrapper.vm.notifyImportEnd();
 
     // success message is displayed
     expect(displayImportErrorPromptMock.callCount).to.be.equal(1);
-    expect(displayImportErrorPromptMock.lastCall.args[0]).to.equal(1); // docsInError length
+    expect(displayImportErrorPromptMock.lastCall.args[0]).to.equal(1); // importDocsInError length
     expect(showMessageBoxMock.callCount).to.be.equal(0);
 
     showMessageBoxMock.reset();

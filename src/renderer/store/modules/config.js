@@ -8,12 +8,16 @@ const defaultApiHostName = 'https://papermatter.app'; // prod
 // const defaultApiHostName = 'http://127.0.0.1:8000'; // local
 
 const state = {
-  apiHostName: defaultApiHostName
+  apiHostName: defaultApiHostName,
+  action: 'import'
 };
 
 const mutations = {
-  UPDATE_API_HOST_NAME (state, apiHostName) {
+  SET_API_HOST_NAME (state, apiHostName) {
     state.apiHostName = apiHostName
+  },
+  SET_ACTION (state, action) {
+    state.action = action
   },
 };
 

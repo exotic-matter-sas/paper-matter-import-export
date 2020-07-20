@@ -7,23 +7,20 @@
   <b-modal id="folder-picker-modal" centered hide-header no-close-on-esc no-close-on-backdrop
            @hidden="$emit('event-folder-picker-modal-hidden')">
     <b-container fluid >
-      <b-row v-if="action === 'import'">
-        <h1 class="text-primary">{{ $t('folderPickerModal.importTitle') }}</h1>
-      </b-row>
-      <b-row v-else>
-        <h1 class="text-primary">{{ $t('folderPickerModal.exportTitle') }}</h1>
+      <b-row >
+        <h1 class="text-primary">{{ title }}</h1>
       </b-row>
       <b-row>
         <b-col>
-          <FTLTreeFolders :store="$store" :i18n="$i18n" :un-saved-import-destination="unSavedImportDestination"
-                          @event-folder-selected="(folder) => {unSavedImportDestination = folder}"/>
+          <FTLTreeFolders :store="$store" :i18n="$i18n" :unsaved-destination="unsavedDestination"
+                          @event-folder-selected="(folder) => {unsavedDestination = folder}"/>
         </b-col>
       </b-row>
     </b-container>
     <template slot="modal-footer">
       <div id="selected-folder-label" class="flex-grow-1 text-muted text-left font-italic">
-        <span v-if="unSavedImportDestination" :title="unSavedImportDestination.name">
-            {{ $t('folderPickerModal.selectedFolderLabel') + unSavedImportDestination.name }}
+        <span v-if="unsavedDestination" :title="unsavedDestination.name">
+            {{ $t('folderPickerModal.selectedFolderLabel') + unsavedDestination.name }}
         </span>
         <span v-else>{{ $t('folderPickerModal.noFolderSelectedLabel') }}</span>
       </div>
@@ -31,7 +28,7 @@
       <b-button variant="secondary" @click.prevent="$bvModal.hide('folder-picker-modal')">
         {{ $t('bModal.cancelButtonValue') }}
       </b-button>
-      <b-button variant="primary" @click.prevent="saveFolderPick">
+      <b-button variant="primary" @click.prevent="savePickedFolder">
         {{ $t('bModal.okButtonValue') }}
       </b-button>
     </template>
@@ -39,7 +36,6 @@
 </template>
 
 <script>
-  import {mapState} from "vuex";
   import FTLTreeFolders from "./FolderPickerModal/FTLTreeFolders";
 
   export default {
@@ -48,31 +44,33 @@
     components: {FTLTreeFolders},
 
     props: {
-      action: {
+      title: {
         type: String,
-        validator: (val) => ['export', 'import'].includes(val)
+        required: true
+      },
+      defaultDestination: {
+        type: Object,
+        default: function () {
+          return {name: 'Root', id: null};
+        }
       }
     },
 
     data(){
       return{
-        unSavedImportDestination: null,
+        unsavedDestination: null,
       }
     },
 
     mounted() {
       this.$bvModal.show('folder-picker-modal');
-      this.unSavedImportDestination = this.savedImportDestination;
-    },
-
-    computed: {
-      ...mapState('import', ['savedImportDestination']),
+      this.unsavedDestination = this.defaultDestination;
     },
 
     methods: {
-      saveFolderPick() {
+      savePickedFolder() {
         // save selection
-        this.$store.commit('import/SET_IMPORT_DESTINATION', this.unSavedImportDestination);
+        this.$emit('event-save-picked-folder', this.unsavedDestination);
         this.$bvModal.hide('folder-picker-modal')
       },
     }
