@@ -14,10 +14,10 @@
                 {{ $t('exportTab.sourcesFormGroupLabel') }}
               </span>
             </template>
-            <label class="d-block" id="update-source" :title="$t('exportTab.sourceOnlyRootTitle')">
-                   <!--TODO re-enable when we could export a specific folder @click.prevent="$emit('event-pick-folder')"-->
+            <label class="d-block" id="update-source" :title="$t('exportTab.sourceOnlyRootTitle')"
+                   @click.prevent="$emit('event-pick-folder')">
               <font-awesome-icon icon="folder"/>{{folderSourceName}}
-              <!--TODO re-enable when we could export a specific folder <div>{{ $t('bFormFile.BrowseLabel') }}</div>-->
+              <div>{{ $t('bFormFile.BrowseLabel') }}</div>
             </label>
         </b-form-group>
       </b-col>
@@ -168,14 +168,15 @@
           // List and store all documents to export
           // (unless there is already documentsToExport, recovered from a previous session)
           if (vi.docsToExport.length === 0) {
-            await vi.listAllDocuments()
+            let sourceFolderId = vi.savedExportSource.id;
+            await vi.listAllDocuments(1, 0, sourceFolderId)
             .then(allDocuments => {
               vi.$store.commit(
                 'export/SET_DOCS_TO_EXPORT',
                 // storing only useful fields for documents to export
                 allDocuments.map(
-                  ({pid, title, note, created, path, md5, ext}) =>
-                    ({pid, title, note, created, path, md5, ext})
+                  ({pid, title, note, created, path, md5, ext, download_url}) =>
+                    ({pid, title, note, created, path, md5, ext, download_url})
                 )
               );
               totalCount = allDocuments.length;
@@ -266,11 +267,11 @@
         }
       },
 
-      listAllDocuments(startPage=1, currentDocumentCount=0) {
+      listAllDocuments(startPage, currentDocumentCount, level) {
         let vi = this;
         let documentsToExport;
 
-        return this.$api.listDocuments(vi.accessToken, startPage)
+        return this.$api.listDocuments(vi.accessToken, startPage, level)
         .then(async response => {
           // Display and update progressModal
           vi.$emit('event-exporting', {
@@ -285,7 +286,7 @@
             // if user does not interrupt export or doesn't need to log again
             if (!(vi.actionInterrupted || vi.accessToken === '')) {
               // /!\ recursion black magic happen here
-              await this.listAllDocuments(startPage + 1, currentDocumentCount + documentsToExport.length)
+              await this.listAllDocuments(startPage + 1, currentDocumentCount + documentsToExport.length, level)
               .then(additionalDocumentsToExport => {
                   // merging returned array with documentsToExport
                   Array.prototype.push.apply(documentsToExport, additionalDocumentsToExport);
@@ -314,7 +315,28 @@
           this.exportFolderName
         ];
 
-        // if doc is in a sub folder
+        // If user export a specific folder, docDirPathArray need to be truncated
+        // for source folder and its parents not to be created inside destination
+        if (docDirPathArray.length > 0 && this.savedExportSource.id !== null) {
+          // reverse array to go through it from closest parent to farthest one
+          docDirPathArray.reverse();
+          let truncatedDocDirPathArray = [];
+
+          // populate truncatedDocDirPathArray with docDirPathArray until exported folder is encountered
+          docDirPathArray.some((doc) => {
+            if (doc.id === this.savedExportSource.id){
+              return true
+            } else {
+              truncatedDocDirPathArray.push(doc);
+            }
+          });
+          docDirPathArray = truncatedDocDirPathArray;
+
+          // restore original order
+          docDirPathArray.reverse();
+        }
+
+        // if doc is inside a sub folder
         if (docDirPathArray.length) {
           docDirAbsolutePathArray.push(
             path.join(...docDirPathArray.map(({name}) => name))
@@ -347,7 +369,7 @@
           serializedDocument.ext
         );
 
-        return vi.$api.downloadDocumentAsArrayBuffer(vi.accessToken, serializedDocument.pid)
+        return vi.$api.downloadDocumentAsArrayBuffer(vi.accessToken, serializedDocument.download_url)
         // compute and check md5
         .then(response => {
           const nodeFileBuffer = Buffer.from(response.data);
