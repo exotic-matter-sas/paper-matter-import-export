@@ -75,10 +75,6 @@ app.on('activate', () => {
 
 import { autoUpdater } from 'electron-updater'
 
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
-});
-
 app.on('ready', () => {
   // will auto download update and install it when the app quits
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdatesAndNotify()

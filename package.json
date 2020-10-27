@@ -56,7 +56,7 @@
         "linux": {
             "icon": "build/icons/icon.png",
             "category": "Utility",
-            "target": "deb"
+            "target": "AppImage"
         }
     },
     "dependencies": {
