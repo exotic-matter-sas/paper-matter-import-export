@@ -58,7 +58,14 @@
             "icon": "build/icons/icon.png",
             "category": "Utility",
             "target": "AppImage"
-        }
+        },
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "exotic-matter-sas",
+                "repo": "paper-matter-app"
+            }
+        ]
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.25",
