@@ -10,9 +10,10 @@ const path = require('path');
 
 export function getTemplate(debugMode){
   let template = [];
+  const isMac = process.platform === 'darwin';
   const name = app.getName();
   // OS X
-  if (process.platform === 'darwin') {
+  if (isMac) {
     template.push({
       label: name,
       role: 'appMenu'
@@ -29,7 +30,15 @@ export function getTemplate(debugMode){
       },
       {
         label: 'Open logs folder',
-        click() { shell.openItem(path.join(app.getPath("appData"), "paper-matter-import-export", "logs")) }
+        click: () => {
+          let logsFolderPath;
+          if (isMac) {
+            logsFolderPath = path.join(app.getPath("home"), "Library", "Logs", "paper-matter-import-export");
+          } else {
+            logsFolderPath = path.join(app.getPath("appData"), "paper-matter-import-export", "logs");
+          }
+          shell.openItem(logsFolderPath);
+        }
       },
     ]
   });
