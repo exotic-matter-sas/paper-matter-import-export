@@ -6,10 +6,18 @@
 <template>
   <b-container>
     <b-row class="align-items-center min-vh-100">
-      <b-col>
+      <b-col v-if="refreshPending">
+        <div id="splash-screen" class="text-center">
+          <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="w-50 d-block mx-auto mb-5">
+          <span v-if="!downloadingUpdate">
+            <b-spinner id="refresh-token-loader" type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"></b-spinner>
+          </span>
+        </div>
+      </b-col>
+      <b-col v-else>
         <b-row>
           <b-col>
-            <form v-if="!refreshPending" id="login-form">
+            <form id="login-form">
               <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="d-block mx-auto my-3">
               <div class="form-label-group">
                 <input autofocus="" class="form-control" id="id_email" name="username"
@@ -21,7 +29,7 @@
                        :placeholder="$t('loginPage.passwordInputLabel' )" required=""
                        type="password"  v-model="password">
                 <label for="id_password">{{ $t('loginPage.passwordInputLabel')}}</label>
-                <a class="mt-1 d-block" href @click.prevent="open('https://papermatter.app/password_reset/')"
+                <a class="mt-1 d-block" href @click.prevent="open(`${apiHostName}/password_reset/`)"
                    id="password-reset">{{ $t('loginPage.forgotPasswordLink')}}
                 </a>
               </div>
@@ -29,11 +37,6 @@
               <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" :value="$t('loginPage.submitInputValue')"
                      @click.prevent="login" :disabled="loginPending || !(login && password)">
             </form>
-
-            <div v-else class="text-center">
-              <b-spinner type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"
-                         style="width:4em;height:4em;"></b-spinner>
-            </div>
           </b-col>
         </b-row>
         <b-row id="domain-footer">

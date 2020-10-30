@@ -23,6 +23,9 @@ export default {
       warningExitingActionIncompleteMessage: 'There are some documents which remain to be imported or exported.',
       warningExitingActionIncompleteDetail: 'If you close now, ongoing import or export wont be fully completed.',
     },
+    splashScreenPage: {
+      downloadingUpdate: 'Downloading update'
+    },
     loginPage: {
       logoAlt: 'Paper Matter logo',
       emailInputLabel: 'Email',
@@ -192,6 +195,9 @@ export default {
       warningExitingActionIncompleteTitle: 'Êtes-vous sûr de vouloir quitter ?',
       warningExitingActionIncompleteMessage: 'Certains documents restent à importer ou exporter.',
       warningExitingActionIncompleteDetail: 'Si vous quittez maintenant, l\'import ou l\'export en cours ne sera pas complètement terminé.',
+    },
+    splashScreenPage: {
+      downloadingUpdate: 'Téléchargement de la mise à jour'
     },
     loginPage: {
       logoAlt: 'Logo Paper Matter',

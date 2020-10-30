@@ -6,11 +6,17 @@
 import Router from 'vue-router'
 import LoginPage from "../components/LoginPage";
 import HomePage from "../components/HomePage";
+import SplashScreenPage from "../components/SplashScreenPage";
 
 export default new Router({
   routes: [
     {
-      path: '/', redirect: '/login'
+      path: '/', redirect: '/splash-screen'
+    },
+    {
+      path: '/splash-screen',
+      name: 'splash-screen',
+      component: SplashScreenPage
     },
     {
       path: '/login',
