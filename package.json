@@ -67,7 +67,7 @@
         "@fortawesome/vue-fontawesome": "^0.1.8",
         "axios": "^0.18.0",
         "bootstrap-vue": "^2.0.4",
-        "electron-log": "^3.0.8",
+        "electron-log": "^4.2.4",
         "electron-updater": "^4.2.0",
         "fast-csv": "^4.3.1",
         "jquery": "^3.4.1",
