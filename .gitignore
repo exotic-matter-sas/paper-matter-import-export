@@ -1,9 +1,8 @@
 .DS_Store
 dist/electron/*
+dist/electron/dev-app-update.yml
 dist/web/*
-build/*
-!build/icons
-!build/entitlements.mac.plist
+build/output/*
 node_modules/
 npm-debug.log
 npm-debug.log.*
