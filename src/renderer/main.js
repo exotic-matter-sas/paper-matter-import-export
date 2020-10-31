@@ -41,7 +41,6 @@ log.transports.console.level = "silly";
 ipcRenderer.on('updateFileLogLevel', (event, level) => {
   log.transports.file.level = level;
 });
-log.error("Renderer log level:", log.transports.file.level);
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.config.productionTip = false;
