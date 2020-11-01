@@ -76,12 +76,9 @@ _With [Karma](https://karma-runner.github.io/latest/index.html) test runner, [Mo
 
 ### Release and build process on CI
 
- 1. Create a draft release on Github
-   * tag should be on master and named with `version` prefixed with a `v` (eg. `v1.0.0`)
-   * name should be `version` (eg. `1.0.0`)
- 2. Update package.json `version` (eg. `1.0.0`) and push
- 3. :warning: Wait for built app to be uploaded by CI to draft release :warning:
- 4. Publish and tag release on Github
+ 1. Update package.json `version` (eg. `1.0.0`) and push
+ 1. :warning: Wait for draft release to be created and built app to be attached to it :warning:
+ 1. Complete and publish/tag release on Github
 
 #### Debug app build locally
 
