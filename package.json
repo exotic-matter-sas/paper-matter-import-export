@@ -1,6 +1,6 @@
 {
     "name": "paper-matter-import-export",
-    "version": "0.2.2",
+    "version": "104.0.0",
     "author": "Exotic Matter SAS <fabien@exotic-matter.fr>",
     "description": "Local client to import/export your documents in/from Paper Matter",
     "homepage": "https://papermatter.app",
@@ -64,8 +64,8 @@
         "publish": [
             {
                 "provider": "github",
-                "owner": "exotic-matter-sas",
-                "repo": "paper-matter-app"
+                "owner": "fdaveine",
+                "repo": "electron-update-test"
             }
         ]
     },
