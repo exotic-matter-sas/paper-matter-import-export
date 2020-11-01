@@ -64,8 +64,8 @@
         "publish": [
             {
                 "provider": "github",
-                "owner": "fdaveine",
-                "repo": "electron-update-test"
+                "owner": "exotic-matter-sas",
+                "repo": "paper-matter-import-export"
             }
         ]
     },
