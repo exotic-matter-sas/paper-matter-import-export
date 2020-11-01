@@ -54,7 +54,6 @@ _Run all command from sme Terminal for set ENV VAR to be preserved_
 1. Update `package.json` > `version` to a very high number (e.g. 100.0.0, make sure it doesn't match an already published release for this repo)
 1. Update `package.json` > `build.publish` to use the test repo
 1. Comment condition to run `autoUpdater.checkForUpdates()` inside `/src/main/index.js`
-1. Make a first local build: `npm run build`
 1. Set Github token to access test repo: `export GH_TOKEN=XXX` (token need repo scope)
 1. Publish app to a Github draft release: `electron-builder -p always`
 1. Edit and publish release on Github
