@@ -1,7 +1,7 @@
 {
     "name": "paper-matter-import-export",
     "version": "0.2.2",
-    "author": "fabien <fabien@exotic-matter.fr>",
+    "author": "Exotic Matter SAS <fabien@exotic-matter.fr>",
     "description": "Local client to import/export your documents in/from Paper Matter",
     "homepage": "https://papermatter.app",
     "license": null,
@@ -20,7 +20,7 @@
         "unit": "karma start test/unit/karma.conf.js"
     },
     "build": {
-        "productName": "Paper Matter import and export",
+        "productName": "Paper Matter import & export",
         "appId": "fr.exotic-matter.app.paper-matter.import-export",
         "directories": {
             "buildResources": "build/resources",
@@ -46,16 +46,18 @@
         },
         "afterSign": "electron-builder-notarize",
         "mac": {
-            "icon": "build/icons/icon.png",
-            "target": "dmg",
+            "icon": "build/resources/icons/icon.png",
+            "entitlements": "build/resources/entitlements.mac.plist",
+            "entitlementsInherit": "build/resources/entitlements.mac.plist",
+            "target": ["dmg", "zip"],
             "hardenedRuntime": true
         },
         "win": {
-            "icon": "build/icons/icon.ico",
+            "icon": "build/resources/icons/icon.ico",
             "target": "nsis"
         },
         "linux": {
-            "icon": "build/icons/icon.png",
+            "icon": "build/resources/icons/icon.png",
             "category": "Utility",
             "target": "AppImage"
         },

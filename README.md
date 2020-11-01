@@ -51,18 +51,19 @@ _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/de
 _Run all command from sme Terminal for set ENV VAR to be preserved_
 
 1. Create a test repo with a README.md on Github
-1. Update `package.json` > `version` to a very high number (e.g. 100.0.0)
+1. Update `package.json` > `version` to a very high number (e.g. 100.0.0, make sure it doesn't match an already published release for this repo)
 1. Update `package.json` > `build.publish` to use the test repo
 1. Comment condition to run `autoUpdater.checkForUpdates()` inside `/src/main/index.js`
 1. Make a first local build: `npm run build`
-1. Set Github token to access test repo: `export GH_TOKEN=XXX`
+1. Set Github token to access test repo: `export GH_TOKEN=XXX` (token need repo scope)
 1. Publish app to a Github draft release: `electron-builder -p always`
 1. Edit and publish release on Github
 1. Restore old value for `package.json` > `version`
 1. Copy `dev-app-update.yml` to `dist/electron/dev-app-update.yml` and update values to use test repo
 1. (optional) Set ENV VAR to help debug electron-builder process: `export DEBUG=electron-builder`
 1. (Linux only) Set APPIMAGE ENV VAR: `export APPIMAGE=true`
-1. Run app in dev mode `npm run dev` (allow to test update process partially) or build app `npm run build` and run it (should allow to test full update process)
+1. (Mac only) App notarization is needed to test full update process, you have to set `API_KEY_ID` and `API_KEY_ISSUER_ID` (theses values can be generated/retrieved from https://appstoreconnect.apple.com/access/api)
+1. Run app in dev mode `npm run dev` to test update process partially or build app `npm run build` and run it to test full update process
 
 You should see logs related to update process popping in the terminal
 
