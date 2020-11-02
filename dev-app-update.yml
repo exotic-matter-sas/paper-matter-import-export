@@ -1,5 +1,5 @@
 # Copy this file inside dist/electron to test electron update
 # Update the file accordingly to the test repo url, e.g.: https://github.com/repo-owner/repo-name
 owner: repo-owner # CHANGEME
-repo: repo-name # CHANGEMEN
+repo: repo-name # CHANGEME
 provider: github

@@ -50,7 +50,7 @@ function createWindow () {
   Menu.setApplicationMenu(menu);
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.setAutoHideMenuBar(true); // user can bring menu hitting alt key
+  mainWindow.setAutoHideMenuBar(true); // user can bring out menu using Alt key
 
   mainWindow.loadURL(winURL);
 

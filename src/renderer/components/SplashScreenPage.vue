@@ -33,7 +33,7 @@
       components: {EditServerAddressModal},
       data(){
         return {
-          windowHeight: 438, // use same height as LoginPage
+          windowHeight: 438, // use LoginPage height
           downloadingUpdate: false,
           downloadCurrentProgress: 0,
           downloadTotalProgress: 100
@@ -56,6 +56,7 @@
         });
         ipcRenderer.on('update-downloaded', () => {
           this.downloadCurrentProgress = this.downloadTotalProgress;
+          // electron-builder will then close > update > restart app
         });
         ipcRenderer.on('updateError', () => {
           this.$router.push({name: 'login'})

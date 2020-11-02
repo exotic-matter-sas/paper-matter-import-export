@@ -12,7 +12,6 @@ export function getTemplate(debugMode){
   let template = [];
   const isMac = process.platform === 'darwin';
   const name = app.getName();
-  // OS X
   if (isMac) {
     template.push({
       label: name,
