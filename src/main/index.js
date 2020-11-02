@@ -109,8 +109,9 @@ import { autoUpdater } from 'electron-updater'
 autoUpdater.logger = log;
 
 app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates();
-  // autoUpdater.checkForUpdates(); // uncomment to debug update process
+  if (process.env.NODE_ENV === 'production' || process.env.DEBUG === 'electron-builder'){
+    autoUpdater.checkForUpdates();
+  }
 });
 
 autoUpdater.on('update-not-available', (info) => {

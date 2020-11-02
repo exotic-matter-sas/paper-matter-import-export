@@ -48,23 +48,22 @@ _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/de
 
 #### Debug update process
 
-_Run all command from sme Terminal for set ENV VAR to be preserved_
+_Run all commands from one Terminal for ENV VAR to be preserved (commands are given for Linux)_
 
 1. Create a test repo with a README.md on Github
-1. Update `package.json` > `version` to a very high number (e.g. 100.0.0, make sure it doesn't match an already published release for this repo)
+1. Update `package.json` > `version` to a very high number (e.g. 100.0.0, just make sure it doesn't match an already published release for this repo)
 1. Update `package.json` > `build.publish` to use the test repo
-1. Comment condition to run `autoUpdater.checkForUpdates()` inside `/src/main/index.js`
-1. Set Github token to access test repo: `export GH_TOKEN=XXX` (token need repo scope)
-1. Publish app to a Github draft release: `electron-builder -p always`
+1. Set ENV VAR for Github token, it should give access to test repo with `repo` scope: `export GH_TOKEN=XXX`
+1. Set ENV VAR to debug electron-builder process and call `checkForUpdates` in dev mode: `export DEBUG=electron-builder`
+1. Publish app to a Github draft release: `npm run build`
 1. Edit and publish release on Github
 1. Restore old value for `package.json` > `version`
 1. Copy `dev-app-update.yml` to `dist/electron/dev-app-update.yml` and update values to use test repo
-1. (optional) Set ENV VAR to help debug electron-builder process: `export DEBUG=electron-builder`
 1. (Linux only) Set APPIMAGE ENV VAR: `export APPIMAGE=true`
 1. (Mac only) App notarization is needed to test full update process, you have to set `API_KEY_ID` and `API_KEY_ISSUER_ID` (theses values can be generated/retrieved from https://appstoreconnect.apple.com/access/api)
-1. Run app in dev mode `npm run dev` to test update process partially or build app `npm run build` and run it to test full update process
+1. Run app in dev mode `npm run dev` to test update process partially or build app `npm run build` and run it (from `build/output`) to test full update process
 
-You should see logs related to update process popping in the terminal
+You should see logs related to update process popping in the terminal.
 
 ### Run tests
 
