@@ -28,6 +28,8 @@
     import {remote, ipcRenderer} from "electron";
     import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
 
+    const log = require('electron-log');
+
     export default {
       name: 'splash-screen',
       components: {EditServerAddressModal},
@@ -45,7 +47,6 @@
         const window = remote.getCurrentWindow();
         window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
 
-        // If checkUpdate is called in src/main/index.js
         if (process.env.NODE_ENV === 'production' || process.env.DEBUG === 'electron-builder'){
           // wait for update check to be completed, then redirect to LoginPage
           ipcRenderer.on('updateNotAvailable', () => {
@@ -63,9 +64,12 @@
           ipcRenderer.on('updateError', () => {
             this.$router.push({name: 'login'})
           });
+
+          ipcRenderer.send('checkForUpdate');
         }
         else {
-          this.$router.push({name: 'login'})
+          this.$router.push({name: 'login'});
+          log.info("checkForUpdates skipped as neither in production mode or env DEBUG=='electron-builder'");
         }
       },
     }
