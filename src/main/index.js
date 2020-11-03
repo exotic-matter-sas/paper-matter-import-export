@@ -111,6 +111,8 @@ autoUpdater.logger = log;
 app.on('ready', () => {
   if (process.env.NODE_ENV === 'production' || process.env.DEBUG === 'electron-builder'){
     autoUpdater.checkForUpdates();
+  } else {
+    log.info("checkForUpdates skipped as neither in production mode or env DEBUG=='electron-builder'")
   }
 });
 

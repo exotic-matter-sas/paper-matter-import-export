@@ -45,22 +45,28 @@
         const window = remote.getCurrentWindow();
         window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
 
-        // wait for update check to be completed, then redirect to LoginPage
-        ipcRenderer.on('updateNotAvailable', () => {
+        // If checkUpdate is called in src/main/index.js
+        if (process.env.NODE_ENV === 'production' || process.env.DEBUG === 'electron-builder'){
+          // wait for update check to be completed, then redirect to LoginPage
+          ipcRenderer.on('updateNotAvailable', () => {
+            this.$router.push({name: 'login'})
+          });
+          ipcRenderer.on('downloadingUpdate', (event, current, total) => {
+            this.downloadingUpdate = true;
+            this.downloadCurrentProgress = current;
+            this.downloadTotalProgress = total;
+          });
+          ipcRenderer.on('update-downloaded', () => {
+            this.downloadCurrentProgress = this.downloadTotalProgress;
+            // electron-builder will then close > update > restart app
+          });
+          ipcRenderer.on('updateError', () => {
+            this.$router.push({name: 'login'})
+          });
+        }
+        else {
           this.$router.push({name: 'login'})
-        });
-        ipcRenderer.on('downloadingUpdate', (event, current, total) => {
-          this.downloadingUpdate = true;
-          this.downloadCurrentProgress = current;
-          this.downloadTotalProgress = total;
-        });
-        ipcRenderer.on('update-downloaded', () => {
-          this.downloadCurrentProgress = this.downloadTotalProgress;
-          // electron-builder will then close > update > restart app
-        });
-        ipcRenderer.on('updateError', () => {
-          this.$router.push({name: 'login'})
-        });
+        }
       },
     }
 </script>
