@@ -32,6 +32,15 @@ import Vuex from "vuex";
 import Router from "vue-router";
 
 const log = require('electron-log');
+const fs = require('fs');
+const path = require('path');
+// Set log level for render process
+const debugFilePath = path.join(remote.app.getPath("appData"), "paper-matter-import-export", "DEBUG-MODE");
+log.transports.file.level = fs.existsSync(debugFilePath) ? "silly" : "error";
+log.transports.console.level = "silly";
+ipcRenderer.on('updateFileLogLevel', (event, level) => {
+  log.transports.file.level = level;
+});
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.config.productionTip = false;

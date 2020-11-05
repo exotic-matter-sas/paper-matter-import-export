@@ -128,7 +128,6 @@
 
       // Current limitations :
       // - a new folder is created into destination at each export
-      // - no source selection possible (only Root)
       // - no export of empty folder (containing no documents or only folders with no documents)
       async proceedToExport () {
         const vi = this;
