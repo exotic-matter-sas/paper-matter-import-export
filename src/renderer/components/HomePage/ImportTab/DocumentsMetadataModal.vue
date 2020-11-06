@@ -17,7 +17,8 @@
                 <b-form-file
                   v-model="csvFile"
                   :state="Boolean(csvFile)"
-                  :placeholder="$t('documentsMetadataModal.csvInputPlaceholder')"
+                  :title=csvFileInputPlaceholder
+                  :placeholder=csvFileInputPlaceholder
                   :drop-placeholder="$t('documentsMetadataModal.csvInputDropLabel')"
                   accept=".csv"
                 ></b-form-file>
@@ -88,6 +89,13 @@
   export default {
     name: 'documents-metadata-modal',
 
+    props: {
+      detectedMetadataFile: {
+        type: Object,
+        required: true
+      },
+    },
+
     data() {
       return {
         csvFile: null,
@@ -118,6 +126,11 @@
 
     mounted() {
       this.$bvModal.show('documents-metadata-modal');
+
+      // auto-select csv file if it has been detected
+      if (this.detectedMetadataFile !== null) {
+        this.csvFile = this.detectedMetadataFile;
+      }
     },
 
     watch: {
@@ -129,6 +142,14 @@
     },
 
     computed: {
+      csvFileInputPlaceholder () {
+        if (this.detectedMetadataFile) {
+          return this.detectedMetadataFile.path;
+        } else {
+          return this.$t('documentsMetadataModal.csvInputPlaceholder');
+        }
+      },
+
       ...mapState('import', ['docsToImport', 'docsMetadataToImport'])
     },
 
