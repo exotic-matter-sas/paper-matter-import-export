@@ -27,7 +27,7 @@
                 class="close text-white-50" :title="$t('homePage.disconnectTooltip')">
           ×
         </button>
-        {{$t('homePage.loggedAsLabel')}}<span :title="accountName">{{accountName}}</span>
+        {{$t('homePage.loggedAsLabel')}}<span :title="accountName" class="text-nowrap">{{accountName}}</span>
       </li>
     </ul>
     <div class="tab-content row flex-grow-1 mb-3">
