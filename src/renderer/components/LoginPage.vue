@@ -9,9 +9,7 @@
       <b-col v-if="refreshPending">
         <div id="splash-screen" class="text-center">
           <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="w-50 d-block mx-auto mb-5">
-          <span v-if="!downloadingUpdate">
-            <b-spinner id="refresh-token-loader" type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"></b-spinner>
-          </span>
+          <b-spinner id="refresh-token-loader" type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"></b-spinner>
         </div>
       </b-col>
       <b-col v-else>
