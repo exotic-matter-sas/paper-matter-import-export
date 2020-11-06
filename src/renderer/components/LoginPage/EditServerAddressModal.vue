@@ -8,23 +8,26 @@
            :title="$t('editServerAddressModal.title')"
            @hidden="$emit('event-hidden')"
            @ok="save"
-           centered no-close-on-esc no-close-on-backdrop>
-    <b-container fluid>
-      <b-row>
-        <b-col>
-          <b-form-group :label="$t('editServerAddressModal.inputLabel')"
-                        :description="$t('editServerAddressModal.inputDescription')" >
-            <b-form-input v-model="serverAddress"
-                          onfocus="this.select()"
-                          :placeholder="inputPlaceholder"
-                          :class="{'text-danger': updateError}"
-                          :title="updateError ? $t('editServerAddressModal.errorParseServerAddress') : ''"
-                          @update="updateError = false"
-                          trim autofocus></b-form-input>
-          </b-form-group>
-        </b-col>
-      </b-row>
-    </b-container>
+           centered no-close-on-backdrop>
+    <template #default="{ ok }">
+      <b-container fluid>
+        <b-row>
+          <b-col>
+            <b-form-group :label="$t('editServerAddressModal.inputLabel')"
+                          :description="$t('editServerAddressModal.inputDescription')" >
+              <b-form-input v-model="serverAddress"
+                            onfocus="this.select()"
+                            :placeholder="inputPlaceholder"
+                            :class="{'text-danger': updateError}"
+                            :title="updateError ? $t('editServerAddressModal.errorParseServerAddress') : ''"
+                            @update="updateError = false"
+                            @keyup.enter="ok()"
+                            trim autofocus></b-form-input>
+            </b-form-group>
+          </b-col>
+        </b-row>
+      </b-container>
+    </template>
   </b-modal>
 </template>
 
