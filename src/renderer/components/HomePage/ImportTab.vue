@@ -15,7 +15,7 @@
             </span>
             <span v-else-if="unsupportedFilesInsideFolder.length > 0">
               <a href="#" class="text-danger font-weight-bold" @click.prevent="displayUnsupportedFilesInsideFolderReport"
-                 :title="$t('importTab.sourcesFormGroupDescriptionWarning1Title')">
+                 :title="$tc('importTab.sourcesFormGroupDescriptionWarning1Title', unsupportedFilesInsideFolder.length)">
               {{ $tc('importTab.sourcesFormGroupDescriptionWarning1', unsupportedFilesInsideFolder.length) }}
               </a>
               {{ $tc('importTab.sourcesFormGroupDescriptionWarning2', unsupportedFilesInsideFolder.length) }}
