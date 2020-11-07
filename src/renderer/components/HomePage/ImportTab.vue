@@ -57,25 +57,26 @@
       <b-col>
         <b-dropdown
           id="import-button"
-          :text="metadataFileDetected ?
+          :text="detectedMetadataFile !== null ?
           $t('importTab.importButtonWithMetadataValue') : $t('importTab.importButtonWithoutMetadataValue')"
           block
           split
           variant="primary"
           class="w-100"
           :disabled="actionDisabled"
-          @click.prevent="prepareImport(metadataFileDetected)"
+          @click.prevent="prepareImport(detectedMetadataFile !== null)"
           menu-class="w-100"
           dropup
         >
-          <b-dropdown-item variant="primary" @click.prevent="prepareImport(!metadataFileDetected)" class="text-center">
-            {{!metadataFileDetected ?
+          <b-dropdown-item variant="primary" @click.prevent="prepareImport(!(detectedMetadataFile !== null))" class="text-center">
+            {{!(detectedMetadataFile !== null) ?
             $t('importTab.importButtonWithMetadataValue') : $t('importTab.importButtonWithoutMetadataValue')}}
           </b-dropdown-item>
         </b-dropdown>
       </b-col>
     </b-row>
     <DocumentsMetadataModal v-if="settingDocumentsMetadata"
+                            :detected-metadata-file="detectedMetadataFile"
                             @event-proceed-to-import="proceedToImport"
                             @event-close-documents-metadata-modal="settingDocumentsMetadata = false"/>
   </b-container>
@@ -115,8 +116,8 @@
         importing: false,
         createdFoldersCache: {},
         settingDocumentsMetadata: false,
-        expectedMetadataFileNameList: ['data_documents_exported.csv', 'import.csv'],
-        metadataFileDetected: false
+        expectedMetadataFileNameList: ['import.csv', 'data_documents_exported.csv'],
+        detectedMetadataFile: null
       }
     },
 
@@ -124,11 +125,17 @@
       filesInsideFolder: function (newVal, oldVal) {
         if (newVal !== oldVal && newVal != null) {
           // we try to detect the presence of a csv file with document metadata inside folder to import
-          if (newVal.some(({name}) => this.expectedMetadataFileNameList.includes(name))) {
-            this.metadataFileDetected = true;
-          } else {
-            this.metadataFileDetected = false;
-          }
+          let returnedIndex;
+          let vi = this;
+          newVal.some(function (file) {
+            returnedIndex = vi.expectedMetadataFileNameList.indexOf(file.name);
+            if (returnedIndex === -1) {
+              vi.detectedMetadataFile = null;
+            } else {
+              vi.detectedMetadataFile = file;
+              return true; // stop iteration
+            }
+          });
         }
       },
 
