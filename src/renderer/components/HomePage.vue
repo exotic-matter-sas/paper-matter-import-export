@@ -99,7 +99,7 @@
 
     data() {
       return {
-        windowHeight: 386,
+        windowHeight: 415,
         ongoingAction: false,
         currentStep: 1,
         currentCount: 0,

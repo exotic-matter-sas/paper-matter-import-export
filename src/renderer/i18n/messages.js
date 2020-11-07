@@ -54,6 +54,11 @@ export default {
       disconnectTooltip: 'Disconnect'
     },
     importTab: {
+      sourcesFormGroupDescriptionCheck: 'Checking files inside folder...',
+      sourcesFormGroupDescriptionWarning1: ' | One file | {n} files',
+      sourcesFormGroupDescriptionWarning1Title: 'Click to display a report of concerned file(s)',
+      sourcesFormGroupDescriptionWarning2: ' | won\'t be imported in selected folder, its type isn\'t supported.| won\'t be imported in selected folder, their types aren\'t supported.',
+      displayUnsupportedFilesInsideFolderReportIntro: 'Files below won\'t be imported, Paper Matter only support the following files types: {files_extensions}',
       sourcesFormGroupLabel: 'Sources',
       filesInputPlaceholder: 'Choose documents to import...',
       filesInputDropLabel: 'Drop documents to import here...',
@@ -227,6 +232,11 @@ export default {
       disconnectTooltip: 'Se déconnecter'
     },
     importTab: {
+      sourcesFormGroupDescriptionCheck: 'Vérification des fichiers dans le dossier...',
+      sourcesFormGroupDescriptionWarning1: ' | Un fichier | {n} fichiers',
+      sourcesFormGroupDescriptionWarning1Title: 'Cliquez pour afficher un rapport de(s) fichier(s) concerné(s)',
+      sourcesFormGroupDescriptionWarning2: ' | ne sera pas importé dans le dossier sélectionné, son type n\'est pas supporté.| ne seront pas importés dans le dossier sélectionné, leurs types ne sont pas supportés.',
+      displayUnsupportedFilesInsideFolderReportIntro: 'Les fichiers ci-dessous ne seront pas importés, Paper Matter supporte uniquement les types de fichiers suivants : {files_extensions}',
       sourcesFormGroupLabel: 'Sources',
       filesInputPlaceholder: 'Choisissez les documents à importer...',
       filesInputDropLabel: 'Déposez les documents à importer ici...',
