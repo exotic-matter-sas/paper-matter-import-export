@@ -33,7 +33,7 @@ function createWindow () {
   /**
    * Initial window options
    */
-  mainWindow = new BrowserWindow({
+  let browserWindowOptions = {
     // When using run dev, electron version may be shown instead of packages.json version
     title: 'Paper Matter import & export - ' + app.getVersion(),
     width: 500,
@@ -43,7 +43,14 @@ function createWindow () {
       nodeIntegration: true, // not an issue as long as we do not display third party web page through the app
       webSecurity: process.env.NODE_ENV !== 'development' // to allow requesting API from localhost during development
     }
-  });
+  };
+  if (process.platform === 'linux') {
+    // Workaround to make icon work for AppImage (in task bar only, icon not appears on .AppImage file)
+    // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-406786917
+    // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-342062462
+    browserWindowOptions['icon'] = path.join(process.env.APPDIR, "paper-matter-import-export.png");
+  }
+  mainWindow = new BrowserWindow(browserWindowOptions);
 
   // Set custom menu
   menu = Menu.buildFromTemplate(getTemplate(debugMode));
