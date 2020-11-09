@@ -8,6 +8,23 @@
     <b-row>
       <b-col>
         <b-form-group>
+          <template slot="description">
+            <span v-if="checkingFilesInFolder">
+              <b-spinner small type="grow"></b-spinner>
+              {{ $t('importTab.sourcesFormGroupDescriptionCheck') }}
+            </span>
+            <span v-else-if="unsupportedFilesInsideFolder.length > 0">
+              <a href="#" class="text-danger font-weight-bold" @click.prevent="displayUnsupportedFilesInsideFolderReport"
+                 :title="$tc('importTab.sourcesFormGroupDescriptionWarning1Title', unsupportedFilesInsideFolder.length)">
+              {{ $tc('importTab.sourcesFormGroupDescriptionWarning1', unsupportedFilesInsideFolder.length) }}
+              </a>
+              {{ $tc('importTab.sourcesFormGroupDescriptionWarning2', unsupportedFilesInsideFolder.length) }}
+            </span>
+            <span v-else>
+              <!--to keep same UI height when no description is displayed-->
+              &nbsp;
+            </span>
+          </template>
           <template slot="label">
             <span :title="$t('yourComputer')">
               <font-awesome-icon icon="laptop"/>
@@ -117,25 +134,43 @@
         createdFoldersCache: {},
         settingDocumentsMetadata: false,
         expectedMetadataFileNameList: ['import.csv', 'data_documents_exported.csv'],
-        detectedMetadataFile: null
+        detectedMetadataFile: null,
+        unsupportedFilesInsideFolder: [],
+        checkingFilesInFolder: false,
       }
     },
 
     watch: {
       filesInsideFolder: function (newVal, oldVal) {
         if (newVal !== oldVal && newVal != null) {
-          // we try to detect the presence of a csv file with document metadata inside folder to import
-          let returnedIndex;
+          this.checkingFilesInFolder = true;
+          this.detectedMetadataFile = null;
+          this.unsupportedFilesInsideFolder = [];
           let vi = this;
-          newVal.some(function (file) {
-            returnedIndex = vi.expectedMetadataFileNameList.indexOf(file.name);
-            if (returnedIndex === -1) {
-              vi.detectedMetadataFile = null;
-            } else {
-              vi.detectedMetadataFile = file;
-              return true; // stop iteration
+          let fileExtension;
+          let returnedIndex;
+
+          newVal.forEach(function (file){
+            // if document metadata file not yet detected
+            if (vi.detectedMetadataFile === null) {
+              returnedIndex = vi.expectedMetadataFileNameList.indexOf(file.name);
+              if (returnedIndex === -1) {
+                vi.detectedMetadataFile = null;
+              } else {
+                vi.detectedMetadataFile = file;
+                // if current file is the metadata file, skip next check
+                return;
+              }
+            }
+            fileExtension = path.extname(file.name).toLowerCase();
+            // if file got no extension or extension isn't supported
+            if (!fileExtension || !vi.supportedFileExtensions.includes(fileExtension)){
+              // store its path to display a warning message to user
+              vi.unsupportedFilesInsideFolder.push(file.path)
             }
           });
+
+          vi.checkingFilesInFolder = false;
         }
       },
 
@@ -492,6 +527,25 @@
         const report = new reportTools.HtmlReport(
             ['Name', 'Path', 'Error detail'],
             this.importDocsInError.map(({name, path, reason}) => ([name, path, reason]))
+        );
+        this.$electron.shell.openExternal('file:///'+ report.save());
+      },
+
+      displayUnsupportedFilesInsideFolderReport() {
+        log.debug('displaying unsupported files report');
+        let reportContent = this.unsupportedFilesInsideFolder.map((path) => ([path]));
+        // Add an information message as first row
+        reportContent.unshift([
+          `<span style="color: gray;">${
+            this.$t(
+              'importTab.displayUnsupportedFilesInsideFolderReportIntro',
+              {files_extensions: this.supportedFileExtensions.join(', ')}
+            )
+          }</span><hr>`
+        ]);
+
+        const report = new reportTools.HtmlReport(
+          ['Path'], reportContent
         );
         this.$electron.shell.openExternal('file:///'+ report.save());
       },
