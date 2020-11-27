@@ -44,7 +44,7 @@ function createWindow () {
       webSecurity: process.env.NODE_ENV !== 'development' // to allow requesting API from localhost during development
     }
   };
-  if (process.platform === 'linux') {
+  if (process.env.NODE_ENV !== 'development' && process.platform === 'linux') {
     // Workaround to make icon work for AppImage (in task bar only, icon not appears on .AppImage file)
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-406786917
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-342062462
