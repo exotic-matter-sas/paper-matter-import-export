@@ -14,6 +14,8 @@ import axios from "axios";
 import {ipcRenderer, remote} from 'electron';
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {
+  faEdit,
+  faExternalLinkAlt,
   faFolder,
   faFolderOpen,
   faFolderPlus,
@@ -46,7 +48,7 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.config.productionTip = false;
 
 // Font Awesome icons definition
-library.add(faFolder, faFolderOpen, faFolderPlus, faPlusSquare, faMinusSquare, faLaptop);
+library.add(faFolder, faFolderOpen, faFolderPlus, faPlusSquare, faMinusSquare, faLaptop, faExternalLinkAlt, faEdit);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 // register Bootstrap vue components
 Vue.use(BootstrapVue);
@@ -57,7 +59,11 @@ Vue.use(Router);
 
 const store = new Vuex.Store(storeConfig);
 
-Vue.api = Vue.prototype.$api = new ApiClient(store.state.config.apiHostName);
+Vue.api = Vue.prototype.$api = new ApiClient({
+  hostName: store.state.config.apiHostName,
+  clientId: store.state.auth.clientId,
+  redirectUri: store.state.auth.redirectUri,
+});
 
 /* eslint-disable no-new */
 const vi = new Vue({
@@ -68,8 +74,20 @@ const vi = new Vue({
   template: '<App/>'
 }).$mount('#app');
 
-// listen to webContents close event to ask user for confirmation on close (if needed)
+function cleanUpBeforeClose (store) {
+  // disconnect user and reset import & export data before each close
+  return store.dispatch('auth/disconnectUser', vi.$api,  'auto disconnect at close')
+  .catch(error => log.error('disconnect failed, ignoring error:\n' + error))
+  .finally(() => {
+    store.commit('import/RESET_IMPORT_DATA');
+    store.commit('export/RESET_EXPORT_DATA');
+    ipcRenderer.sendSync('closeConfirmed');
+  });
+}
+
+// listen to webContents close event
 ipcRenderer.on('closeMainWindow', (event, message) => {
+  // Ask user for close confirmation (if needed)
   if (store.state.import.docsToImport.length  > 0 || store.state.export.docsToExport.length  > 0){
     remote.dialog.showMessageBox(null,
       {
@@ -81,15 +99,11 @@ ipcRenderer.on('closeMainWindow', (event, message) => {
         defaultId: 0
       }).then( ({response}) => {
         if (response === 1){
-          store.commit('import/RESET_IMPORT_DATA');
-          store.commit('export/RESET_EXPORT_DATA');
-          ipcRenderer.sendSync('closeConfirmed');
+          cleanUpBeforeClose(store);
        }
     });
   } else {
-    store.commit('import/RESET_IMPORT_DATA');
-    store.commit('export/RESET_EXPORT_DATA');
-    ipcRenderer.sendSync('closeConfirmed');
+    cleanUpBeforeClose(store);
   }
 });
 
@@ -118,7 +132,7 @@ Vue.api.http.interceptors.response.use(function (response) {
             log.error('refreshed token used in replayed request considered as invalid, disconnecting user to get' +
               ' new accessToken');
           }
-          return store.dispatch('auth/disconnectUser', 'fail to refresh access token')
+          return store.dispatch('auth/disconnectUser', vi.$api, 'fail to refresh access token')
             .then(() => {
               return Promise.reject(error)
             });

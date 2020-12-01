@@ -23,7 +23,7 @@
         </a>
       </li>
       <li id="logged-header" class="col  text-white-50">
-        <button @click.prevent="disconnectUser" type="button" :aria-label="$t('homePage.disconnectTooltip')"
+        <button @click.prevent="logout" type="button" :aria-label="$t('homePage.disconnectTooltip')"
                 class="close text-white-50" :title="$t('homePage.disconnectTooltip')">
           ×
         </button>
@@ -118,6 +118,8 @@
       window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
 
       this.displayRetryModalIfNeeded();
+
+      // TODO call a new API request to get user login
     },
 
     computed: {
@@ -128,14 +130,14 @@
         return this.action === 'import' ? this.savedImportDestination : this.savedExportSource
       },
       ...mapState('config', ['action']),
-      ...mapState('auth', ['accountName']),
+      ...mapState('auth', ['accountName', 'accessToken', 'refreshToken']),
       ...mapState('import', ['docsToImport', 'importDocsInError', 'savedImportDestination']),
       ...mapState('export', ['docsToExport', 'exportDocsInError', 'savedExportSource']),
     },
 
     methods: {
-      disconnectUser () {
-        this.$store.dispatch('auth/disconnectUser', 'user disconnect himself');
+      logout () {
+        this.$store.dispatch('auth/disconnectUser', this.$api, 'user disconnect himself');
       },
 
       saveFolderPickerSelection (destinationFolder) {

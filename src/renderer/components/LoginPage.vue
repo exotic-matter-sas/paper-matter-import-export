@@ -6,42 +6,29 @@
 <template>
   <b-container>
     <b-row class="align-items-center min-vh-100">
-      <b-col v-if="refreshPending">
-        <div id="splash-screen" class="text-center">
-          <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="w-50 d-block mx-auto mb-5">
-          <b-spinner id="refresh-token-loader" type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"></b-spinner>
-        </div>
-      </b-col>
-      <b-col v-else>
+      <b-col>
         <b-row>
           <b-col>
-            <form id="login-form">
-              <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="d-block mx-auto my-3">
-              <div class="form-label-group">
-                <input autofocus="" class="form-control" id="id_email" name="username"
-                       :placeholder="$t('loginPage.emailInputLabel')" required="" type="text" v-model="email">
-                <label for="id_email">{{ $t('loginPage.emailInputLabel')}}</label>
-              </div>
-              <div class="form-label-group">
-                <input class="form-control" id="id_password" name="password"
-                       :placeholder="$t('loginPage.passwordInputLabel' )" required=""
-                       type="password"  v-model="password">
-                <label for="id_password">{{ $t('loginPage.passwordInputLabel')}}</label>
-                <a class="mt-1 d-block" href @click.prevent="open(`${apiHostName}/password_reset/`)"
-                   id="password-reset">{{ $t('loginPage.forgotPasswordLink')}}
-                </a>
-              </div>
-              <div v-if="lastError" class="alert alert-danger">{{lastError}}</div>
-              <input class="btn btn-lg btn-primary btn-block mb-3" type="submit" :value="$t('loginPage.submitInputValue')"
-                     @click.prevent="login" :disabled="loginPending || !(login && password)">
-            </form>
+            <div id="login-form" class="text-center">
+              <img class="mb-1" src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')">
+              <br>
+              <a href="#" :title="$t('loginPage.loginDomainLinkTitle')" @click.prevent="updatingServerAddress = true">
+                {{ apiHostName }}
+                <font-awesome-icon class="align-baseline" icon="edit" size="xs"/>
+              </a>
+              <br>
+              <a href="#" class="btn btn-lg btn-primary mt-5 w-50" @click.prevent="openLoginPage" :disabled="loginPending"
+                 :title="$t('loginPage.loginLinkTitle')">
+                {{ $t('loginPage.submitInputValue') }}
+                <font-awesome-icon icon="external-link-alt" size="xs"/>
+              </a>
+              <div v-if="lastError" class="alert alert-danger mt-3">{{ $t('loginPage.errorAuthorizationFailed', [lastError]) }}</div>
+            </div>
           </b-col>
         </b-row>
         <b-row id="domain-footer">
           <b-col class="text-center">
-            <label class="d-inline">{{ $t('loginPage.serverAddressLabel') }}</label>
-            <a href="#" :title="$t('loginPage.loginDomainLinkTitle')"
-               @click.prevent="updatingServerAddress = true">{{ apiHostName }}</a>
+
           </b-col>
         </b-row>
       </b-col>
@@ -53,97 +40,96 @@
 
 
 <script>
-    import {remote} from "electron";
-    import {mapState} from "vuex";
-    import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
-    import {defaultApiHostName} from "./../store/modules/config";
-    const log = require('electron-log');
+  import {remote, ipcRenderer} from "electron";
+  import {mapActions, mapState} from "vuex";
+  import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
+  const log = require('electron-log');
 
-    export default {
-      name: 'login',
-      components: {EditServerAddressModal},
-      data(){
-            return{
-                windowHeight: 438,
-                email: '',
-                password: '',
-                loginPending: false,
-                refreshPending: false,
-                lastError: '',
-                updatingServerAddress: false
-            }
-        },
+  export default {
+    name: 'login',
+    components: {EditServerAddressModal},
+    data(){
+      return {
+        windowHeight: 438,
+        email: '',
+        password: '',
+        loginPending: false,
+        lastError: '',
+        updatingServerAddress: false
+      }
+    },
 
-        mounted () {
-          // to resize window to page content
-          const window = remote.getCurrentWindow();
-          window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
-          // redirect to home if user access token is set (and still valid or can be refresh)
-          this.skipLoginIfAuthenticated();
-        },
+    mounted () {
+      const vi = this;
+      // to resize window to page content
+      const window = remote.getCurrentWindow();
+      window.setContentSize(window.getContentSize()[0], vi.windowHeight); // keep same width
 
-        computed: {
-          ...mapState('auth', ['accessToken', 'refreshToken']),
-          ...mapState('config', ['apiHostName'])
-        },
+      // force disconnect user when app start in case disconnectUser wasn't call on close
+      this.disconnectUser(vi.$api, 'auto disconnect at startup')
+      .catch(error => log.error('disconnect failed, ignoring error:\n' + error));
 
-        methods: {
-            open(link) {
-                this.$electron.shell.openExternal(link)
-            },
+      // start local server to listen for Oauth2 flow redirect uri
+      ipcRenderer.on('oauthFlowSuccess', (event, code) => {
+        vi.getAndStoreAccessToken(code)
+      });
+      ipcRenderer.on('oauthFlowError', (event, error) => {
+        vi.lastError = error;
+      });
+      ipcRenderer.send('startLocalServer', this.apiHostName);
+    },
 
-            async skipLoginIfAuthenticated(){
-                let vi = this;
+    destroyed () {
+      // delete events registered in mounted to avoid multiple trigger if login page is displayed multiple time
+      ipcRenderer.removeAllListeners('oauthFlowSuccess');
+      ipcRenderer.removeAllListeners('oauthFlowError');
+    },
 
-                if (vi.accessToken) {
-                  vi.refreshPending = true;
-                  await vi.$store.dispatch('auth/refreshAccessToken', vi.$api)
-                  .then(() => vi.$router.push({name: 'home'}))
-                  .catch((error)=>{});
-                  vi.refreshPending = false;
-                }
-            },
+    computed: {
+      ...mapState('auth', ['clientId', 'redirectUri', 'accessToken', 'refreshToken']),
+      ...mapState('config', ['apiHostName'])
+    },
 
-            async login(){
-                log.debug('login start');
-                let vi = this;
+    methods: {
+      open(link) {
+          this.$electron.shell.openExternal(link)
+      },
 
-                vi.lastError = '';
-                vi.loginPending = true;
+      openLoginPage(){
+        log.debug('Oauth2 flow [1]: open login page');
 
-                await vi.$api.getAccessToken(vi.email, vi.password).then(response => {
-                        vi.$store.commit('auth/SAVE_AUTHENTICATION_DATA', {
-                            accountName: vi.email,
-                            accessToken: response.data.access,
-                            refreshToken: response.data.refresh
-                        });
-                        vi.$router.push({name: 'home'});
-                    })
-                    .catch((error) => {
-                        if (error.response) {
-                            if (error.response.data.detail) {
-                                if (error.response.status === 401){
-                                  vi.lastError = this.$t('loginPage.errorLogin')
-                                } else {
-                                  vi.lastError = this.$t('loginPage.errorUnexpected', [error.response.data.detail])
-                                }
-                            } else {
-                                if(this.apiHostName !== defaultApiHostName) {
-                                  vi.lastError = this.$t('loginPage.errorUnknownCustomHostName')
-                                } else {
-                                  vi.lastError = this.$t('loginPage.errorUnknown')
-                                }
-                            }
-                        } else if (error.request) {
-                         vi.lastError = this.$t('loginPage.errorServerUnreachable')
-                        }
-                    });
+        this.lastError = '';
 
-                vi.loginPending = false;
-                log.debug('login end');
-            },
-        }
+        this.open(
+          `${this.apiHostName}/oauth2/authorize/` +
+          `?response_type=code` +
+          `&client_id=${this.clientId}` +
+          `&redirect_uri=${this.redirectUri}` +
+          `&state=random` +
+          `&scope=read write` +
+          `&approval_prompt=auto` // to only ask for user approval on first login
+        );
+      },
+
+      async getAndStoreAccessToken(code){
+        log.debug('get and store access token - start');
+        const vi = this;
+
+        await vi.$api.getAccessToken(code).then(response => {
+            vi.$store.commit('auth/SAVE_AUTHENTICATION_DATA', {
+                accessToken: response.data.access_token,
+                accessTokenExpiresIn: response.data.expires_in,
+                refreshToken: response.data.refresh_token
+            });
+            vi.$router.push({name: 'home'});
+          });
+
+        log.debug('get and store access token - end');
+      },
+
+      ...mapActions('auth', ['disconnectUser']),
     }
+  }
 </script>
 
 <style lang="scss" scoped>
