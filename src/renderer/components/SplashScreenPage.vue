@@ -10,7 +10,7 @@
         <div id="splash-screen" class="text-center text-primary">
           <img src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')" class="w-50 d-block mx-auto mb-5">
           <span v-if="!downloadingUpdate">
-            <b-spinner id="checking-update-loader" type="grow" variant="primary" :label="$t('loginPage.loadingSpinnerLabel')"></b-spinner>
+            <b-spinner id="checking-update-loader" type="grow" variant="primary" :label="$t('loadingSpinnerLabel')"></b-spinner>
           </span>
           <span v-else>
             {{ $t('splashScreenPage.downloadingUpdate')}}

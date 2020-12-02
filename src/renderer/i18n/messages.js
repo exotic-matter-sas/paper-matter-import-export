@@ -9,6 +9,7 @@ export default {
     yourComputer: 'Your computer',
     yourPaperMatterOrg: 'Your Paper Matter organization',
     reportAnIssue: 'Report an issue',
+    loadingSpinnerLabel: 'Loading...',
     bFormFile: {
       BrowseLabel: 'Browse'
     },
@@ -28,20 +29,10 @@ export default {
     },
     loginPage: {
       logoAlt: 'Paper Matter logo',
-      emailInputLabel: 'Email',
-      passwordInputLabel: 'Password',
-      forgotPasswordLink: 'Forgot password?',
       submitInputValue: 'Login',
-      loadingSpinnerLabel: 'Loading...',
-      serverAddressLabel: 'Login to: ',
       loginDomainLinkTitle: 'If you are using a self-hosted Paper Matter, click to set your server address',
       loginLinkTitle: 'Will open your browser to log you in',
-      errorLogin: 'Please enter a correct email address and password.',
       errorAuthorizationFailed: 'Access to your account has been refused, you can retry to login (error code: {0}).',
-      errorUnexpected: 'Unexpected error ({0}).',
-      errorUnknown: 'Unknown error, please retry later.',
-      errorUnknownCustomHostName: 'Unknown error, please double check the server address set.',
-      errorServerUnreachable: 'The Paper Matter server seems unreachable, please check your internet connection.',
     },
     editServerAddressModal: {
       title: 'Set your server address',
@@ -189,6 +180,7 @@ export default {
     yourComputer: 'Votre ordinateur',
     yourPaperMatterOrg: 'Votre organisation Paper Matter',
     reportAnIssue: 'Signaler un bug',
+    loadingSpinnerLabel: 'Chargement...',
     bFormFile: {
       BrowseLabel: 'Parcourir'
     },
@@ -208,20 +200,10 @@ export default {
     },
     loginPage: {
       logoAlt: 'Logo Paper Matter',
-      emailInputLabel: 'Email',
-      passwordInputLabel: 'Mot de passe',
-      forgotPasswordLink: 'Mot de passe oublié ?',
       submitInputValue: 'Se connecter',
-      loadingSpinnerLabel: 'Chargement...',
-      serverAddressLabel: 'Connexion à : ',
       loginDomainLinkTitle: 'Si vous utilisez une version auto-hébergée de Paper Matter, cliquez pour saisir l\'adresse de votre serveur',
       loginLinkTitle: 'Votre navigateur sera ouvert pour vous connecter',
-      errorLogin: 'Veuillez saisir une adresse électronique et un mot de passe valides.',
       errorAuthorizationFailed: "L'accès à votre compte a été refusé, vous pouvez essayer de vous reconnecter (code erreur : {0}).",
-      errorUnexpected: 'Erreur imprévue ({0})',
-      errorUnknown: 'Erreur inconnue, veuillez réessayer plus tard.',
-      errorUnknownCustomHostName: 'Erreur inconnue, vérifiez l\'adresse du serveur que vous avez défini.',
-      errorServerUnreachable: 'Le serveur Paper Matter semble injoignable, veuillez vérifier votre connexion internet.',
     },
     editServerAddressModal: {
       title: 'Saisissez l\'adresse de votre serveur',
