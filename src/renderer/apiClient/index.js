@@ -61,6 +61,13 @@ export default class ApiCient {
    * API REST requests
    */
 
+  getUserData(accessToken) {
+    return this.http.get(
+      `/app/api/v1/accounts/me`,
+      {headers: {'Authorization': "Bearer " + accessToken}}
+    )
+  }
+
   createFolder(accessToken, name, parent=null){
     return this.http.post(
       '/app/api/v1/folders',

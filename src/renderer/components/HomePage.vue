@@ -113,13 +113,21 @@
     },
 
     mounted() {
+      const vi = this;
       // to resize window to page content
       const window = remote.getCurrentWindow();
-      window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
+      window.setContentSize(window.getContentSize()[0], vi.windowHeight); // keep same width
 
-      this.displayRetryModalIfNeeded();
+      vi.displayRetryModalIfNeeded();
 
-      // TODO call a new API request to get user login
+      vi.$api.getUserData(this.accessToken)
+      .then(response => {
+        vi.$store.commit('auth/SET_ACCOUNT_NAME', response.data.email);
+      })
+      .catch (error => {
+        log.error("Can't retrieve user data:\n", error);
+        vi.$store.commit('auth/SET_ACCOUNT_NAME', '?');
+      })
     },
 
     computed: {

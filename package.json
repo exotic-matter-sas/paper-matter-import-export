@@ -1,6 +1,6 @@
 {
     "name": "paper-matter-import-export",
-    "version": "0.2.4",
+    "version": "0.3.0",
     "author": "Exotic Matter SAS <fabien@exotic-matter.fr>",
     "description": "Local client to import/export your documents in/from Paper Matter",
     "homepage": "https://papermatter.app",

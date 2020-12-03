@@ -13,7 +13,7 @@ const namespaced = true;
 const state = {
   clientId: 'jAVjrlpVayPTvASvaKwgcj5Wfg9PmtNOnvaKoFqa', // FIXME set using var ENV during build
   redirectUri: 'http://localhost:1612/oauth2/redirect',
-  accountName: '', // FIXME use new api request to get accountName in HomePage mounted
+  accountName: '',
   accessToken: '',
   accessTokenExpireTimestamp: '',
   refreshToken: ''
@@ -42,7 +42,6 @@ const actions = {
   refreshAccessToken({commit, state, dispatch}, apiClient) {
     log.debug('trying to refresh accessToken if needed');
     const currentDate = new Date();
-    // TODO store expiration date separately as its no longer stored access token as JWT
     let tokenExpirationDate = new Date(state.accessTokenExpireTimestamp);
     // subtracts 1 min to expiration date to be sure the token is valid long enough to be used
     tokenExpirationDate = new Date( tokenExpirationDate.getTime() - 1000 * 60 );
