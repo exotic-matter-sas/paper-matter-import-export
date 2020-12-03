@@ -3,7 +3,6 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
-import jwt_decode from "jwt-decode"
 import router from "../../router"
 
 const log = require('electron-log');
