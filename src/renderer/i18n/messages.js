@@ -34,10 +34,13 @@ export default {
       loginLinkTitle: 'Will open your browser to log you in',
       errorAuthorizationFailed: 'Access to your account has been refused, you can retry to login (error code: {0}).',
     },
-    editServerAddressModal: {
-      title: 'Set your server address',
-      inputLabel: 'Server address',
-      inputDescription: 'Copy url displayed in your browser when you are logged into your Paper Matter account (or leave blank to reset default value).',
+    EditServerModal: {
+      title: 'Set your server data',
+      serverInputLabel: 'Server address',
+      clientIdInputLabel: 'Client ID',
+      serverInputDescription: 'Copy url displayed in your browser when you are logged into your Paper Matter account (or leave blank to reset default value).',
+      clientIdInputDescription: 'Ask this ID to your self hosted instance admin, he have to create app as {self_hosting_doc_link} (or leave blank to reset default value).',
+      clientIdInputDescriptionLinkText: 'mentioned here',
       errorParseServerAddress: 'Url is not properly formatted (it should be something like https://example.com)',
     },
     homePage: {
@@ -205,10 +208,13 @@ export default {
       loginLinkTitle: 'Votre navigateur sera ouvert pour vous connecter',
       errorAuthorizationFailed: "L'accès à votre compte a été refusé, vous pouvez essayer de vous reconnecter (code erreur : {0}).",
     },
-    editServerAddressModal: {
-      title: 'Saisissez l\'adresse de votre serveur',
-      inputLabel: 'Adresse du serveur',
-      inputDescription: 'Copiez l\'adresse affichée dans votre navigateur quand vous êtes connecté à votre compte Paper Matter (ou laissez vide pour restaurer la valeur par défaut).',
+    EditServerModal: {
+      title: 'Saisissez les données de votre serveur',
+      serverInputLabel: 'Adresse du serveur',
+      clientIdInputLabel: 'Client ID',
+      serverInputDescription: 'Copiez l\'adresse affichée dans votre navigateur quand vous êtes connecté à votre compte Paper Matter (ou laissez vide pour restaurer la valeur par défaut).',
+      clientIdInputDescription: 'Demandez cet ID à l\'Administarteur de votre instance, celui-ci doit créer l\'application comme {self_hosting_doc_link} (ou laissez vide pour restaurer la valeur par défaut).',
+      clientIdInputDescriptionLinkText: 'mentionné ici',
       errorParseServerAddress: 'L\'adresse n\'est pas correctement formatée (elle devrait ressembler à https://exemple.com)',
     },
     homePage: {

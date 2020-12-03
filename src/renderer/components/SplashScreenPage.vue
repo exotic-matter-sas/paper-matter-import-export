@@ -26,13 +26,11 @@
 
 <script>
     import {remote, ipcRenderer} from "electron";
-    import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
 
     const log = require('electron-log');
 
     export default {
       name: 'splash-screen',
-      components: {EditServerAddressModal},
       data(){
         return {
           windowHeight: 438, // use LoginPage height

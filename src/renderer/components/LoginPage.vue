@@ -12,7 +12,7 @@
             <div id="login-form" class="text-center">
               <img class="mb-1" src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')">
               <br>
-              <a href="#" :title="$t('loginPage.loginDomainLinkTitle')" @click.prevent="updatingServerAddress = true">
+              <a href="#" :title="$t('loginPage.loginDomainLinkTitle')" @click.prevent="updatingServer = true">
                 {{ apiHostName }}
                 <font-awesome-icon class="align-baseline" icon="edit" size="xs"/>
               </a>
@@ -33,8 +33,8 @@
         </b-row>
       </b-col>
     </b-row>
-    <EditServerAddressModal v-if="updatingServerAddress"
-                            @event-hidden="updatingServerAddress = false"/>
+    <EditServerModal v-if="updatingServer"
+                     @event-hidden="updatingServer = false"/>
   </b-container>
 </template>
 
@@ -42,12 +42,12 @@
 <script>
   import {remote, ipcRenderer} from "electron";
   import {mapActions, mapState} from "vuex";
-  import EditServerAddressModal from "./LoginPage/EditServerAddressModal";
+  import EditServerModal from "./LoginPage/EditServerModal";
   const log = require('electron-log');
 
   export default {
     name: 'login',
-    components: {EditServerAddressModal},
+    components: {EditServerModal},
     data(){
       return {
         windowHeight: 438,
@@ -55,7 +55,7 @@
         password: '',
         loginPending: false,
         lastError: '',
-        updatingServerAddress: false
+        updatingServer: false
       }
     },
 

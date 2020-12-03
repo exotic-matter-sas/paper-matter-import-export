@@ -11,7 +11,7 @@ import Vuex from "vuex";
 import storeConfig from "../../../src/renderer/store";
 import cloneDeep from "lodash.clonedeep";
 
-import EditServerAddressModal from "../../../src/renderer/components/LoginPage/EditServerAddressModal";
+import EditServerModal from "../../../src/renderer/components/LoginPage/EditServerModal";
 import {defaultApiHostName} from "../../../src/renderer/store/modules/config";
 
 // Create clean Vue instance and set installed package to avoid warning
@@ -39,7 +39,7 @@ localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
 
-describe("EditServerAddressModal template", () => {
+describe("EditServerModal template", () => {
   // define all var needed for the test here
   let wrapper;
   let storeConfigCopy;
@@ -49,7 +49,7 @@ describe("EditServerAddressModal template", () => {
     // set vars here: vue wrapper args, fake values, mock
     storeConfigCopy = cloneDeep(storeConfig);
     store = new Vuex.Store(storeConfigCopy);
-    wrapper = shallowMount(EditServerAddressModal, {
+    wrapper = shallowMount(EditServerModal, {
       localVue,
       store
     });
@@ -67,7 +67,7 @@ describe("EditServerAddressModal template", () => {
   });
 });
 
-describe("EditServerAddressModal mounted", () => {
+describe("EditServerModal mounted", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
@@ -81,7 +81,7 @@ describe("EditServerAddressModal mounted", () => {
     apiHostNameMock = sm.mock().returnWith("https://example.com");
     storeConfigCopy = cloneDeep(storeConfig);
     store = new Vuex.Store(storeConfigCopy);
-    wrapper = shallowMount(EditServerAddressModal, {
+    wrapper = shallowMount(EditServerModal, {
       localVue,
       store,
       computed: {
@@ -103,7 +103,7 @@ describe("EditServerAddressModal mounted", () => {
   });
 });
 
-describe("EditServerAddressModal methods", () => {
+describe("EditServerModal methods", () => {
   let wrapper;
   let storeConfigCopy;
   let store;
@@ -120,7 +120,7 @@ describe("EditServerAddressModal methods", () => {
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.config.mutations.SET_API_HOST_NAME = setApiHostNameMock;
     store = new Vuex.Store(storeConfigCopy);
-    wrapper = shallowMount(EditServerAddressModal, {
+    wrapper = shallowMount(EditServerModal, {
       localVue,
       store,
       computed: {

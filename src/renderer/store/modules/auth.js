@@ -8,9 +8,11 @@ import router from "../../router"
 const log = require('electron-log');
 
 const namespaced = true;
+const defaultClientId = 'dBq5VfSb8SxNFuGZAGlPA52ET3oLAnMrh1pa2bdd'; // prod
+// const defaultClientId = 'CHANGE-ME'; // local
 
 const state = {
-  clientId: 'jAVjrlpVayPTvASvaKwgcj5Wfg9PmtNOnvaKoFqa', // FIXME set using var ENV during build
+  clientId: defaultClientId,
   redirectUri: 'http://localhost:1612/oauth2/redirect',
   accountName: '',
   accessToken: '',
@@ -19,6 +21,10 @@ const state = {
 };
 
 const mutations = {
+  SET_CLIENT_ID(state, clientId) {
+    state.clientId = clientId;
+  },
+
   SAVE_AUTHENTICATION_DATA(state, {accessToken, accessTokenExpiresIn, refreshToken}) {
     state.accessToken = accessToken;
     state.accessTokenExpireTimestamp = new Date().getTime() + (parseInt(accessTokenExpiresIn) * 1000);
@@ -87,6 +93,10 @@ const actions = {
         })
     }
   }
+};
+
+export {
+  defaultClientId
 };
 
 export default {
