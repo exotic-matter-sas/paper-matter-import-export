@@ -105,7 +105,6 @@
           `?response_type=code` +
           `&client_id=${this.clientId}` +
           `&redirect_uri=${this.redirectUri}` +
-          `&state=random` +
           `&scope=read write` +
           `&approval_prompt=auto` // to only ask for user approval on first login
         );
