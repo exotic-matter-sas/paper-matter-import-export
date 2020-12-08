@@ -62,7 +62,7 @@ export default class ApiCient {
 
   getUserData(accessToken) {
     return this.http.get(
-      `/app/api/v1/accounts/me`,
+      `/app/api/v1/users/me`,
       {headers: {'Authorization': "Bearer " + accessToken}}
     )
   }
