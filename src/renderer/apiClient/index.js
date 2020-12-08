@@ -25,7 +25,7 @@ export default class ApiCient {
     data.append('redirect_uri', this.redirectUri);
     data.append('grant_type', 'authorization_code');
     return this.http.post(
-      '/oauth2/token/',
+      '/oauth2/token',
       data
     )
   }
@@ -38,7 +38,7 @@ export default class ApiCient {
     data.append('refresh_token', refreshToken);
     data.append('grant_type', 'refresh_token');
     return this.http.post(
-      '/oauth2/token/',
+      '/oauth2/token',
       data
     )
   }
@@ -51,7 +51,7 @@ export default class ApiCient {
     data.append('token', token);
     data.append('token_type_hint', token_type_hint);
     return this.http.post(
-      '/oauth2/revoke_token/',
+      '/oauth2/revoke_token',
       data
     )
   }
