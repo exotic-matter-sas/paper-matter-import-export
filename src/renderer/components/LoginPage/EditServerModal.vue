@@ -113,7 +113,7 @@
         );
 
         // re-instantiate api http client with new base url
-        this.$api.constructor(this.apiHostName, this.clientId, this.redirectUri);
+        this.$api.constructor({hostName:this.apiHostName, clientId: this.clientId, redirectUri: this.redirectUri});
         log.info('server data updated');
       },
     }
