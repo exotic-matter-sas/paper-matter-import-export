@@ -5,11 +5,11 @@
 
 <template>
   <b-container>
-    <b-row class="align-items-center min-vh-100">
+    <b-row id="login-page" class="align-items-center min-vh-100">
       <b-col>
         <b-row>
           <b-col>
-            <div id="login-form" class="text-center">
+            <div class="text-center">
               <img class="mb-1" src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')">
               <br>
               <a href="#" :title="$t('loginPage.loginDomainLinkTitle')" @click.prevent="updatingServer = true">
@@ -24,11 +24,6 @@
               </a>
               <div v-if="lastError" class="alert alert-danger mt-3">{{ $t('loginPage.errorAuthorizationFailed', [lastError]) }}</div>
             </div>
-          </b-col>
-        </b-row>
-        <b-row id="domain-footer">
-          <b-col class="text-center">
-
           </b-col>
         </b-row>
       </b-col>
@@ -131,78 +126,5 @@
   }
 </script>
 
-<style lang="scss" scoped>
-  @import '../customBootstrap.scss';
-
-  #domain-footer{
-    align-items: baseline;
-    color: map_get($theme-colors, 'primary');
-    font-style: italic;
-
-    label{
-      font-size: 0.9em;
-    }
-  }
-
-  #login-form {
-    .form-label-group {
-      position: relative;
-      margin-bottom: 1rem;
-
-      input, label {
-        height: 3.125rem;
-        padding: .75rem;
-        &::placeholder{
-          color: transparent;
-        }
-      }
-
-      input:not(:placeholder-shown) {
-        padding-top: 1.25rem;
-        padding-bottom: .25rem;
-      }
-
-      input:not(:placeholder-shown) ~ label {
-        padding-top: .25rem;
-        padding-bottom: .25rem;
-        font-size: 12px;
-        color: #777;
-      }
-
-      label {
-        position: absolute;
-        top: 0;
-        left: 0;
-        display: block;
-        width: 100%;
-        margin-bottom: 0;
-        line-height: 1.5;
-        color: #495057;
-        pointer-events: none;
-        cursor: text;
-        border: 1px solid transparent;
-        border-radius: .25rem;
-        transition: all .1s ease-in-out;
-      }
-    }
-
-    ul {
-      list-style: none;
-      padding-left: 0;
-      text-align: justify;
-      margin-bottom: 0;
-    }
-
-    .alert-danger li {
-      border-top: 1px solid lighten($danger, 20%);
-      margin-top: 0.5em;
-      padding-top: 0.5em;
-
-      &:first-child {
-        margin-top: 0;
-        padding-top: 0;
-        border-top: none;
-      }
-    }
-  }
+<style>
 </style>
