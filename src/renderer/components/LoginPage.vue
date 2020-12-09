@@ -66,7 +66,7 @@
       window.setContentSize(window.getContentSize()[0], vi.windowHeight); // keep same width
 
       // force disconnect user when app start in case disconnectUser wasn't call on close
-      this.disconnectUser(vi.$api, 'auto disconnect at startup')
+      this.disconnectUser({apiClient: vi.$api, reason: 'auto disconnect at startup'})
       .catch(error => log.error('disconnect failed, ignoring error:\n' + error));
 
       // start local server to listen for Oauth2 flow redirect uri

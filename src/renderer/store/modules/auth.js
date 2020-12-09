@@ -68,13 +68,13 @@ const actions = {
         })
         .catch((error) => {
           log.error('refresh failed, user need to login to set a new access token\n' + error);
-          dispatch('disconnectUser', apiClient, 'refresh failed');
+          dispatch('disconnectUser', {apiClient, reason: 'refresh failed'});
           return Promise.reject('Access token refresh failed');
         });
     }
   },
 
-  disconnectUser({commit, state}, apiClient, reason = null) {
+  disconnectUser({commit, state}, {apiClient, reason = null}) {
     if (state.accountName === '' && state.accessToken === '' && state.accessTokenExpireTimestamp === ''
       && state.refreshToken === ''){
       log.info("disconnectUser skipped as auth data already cleared")

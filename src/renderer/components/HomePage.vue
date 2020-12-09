@@ -145,7 +145,7 @@
 
     methods: {
       logout () {
-        this.$store.dispatch('auth/disconnectUser', this.$api, 'user disconnect himself');
+        this.$store.dispatch('auth/disconnectUser', {apiClient: this.$api, reason: 'user disconnect himself'});
       },
 
       saveFolderPickerSelection (destinationFolder) {

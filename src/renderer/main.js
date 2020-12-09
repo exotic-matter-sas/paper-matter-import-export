@@ -76,7 +76,7 @@ const vi = new Vue({
 
 function cleanUpBeforeClose (store) {
   // disconnect user and reset import & export data before each close
-  return store.dispatch('auth/disconnectUser', vi.$api,  'auto disconnect at close')
+  return store.dispatch('auth/disconnectUser', {apiClient: vi.$api, reason: 'auto disconnect at close'})
   .catch(error => log.error('disconnect failed, ignoring error:\n' + error))
   .finally(() => {
     store.commit('import/RESET_IMPORT_DATA');
@@ -132,7 +132,7 @@ Vue.api.http.interceptors.response.use(function (response) {
             log.error('refreshed token used in replayed request considered as invalid, disconnecting user to get' +
               ' new accessToken');
           }
-          return store.dispatch('auth/disconnectUser', vi.$api, 'fail to refresh access token')
+          return store.dispatch('auth/disconnectUser', {apiClient: vi.$api, reason: 'fail to refresh access token'})
             .then(() => {
               return Promise.reject(error)
             });
