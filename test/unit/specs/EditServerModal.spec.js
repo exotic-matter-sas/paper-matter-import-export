@@ -25,8 +25,7 @@ localVue.prototype.$tc = (text, args = "") => {
   return text + args;
 }; // i18n mock
 let apiConstructorMock = sm.mock();
-let getAccessTokenMock = sm.mock();
-let apiMock = {constructor: apiConstructorMock, getAccessToken: getAccessTokenMock};
+let apiMock = {constructor: apiConstructorMock};
 localVue.prototype.$api = apiMock; // api prototype mock
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
@@ -61,7 +60,7 @@ describe("EditServerModal template", () => {
   });
 
   it("renders properly html element", () => {
-    const elementSelector = "#edit-server-address-modal";
+    const elementSelector = "#edit-server-modal";
     const elem = wrapper.find(elementSelector);
     expect(elem.is(elementSelector)).to.equal(true);
   });
@@ -71,12 +70,10 @@ describe("EditServerModal mounted", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
-  let fakeWidth;
   let mockedApiHostName;
   let apiHostNameMock;
 
   beforeEach(() => {
-    fakeWidth = 100;
     mockedApiHostName = "https://example.com";
     apiHostNameMock = sm.mock().returnWith("https://example.com");
     storeConfigCopy = cloneDeep(storeConfig);
@@ -97,7 +94,7 @@ describe("EditServerModal mounted", () => {
 
   it("modal is shown and proper values are set", () => {
     expect(showModalMock.callCount).to.equal(1);
-    expect(showModalMock.lastCall.args[0]).to.equal('edit-server-address-modal');
+    expect(showModalMock.lastCall.args[0]).to.equal('edit-server-modal');
     expect(wrapper.vm.serverAddress).to.equal(mockedApiHostName);
     expect(wrapper.vm.inputPlaceholder).to.equal(defaultApiHostName);
   });

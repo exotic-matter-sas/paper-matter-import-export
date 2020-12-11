@@ -4,7 +4,7 @@
   -->
 
 <template>
-  <b-modal id="edit-server-address-modal"
+  <b-modal id="edit-server-modal"
            :title="$t('EditServerModal.title')"
            @hidden="$emit('event-hidden')"
            @ok="save"
@@ -18,9 +18,9 @@
               <b-form-input v-model="serverAddress"
                             onfocus="this.select()"
                             :placeholder="serverInputPlaceholder"
-                            :class="{'text-danger': updateServerAddressError}"
-                            :title="updateServerAddressError ? $t('EditServerModal.errorParseServerAddress') : ''"
-                            @update="updateServerAddressError = false"
+                            :class="{'text-danger': serverAddressError}"
+                            :title="serverAddressError ? $t('EditServerModal.errorParseServerAddress') : ''"
+                            @update="serverAddressError = false"
                             trim autofocus></b-form-input>
             </b-form-group>
             <b-form-group :label="$t('EditServerModal.clientIdInputLabel')">
@@ -53,7 +53,7 @@
   const log = require('electron-log');
 
   export default {
-    name: 'edit-server-address-modal',
+    name: 'edit-server-modal',
 
     data(){
       return {
@@ -61,7 +61,7 @@
         serverInputPlaceholder: '',
         clientIdModel: '',
         clientIdInputPlaceholder: '',
-        updateServerAddressError: false
+        serverAddressError: false
       }
     },
 
@@ -71,7 +71,7 @@
     },
 
     mounted() {
-      this.$bvModal.show('edit-server-address-modal');
+      this.$bvModal.show('edit-server-modal');
       this.serverAddress = this.apiHostName;
       this.clientIdModel = this.clientId;
       this.serverInputPlaceholder = defaultApiHostName;
@@ -84,6 +84,8 @@
       },
 
       save (bvModalEvt) {
+        let parsedAddress;
+
         if (this.serverAddress === ''){
           this.serverAddress = defaultApiHostName;
         }
@@ -93,19 +95,19 @@
         }
 
         try {
-          const parsedAddress = new URL(this.serverAddress);
-
-          this.$store.commit(
-            'config/SET_API_HOST_NAME',
-            `${parsedAddress.protocol}//${parsedAddress.host}`
-          );
+          parsedAddress = new URL(this.serverAddress);
         }
         catch (e) {
           log.error('fail to parse new hostname');
-          this.updateServerAddressError = true;
+          this.serverAddressError = true;
           bvModalEvt.preventDefault();
           throw new Error('cantParseHostName');
         }
+
+        this.$store.commit(
+          'config/SET_API_HOST_NAME',
+          `${parsedAddress.protocol}//${parsedAddress.host}`
+        );
 
         this.$store.commit(
           'auth/SET_CLIENT_ID',
