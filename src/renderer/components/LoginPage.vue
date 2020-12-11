@@ -22,7 +22,7 @@
                 {{ $t('loginPage.submitInputValue') }}
                 <font-awesome-icon icon="external-link-alt" size="xs"/>
               </a>
-              <div v-if="lastError" class="alert alert-danger mt-3">{{ $t('loginPage.errorAuthorizationFailed', [lastError]) }}</div>
+              <div v-if="lastErrorCode" class="alert alert-danger mt-3">{{ $t('loginPage.errorAuthorizationFailed', [lastErrorCode]) }}</div>
             </div>
           </b-col>
         </b-row>
@@ -49,7 +49,7 @@
         email: '',
         password: '',
         loginPending: false,
-        lastError: '',
+        lastErrorCode: '',
         updatingServer: false
       }
     },
@@ -69,7 +69,7 @@
         vi.getAndStoreAccessToken(code)
       });
       ipcRenderer.on('oauthFlowError', (event, error) => {
-        vi.lastError = error;
+        vi.lastErrorCode = error;
       });
       ipcRenderer.send('startLocalServer', this.apiHostName);
     },
@@ -93,7 +93,7 @@
       openLoginPage(){
         log.debug('Oauth2 flow [1]: open login page');
 
-        this.lastError = '';
+        this.lastErrorCode = '';
 
         this.open(
           `${this.apiHostName}/oauth2/authorize/` +
@@ -109,14 +109,20 @@
         log.debug('get and store access token - start');
         const vi = this;
 
-        await vi.$api.getAccessToken(code).then(response => {
-            vi.$store.commit('auth/SAVE_AUTHENTICATION_DATA', {
-                accessToken: response.data.access_token,
-                accessTokenExpiresIn: response.data.expires_in,
-                refreshToken: response.data.refresh_token
-            });
-            vi.$router.push({name: 'home'});
+        await vi.$api.getAccessToken(code)
+        .then(response => {
+          vi.$store.commit('auth/SAVE_AUTHENTICATION_DATA', {
+              accessToken: response.data.access_token,
+              accessTokenExpiresIn: response.data.expires_in,
+              refreshToken: response.data.refresh_token
           });
+          vi.$router.push({name: 'home'});
+        })
+        .catch(error => {
+          log.error('fail to get access token:\n', error);
+          this.lastErrorCode = "cantGetAccessToken"
+        });
+
 
         log.debug('get and store access token - end');
       },
