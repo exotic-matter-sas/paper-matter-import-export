@@ -32,8 +32,7 @@
                 <i18n path="EditServerModal.clientIdInputDescription" tag="span">
                   <template slot="self_hosting_doc_link">
                     <a href="#" @click.prevent="open('https://exotic-matter.gitlab.io/ftl-app/doc/self-hosting/#authorize-import-and-export-app-and-other-oauth2-apps')">
-                      {{ $t('EditServerModal.clientIdInputDescriptionLinkText') }}
-                    </a>
+                      {{ $t('EditServerModal.clientIdInputDescriptionLinkText') }}</a>
                   </template>
                 </i18n>
               </template>
@@ -46,7 +45,9 @@
 </template>
 
 <script>
+  import {ipcRenderer} from "electron";
   import {mapState} from "vuex";
+
   import {defaultApiHostName} from "../../store/modules/config";
   import {defaultClientId} from "../../store/modules/auth";
 
@@ -67,7 +68,7 @@
 
     computed: {
       ...mapState('config', ['apiHostName']),
-      ...mapState('auth', ['clientId', 'redirectUri'])
+      ...mapState('auth', ['clientId'])
     },
 
     mounted() {
@@ -114,10 +115,18 @@
           this.clientIdModel
         );
 
-        // re-instantiate api http client with new base url
-        this.$api.constructor({hostName:this.apiHostName, clientId: this.clientId, redirectUri: this.redirectUri});
+        // update server data in api http client
+        this.$api.setServerData(this.apiHostName, this.clientId);
+        // update server data in main process for localServer
+        ipcRenderer.send('updateHostName', this.apiHostName);
         log.info('server data updated');
       },
     }
   }
 </script>
+
+<style lang="scss" scoped>
+  ::v-deep #edit-server-modal small a {
+    text-decoration: underline;
+  }
+</style>

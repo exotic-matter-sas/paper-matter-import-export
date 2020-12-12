@@ -5,11 +5,15 @@
 
 import axios from "axios";
 
-export default class ApiCient {
+export default class ApiClient {
   constructor({hostName, clientId, redirectUri}) {
+    this.setServerData(hostName, clientId);
+    this.redirectUri = redirectUri;
+  }
+
+  setServerData(hostName, clientId){
     this.http = axios.create({baseURL: hostName});
     this.clientId = clientId;
-    this.redirectUri = redirectUri;
   }
 
   /*
