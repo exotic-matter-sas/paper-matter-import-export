@@ -196,9 +196,6 @@ ipcMain.on('startLocalServer', (event, apiHostName) => {
         });
         res.end();
         mainWindow.webContents.send("oauthFlowSuccess", parsedUrl.searchParams.get('code'));
-
-        // Closing local server as Oauth2 flow is completed (it will be restarted when login page is mounted)
-        shutdownLocalServer();
       }
       else if (parsedUrl.searchParams.has('error')) {
         error = parsedUrl.searchParams.get('error');
@@ -231,4 +228,8 @@ ipcMain.on('startLocalServer', (event, apiHostName) => {
       mainWindow.webContents.send("oauthFlowError", error);
     }
   });
+});
+
+ipcMain.on('shutdownLocalServer', (event) => {
+  shutdownLocalServer();
 });

@@ -78,6 +78,8 @@
       // delete events registered in mounted to avoid multiple trigger if login page is displayed multiple time
       ipcRenderer.removeAllListeners('oauthFlowSuccess');
       ipcRenderer.removeAllListeners('oauthFlowError');
+      // shutdown Oauth2 local server
+      ipcRenderer.send('shutdownLocalServer');
     },
 
     computed: {
