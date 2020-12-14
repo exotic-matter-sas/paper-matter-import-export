@@ -153,7 +153,6 @@ describe("LoginPage mounted", () => {
 
   it("disconnectUser is called", () => {
     expect(disconnectUserMock.callCount).to.equal(1);
-    console.log(disconnectUserMock.lastCall.args);
     expect(disconnectUserMock.lastCall.args[1]).to.eql({
       apiClient: wrapper.vm.$api,
       reason: 'auto disconnect at startup'
