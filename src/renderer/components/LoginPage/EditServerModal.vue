@@ -48,7 +48,7 @@
   import {ipcRenderer} from "electron";
   import {mapState} from "vuex";
 
-  import {defaultApiHostName} from "../../store/modules/config";
+  import {defaultPmHostName} from "../../store/modules/config";
   import {defaultClientId} from "../../store/modules/auth";
 
   const log = require('electron-log');
@@ -67,15 +67,15 @@
     },
 
     computed: {
-      ...mapState('config', ['apiHostName']),
+      ...mapState('config', ['pmHostName']),
       ...mapState('auth', ['clientId'])
     },
 
     mounted() {
       this.$bvModal.show('edit-server-modal');
-      this.serverAddress = this.apiHostName;
+      this.serverAddress = this.pmHostName;
       this.clientIdModel = this.clientId;
-      this.serverInputPlaceholder = defaultApiHostName;
+      this.serverInputPlaceholder = defaultPmHostName;
       this.clientIdInputPlaceholder = defaultClientId;
     },
 
@@ -88,7 +88,7 @@
         let parsedAddress;
 
         if (this.serverAddress === ''){
-          this.serverAddress = defaultApiHostName;
+          this.serverAddress = defaultPmHostName;
         }
 
         if (this.clientIdModel === ''){
@@ -106,7 +106,7 @@
         }
 
         this.$store.commit(
-          'config/SET_API_HOST_NAME',
+          'config/SET_PM_HOST_NAME',
           `${parsedAddress.protocol}//${parsedAddress.host}`
         );
 
@@ -116,9 +116,9 @@
         );
 
         // update server data in api http client
-        this.$api.setServerData(this.apiHostName, this.clientId);
+        this.$api.setServerData(this.pmHostName, this.clientId);
         // update server data in main process for localServer
-        ipcRenderer.send('updateHostName', this.apiHostName);
+        ipcRenderer.send('updateHostName', this.pmHostName);
         log.info('server data updated');
       },
     }

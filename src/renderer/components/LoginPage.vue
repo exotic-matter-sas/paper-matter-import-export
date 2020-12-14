@@ -13,7 +13,7 @@
               <img class="mb-1" src="~@/assets/colors_logo.svg" :alt="$t('loginPage.logoAlt')">
               <br>
               <a href="#" :title="$t('loginPage.loginDomainLinkTitle')" @click.prevent="updatingServer = true">
-                {{ apiHostName }}
+                {{ pmHostName }}
                 <font-awesome-icon class="align-baseline" icon="edit" size="xs"/>
               </a>
               <br>
@@ -71,7 +71,7 @@
       ipcRenderer.on('oauthFlowError', (event, error) => {
         vi.lastErrorCode = error;
       });
-      ipcRenderer.send('startLocalServer', this.apiHostName);
+      ipcRenderer.send('startLocalServer', this.pmHostName);
     },
 
     destroyed () {
@@ -84,7 +84,7 @@
 
     computed: {
       ...mapState('auth', ['clientId', 'redirectUri', 'accessToken', 'refreshToken']),
-      ...mapState('config', ['apiHostName'])
+      ...mapState('config', ['pmHostName'])
     },
 
     methods: {
@@ -98,7 +98,7 @@
         this.lastErrorCode = '';
 
         this.open(
-          `${this.apiHostName}/oauth2/authorize/` +
+          `${this.pmHostName}/oauth2/authorize/` +
           `?response_type=code` +
           `&client_id=${this.clientId}` +
           `&redirect_uri=${this.redirectUri}` +

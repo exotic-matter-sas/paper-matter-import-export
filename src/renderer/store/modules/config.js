@@ -4,17 +4,17 @@
  */
 
 const namespaced = true;
-const defaultApiHostName = 'https://papermatter.app'; // prod
-// const defaultApiHostName = 'http://127.0.0.1:8000'; // local
+const defaultPmHostName = 'https://papermatter.app'; // prod
+// const defaultPmHostName = 'http://127.0.0.1:8000'; // local
 
 const state = {
-  apiHostName: defaultApiHostName,
+  pmHostName: defaultPmHostName,
   action: 'import'
 };
 
 const mutations = {
-  SET_API_HOST_NAME (state, apiHostName) {
-    state.apiHostName = apiHostName
+  SET_PM_HOST_NAME (state, pmHostName) {
+    state.pmHostName = pmHostName
   },
   SET_ACTION (state, action) {
     state.action = action
@@ -22,7 +22,7 @@ const mutations = {
 };
 
 export {
-  defaultApiHostName
+  defaultPmHostName
 };
 
 export default {

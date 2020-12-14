@@ -101,7 +101,7 @@
       ...mapState('auth', ['accessToken']),
       ...mapState('export', ['savedExportSource', 'savedExportDestination', 'exportFolderName', 'docsToExport',
         'exportDocsInError', 'duplicatedFilePathCount', 'metadataExportSkipped']),
-      ...mapState('config', ['apiHostName'])
+      ...mapState('config', ['pmHostName'])
     },
 
     methods: {
@@ -544,7 +544,7 @@
         const report = new reportTools.HtmlReport(
           ['Title', 'Error detail'],
           this.exportDocsInError.map(({title, pid, reason}) => ([
-            `<a href="${this.apiHostName}/app/#/home?doc=${pid}" target="_blank">${title}</a>`,
+            `<a href="${this.pmHostName}/app/#/home?doc=${pid}" target="_blank">${title}</a>`,
             reason
           ]))
         );

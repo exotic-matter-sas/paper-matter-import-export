@@ -152,7 +152,7 @@ autoUpdater.on('update-downloaded', (info) => {
 const http = require('http');
 let localServer;
 let localServerSockets;
-let pmHostName;
+let paperMatterHostName;
 
 // We have to kill every socket alive to be able to really close the server
 function shutdownLocalServer () {
@@ -162,12 +162,12 @@ function shutdownLocalServer () {
   localServer.close(() => log.debug("Local server closed"));
 }
 
-ipcMain.on('updateHostName', (event, apiHostName) => {
-  pmHostName = apiHostName;
+ipcMain.on('updateHostName', (event, pmHostName) => {
+  paperMatterHostName = pmHostName;
 });
 
-ipcMain.on('startLocalServer', (event, apiHostName) => {
-  pmHostName = apiHostName;
+ipcMain.on('startLocalServer', (event, pmHostName) => {
+  paperMatterHostName = pmHostName;
   let error;
   log.debug("Local server started, listening for Oauth2 redirect URI...");
 
@@ -192,7 +192,7 @@ ipcMain.on('startLocalServer', (event, apiHostName) => {
       if (parsedUrl.searchParams.has('code')) {
         log.debug("Oauth2 flow [2]: OK, redirect URI properly formatted with authorization code");
         res.writeHead(302, {
-          'Location': `${pmHostName}/oauth2/authorization_ok/?app_name=${encodeURIComponent(appName)}`
+          'Location': `${paperMatterHostName}/oauth2/authorization_ok/?app_name=${encodeURIComponent(appName)}`
         });
         res.end();
         mainWindow.webContents.send("oauthFlowSuccess", parsedUrl.searchParams.get('code'));
@@ -201,7 +201,7 @@ ipcMain.on('startLocalServer', (event, apiHostName) => {
         error = parsedUrl.searchParams.get('error');
         log.error("Oauth2 flow [2]: server returns an error:\n", error);
         res.writeHead(302, {
-          'Location': `${pmHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
+          'Location': `${paperMatterHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
         });
         res.end();
         mainWindow.webContents.send("oauthFlowError", error);
@@ -211,7 +211,7 @@ ipcMain.on('startLocalServer', (event, apiHostName) => {
         error = 'query_string_missing';
         log.error(`Oauth2 flow [2]: redirect URI malformed (${error})`);
         res.writeHead(302, {
-          'Location': `${pmHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
+          'Location': `${paperMatterHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
         });
         res.end();
         mainWindow.webContents.send("oauthFlowError", error);
@@ -222,7 +222,7 @@ ipcMain.on('startLocalServer', (event, apiHostName) => {
       error = 'wrong_url_called';
       log.error(`Oauth2 flow [2]: redirect URI malformed (${error})`);
       res.writeHead(302, {
-        'Location': `${pmHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
+        'Location': `${paperMatterHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
       });
       res.end();
       mainWindow.webContents.send("oauthFlowError", error);

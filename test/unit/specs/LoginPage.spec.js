@@ -71,7 +71,7 @@ localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
-const mockedApiHostName = "https://example.com";
+const mockedPmHostName = "https://example.com";
 const mockedClientId = "https://example.com";
 const mockedRedirectUri = "https://example.com/2";
 
@@ -80,18 +80,18 @@ describe("LoginPage template", () => {
   let wrapper;
   let storeConfigCopy;
   let store;
-  let apiHostNameMock;
+  let pmHostNameMock;
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
     storeConfigCopy = cloneDeep(storeConfig);
-    apiHostNameMock = sm.mock().returnWith(mockedApiHostName);
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
       store,
       computed: {
-        apiHostName: apiHostNameMock
+        pmHostName: pmHostNameMock
       }
     });
   });
@@ -107,7 +107,7 @@ describe("LoginPage template", () => {
   });
 
   it("renders properly component data", async () => {
-    expect(wrapper.text()).to.contains(mockedApiHostName);
+    expect(wrapper.text()).to.contains(mockedPmHostName);
   });
 });
 
@@ -116,13 +116,13 @@ describe("LoginPage mounted", () => {
   let store;
   let storeConfigCopy;
   let disconnectUserMock;
-  let apiHostNameMock;
+  let pmHostNameMock;
   let getAndStoreAccessTokenMock;
 
   beforeEach(() => {
     globalMocks.ipcSendMock.reset(); // reset call made by electron
     disconnectUserMock = sm.mock().resolveWith();
-    apiHostNameMock = sm.mock().returnWith(mockedApiHostName);
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     getAndStoreAccessTokenMock = sm.mock().returnWith("");
 
     storeConfigCopy = cloneDeep(storeConfig);
@@ -132,7 +132,7 @@ describe("LoginPage mounted", () => {
       localVue,
       store,
       computed: {
-        apiHostName: apiHostNameMock
+        pmHostName: pmHostNameMock
       },
       methods: {
         getAndStoreAccessToken: getAndStoreAccessTokenMock
@@ -174,7 +174,7 @@ describe("LoginPage mounted", () => {
     oauthFlowErrorCallBack('fakeEvent', 'fakeError');
     expect(wrapper.vm.lastErrorCode).to.equal('fakeError');
 
-    expect(globalMocks.ipcSendMock.lastCall.args).to.eql(["startLocalServer", mockedApiHostName]);
+    expect(globalMocks.ipcSendMock.lastCall.args).to.eql(["startLocalServer", mockedPmHostName]);
   });
 });
 
@@ -183,12 +183,12 @@ describe("LoginPage destroyed", () => {
   let store;
   let storeConfigCopy;
   let disconnectUserMock;
-  let apiHostNameMock;
+  let pmHostNameMock;
 
   beforeEach(() => {
     globalMocks.ipcSendMock.reset(); // reset call made by electron
     disconnectUserMock = sm.mock().resolveWith();
-    apiHostNameMock = sm.mock().returnWith(mockedApiHostName);
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
 
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
@@ -197,7 +197,7 @@ describe("LoginPage destroyed", () => {
       localVue,
       store,
       computed: {
-        apiHostName: apiHostNameMock
+        pmHostName: pmHostNameMock
       },
     });
   });
@@ -220,7 +220,7 @@ describe("LoginPage methods", () => {
   let store;
   let storeConfigCopy;
   let disconnectUserMock;
-  let apiHostNameMock;
+  let pmHostNameMock;
   let openMock;
   let clientIdMock;
   let redirectUriMock;
@@ -229,10 +229,10 @@ describe("LoginPage methods", () => {
   beforeEach(() => {
     globalMocks.ipcSendMock.reset(); // reset call made by electron
     disconnectUserMock = sm.mock().resolveWith();
-    apiHostNameMock = sm.mock().returnWith(mockedApiHostName);
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     clientIdMock = sm.mock().returnWith(mockedClientId);
     redirectUriMock = sm.mock().returnWith(mockedRedirectUri);
-    apiHostNameMock = sm.mock().returnWith(mockedApiHostName);
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     openMock = sm.mock().returnWith();
     saveAuthenticationDataMock = sm.mock();
 
@@ -244,7 +244,7 @@ describe("LoginPage methods", () => {
       localVue,
       store,
       computed: {
-        apiHostName: apiHostNameMock,
+        pmHostName: pmHostNameMock,
         clientId: clientIdMock,
         redirectUri: redirectUriMock
       },
@@ -283,7 +283,7 @@ describe("LoginPage methods", () => {
     expect(wrapper.vm.lastErrorCode).to.equal('');
     expect(openMock.callCount).to.equal(1);
     expect(openMock.lastCall.arg).to.equal(
-      `${mockedApiHostName}/oauth2/authorize/?response_type=code&client_id=${mockedClientId}` +
+      `${mockedPmHostName}/oauth2/authorize/?response_type=code&client_id=${mockedClientId}` +
       `&redirect_uri=${mockedRedirectUri}&scope=read write&approval_prompt=auto`
     );
   });

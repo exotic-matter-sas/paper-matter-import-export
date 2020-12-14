@@ -60,7 +60,7 @@ Vue.use(Router);
 const store = new Vuex.Store(storeConfig);
 
 Vue.api = Vue.prototype.$api = new ApiClient({
-  hostName: store.state.config.apiHostName,
+  hostName: store.state.config.pmHostName,
   clientId: store.state.auth.clientId,
   redirectUri: store.state.auth.redirectUri,
 });
