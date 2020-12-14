@@ -25,15 +25,15 @@ const localVue = createLocalVue();
 const mockedWidth = 100;
 
 let globalMocks = {
-  setContentSizeMock : sm.mock(),
-  getContentSizeMock : sm.mock().returnWith([mockedWidth, 0]),
-  ipcOnMock : sm.mock(ipcRenderer, "on").returnWith(""),
-  ipcSendMock : sm.mock(ipcRenderer, "send").returnWith(""),
+  setContentSize : sm.mock(),
+  getContentSize : sm.mock().returnWith([mockedWidth, 0]),
+  ipcOn : sm.mock(ipcRenderer, "on").returnWith(""),
+  ipcSend : sm.mock(ipcRenderer, "send").returnWith(""),
   ipcRemoveAllListeners : sm.mock(ipcRenderer, "removeAllListeners").returnWith(""),
   openExternal: sm.mock()
 };
 globalMocks.getCurrentWindowMock =sm.mock(remote, "getCurrentWindow").returnWith(
-  {setContentSize: globalMocks.setContentSizeMock, getContentSize: globalMocks.getContentSizeMock}
+  {setContentSize: globalMocks.setContentSize, getContentSize: globalMocks.getContentSize}
 );
 
 function resetGlobalMocks() {
@@ -120,7 +120,7 @@ describe("LoginPage mounted", () => {
   let getAndStoreAccessTokenMock;
 
   beforeEach(() => {
-    globalMocks.ipcSendMock.reset(); // reset call made by electron
+    globalMocks.ipcSend.reset(); // reset call made by electron
     disconnectUserMock = sm.mock().resolveWith();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     getAndStoreAccessTokenMock = sm.mock().returnWith("");
@@ -146,9 +146,9 @@ describe("LoginPage mounted", () => {
 
   it("electron remote.setContentSize is called to set window size", () => {
     expect(globalMocks.getCurrentWindowMock.callCount).to.equal(1);
-    expect(globalMocks.setContentSizeMock.callCount).to.equal(1);
-    expect(globalMocks.setContentSizeMock.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
-    expect(globalMocks.setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
+    expect(globalMocks.setContentSize.callCount).to.equal(1);
+    expect(globalMocks.setContentSize.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
+    expect(globalMocks.setContentSize.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
   });
 
   it("disconnectUser is called", () => {
@@ -160,21 +160,21 @@ describe("LoginPage mounted", () => {
   });
 
   it("listen to and emmit Oauth2 events", () => {
-    expect(globalMocks.ipcOnMock.callCount).to.equal(2);
-    expect(globalMocks.ipcSendMock.callCount).to.equal(1);
-    expect(globalMocks.ipcOnMock.calls[0].args[0]).to.equal("oauthFlowSuccess");
+    expect(globalMocks.ipcOn.callCount).to.equal(2);
+    expect(globalMocks.ipcSend.callCount).to.equal(1);
+    expect(globalMocks.ipcOn.calls[0].args[0]).to.equal("oauthFlowSuccess");
     // event callback is properly defined
-    const oauthFlowSuccessCallBack = globalMocks.ipcOnMock.calls[0].args[1];
+    const oauthFlowSuccessCallBack = globalMocks.ipcOn.calls[0].args[1];
     oauthFlowSuccessCallBack('fakeEvent', 'fakeCode');
     expect(getAndStoreAccessTokenMock.callCount).to.equal(1);
     expect(getAndStoreAccessTokenMock.lastCall.arg).to.equal('fakeCode');
-    expect(globalMocks.ipcOnMock.calls[1].args[0]).to.equal("oauthFlowError");
+    expect(globalMocks.ipcOn.calls[1].args[0]).to.equal("oauthFlowError");
     // event callback is properly defined
-    const oauthFlowErrorCallBack = globalMocks.ipcOnMock.calls[1].args[1];
+    const oauthFlowErrorCallBack = globalMocks.ipcOn.calls[1].args[1];
     oauthFlowErrorCallBack('fakeEvent', 'fakeError');
     expect(wrapper.vm.lastErrorCode).to.equal('fakeError');
 
-    expect(globalMocks.ipcSendMock.lastCall.args).to.eql(["startLocalServer", mockedPmHostName]);
+    expect(globalMocks.ipcSend.lastCall.args).to.eql(["startLocalServer", mockedPmHostName]);
   });
 });
 
@@ -186,7 +186,7 @@ describe("LoginPage destroyed", () => {
   let pmHostNameMock;
 
   beforeEach(() => {
-    globalMocks.ipcSendMock.reset(); // reset call made by electron
+    globalMocks.ipcSend.reset(); // reset call made by electron
     disconnectUserMock = sm.mock().resolveWith();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
 
@@ -206,12 +206,16 @@ describe("LoginPage destroyed", () => {
     resetGlobalMocks();
   });
 
-  it("Oauth2 events listener are properly removed", () => {
+  it("Oauth2 events listener are properly removed, shutdownLocalServer event is sent", () => {
+    globalMocks.ipcSend.reset(); // reset call made by mounted
+
     wrapper.destroy();
 
     expect(globalMocks.ipcRemoveAllListeners.callCount).to.equal(2);
     expect(globalMocks.ipcRemoveAllListeners.calls[0].arg).to.equal("oauthFlowSuccess");
     expect(globalMocks.ipcRemoveAllListeners.calls[1].arg).to.equal("oauthFlowError");
+    expect(globalMocks.ipcSend.callCount).to.equal(1);
+    expect(globalMocks.ipcSend.lastCall.arg).to.equal("shutdownLocalServer");
   });
 });
 
@@ -227,7 +231,7 @@ describe("LoginPage methods", () => {
   let saveAuthenticationDataMock;
 
   beforeEach(() => {
-    globalMocks.ipcSendMock.reset(); // reset call made by electron
+    globalMocks.ipcSend.reset(); // reset call made by electron
     disconnectUserMock = sm.mock().resolveWith();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     clientIdMock = sm.mock().returnWith(mockedClientId);
