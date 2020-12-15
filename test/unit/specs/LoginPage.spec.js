@@ -36,6 +36,8 @@ globalMocks.getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWit
   {setContentSize: globalMocks.setContentSize, getContentSize: globalMocks.getContentSize}
 );
 
+const disconnectUserMock = sm.mock().resolveWith();
+
 function resetGlobalMocks() {
   Object.values(globalMocks).forEach(mock => mock.reset());
 }
@@ -83,9 +85,9 @@ describe("LoginPage template", () => {
   let pmHostNameMock;
 
   beforeEach(() => {
-    // set vars here: vue wrapper args, fake values, mock
-    storeConfigCopy = cloneDeep(storeConfig);
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    storeConfigCopy = cloneDeep(storeConfig);
+    storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
@@ -98,6 +100,7 @@ describe("LoginPage template", () => {
 
   afterEach(() => {
     resetGlobalMocks();
+    disconnectUserMock.reset();
   });
 
   it("renders properly html element", () => {
@@ -115,13 +118,11 @@ describe("LoginPage mounted", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
-  let disconnectUserMock;
   let pmHostNameMock;
   let getAndStoreAccessTokenMock;
 
   beforeEach(() => {
     globalMocks.ipcSend.reset(); // reset call made by electron
-    disconnectUserMock = sm.mock().resolveWith();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     getAndStoreAccessTokenMock = sm.mock().returnWith("");
 
@@ -142,6 +143,7 @@ describe("LoginPage mounted", () => {
 
   afterEach(() => {
     resetGlobalMocks();
+    disconnectUserMock.reset();
   });
 
   it("electron remote.setContentSize is called to set window size", () => {
@@ -182,12 +184,10 @@ describe("LoginPage destroyed", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
-  let disconnectUserMock;
   let pmHostNameMock;
 
   beforeEach(() => {
     globalMocks.ipcSend.reset(); // reset call made by electron
-    disconnectUserMock = sm.mock().resolveWith();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
 
     storeConfigCopy = cloneDeep(storeConfig);
@@ -204,6 +204,7 @@ describe("LoginPage destroyed", () => {
 
   afterEach(() => {
     resetGlobalMocks();
+    disconnectUserMock.reset();
   });
 
   it("Oauth2 events listener are properly removed, shutdownLocalServer event is sent", () => {
@@ -223,7 +224,6 @@ describe("LoginPage methods", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
-  let disconnectUserMock;
   let pmHostNameMock;
   let openMock;
   let clientIdMock;
@@ -232,7 +232,6 @@ describe("LoginPage methods", () => {
 
   beforeEach(() => {
     globalMocks.ipcSend.reset(); // reset call made by electron
-    disconnectUserMock = sm.mock().resolveWith();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     clientIdMock = sm.mock().returnWith(mockedClientId);
     redirectUriMock = sm.mock().returnWith(mockedRedirectUri);
@@ -264,6 +263,7 @@ describe("LoginPage methods", () => {
     routerPushMock.reset();
     getAccessTokenMock.reset();
     getAccessTokenMock.actions = [];
+    disconnectUserMock.reset();
   });
 
   it("open call electron openExternal", () => {

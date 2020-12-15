@@ -130,16 +130,16 @@ describe("ImportTab watchers", () => {
     sm.restore();
   });
 
-  it("filesInsideFolder set metadataFileDetected properly", async () => {
+  it("filesInsideFolder set detectedMetadataFile properly", async () => {
     wrapper.setData({filesInsideFolder:[{name: 'import.csv'}]});
     await flushPromises();
 
-    expect(wrapper.vm.metadataFileDetected).to.be.equal(true);
+    expect(wrapper.vm.detectedMetadataFile).to.be.eql({name: 'import.csv'});
 
     wrapper.setData({filesInsideFolder:[{name: 'random.csv'}]});
     await flushPromises();
 
-    expect(wrapper.vm.metadataFileDetected).to.be.equal(false);
+    expect(wrapper.vm.detectedMetadataFile).to.be.equal(null);
   });
 
   it("performRetry call proceedToImport if actionDisabled is false", async () => {
