@@ -9,38 +9,36 @@
            @hidden="$emit('event-hidden')"
            @ok="save"
            centered no-close-on-backdrop>
-    <template #default="{ ok }">
-      <b-container fluid>
-        <b-row>
-          <b-col>
-            <b-form-group :label="$t('EditServerModal.serverInputLabel')"
-                          :description="$t('EditServerModal.serverInputDescription')" >
-              <b-form-input v-model="serverAddress"
-                            onfocus="this.select()"
-                            :placeholder="serverInputPlaceholder"
-                            :class="{'text-danger': serverAddressError}"
-                            :title="serverAddressError ? $t('EditServerModal.errorParseServerAddress') : ''"
-                            @update="serverAddressError = false"
-                            trim autofocus></b-form-input>
-            </b-form-group>
-            <b-form-group :label="$t('EditServerModal.clientIdInputLabel')">
-              <b-form-input v-model="clientIdModel"
-                            onfocus="this.select()"
-                            :placeholder="clientIdInputPlaceholder"
-                            trim></b-form-input>
-              <template slot="description">
-                <i18n path="EditServerModal.clientIdInputDescription" tag="span">
-                  <template slot="self_hosting_doc_link">
-                    <a href="#" @click.prevent="open('https://exotic-matter.gitlab.io/ftl-app/doc/self-hosting/#authorize-import-and-export-app-and-other-oauth2-apps')">
-                      {{ $t('EditServerModal.clientIdInputDescriptionLinkText') }}</a>
-                  </template>
-                </i18n>
-              </template>
-            </b-form-group>
-          </b-col>
-        </b-row>
-      </b-container>
-    </template>
+    <b-container fluid>
+      <b-row>
+        <b-col>
+          <b-form-group :label="$t('EditServerModal.serverInputLabel')"
+                        :description="$t('EditServerModal.serverInputDescription')" >
+            <b-form-input v-model="serverAddress"
+                          onfocus="this.select()"
+                          :placeholder="serverInputPlaceholder"
+                          :class="{'text-danger': serverAddressError}"
+                          :title="serverAddressError ? $t('EditServerModal.errorParseServerAddress') : ''"
+                          @update="serverAddressError = false"
+                          trim autofocus></b-form-input>
+          </b-form-group>
+          <b-form-group :label="$t('EditServerModal.clientIdInputLabel')">
+            <b-form-input v-model="clientIdModel"
+                          onfocus="this.select()"
+                          :placeholder="clientIdInputPlaceholder"
+                          trim></b-form-input>
+            <template slot="description">
+              <i18n path="EditServerModal.clientIdInputDescription" tag="span">
+                <template slot="self_hosting_doc_link">
+                  <a href="#" @click.prevent="open('https://exotic-matter.gitlab.io/ftl-app/doc/self-hosting/#authorize-import-and-export-app-and-other-oauth2-apps')">
+                    {{ $t('EditServerModal.clientIdInputDescriptionLinkText') }}</a>
+                </template>
+              </i18n>
+            </template>
+          </b-form-group>
+        </b-col>
+      </b-row>
+    </b-container>
   </b-modal>
 </template>
 
@@ -62,6 +60,7 @@
         serverInputPlaceholder: '',
         clientIdModel: '',
         clientIdInputPlaceholder: '',
+        // FIXME: UI is not refreshed when updated to true (it seems to not be responsive but can't figure out why)
         serverAddressError: false
       }
     },
