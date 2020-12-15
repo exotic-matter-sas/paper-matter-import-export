@@ -32,7 +32,7 @@ let globalMocks = {
   ipcRemoveAllListeners : sm.mock(ipcRenderer, "removeAllListeners").returnWith(""),
   openExternal: sm.mock()
 };
-globalMocks.getCurrentWindowMock =sm.mock(remote, "getCurrentWindow").returnWith(
+globalMocks.getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
   {setContentSize: globalMocks.setContentSize, getContentSize: globalMocks.getContentSize}
 );
 
