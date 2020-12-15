@@ -32,7 +32,7 @@ localVue.prototype.$electron = {
 }; // electron prototype mock
 let requestAMock = sm.mock();
 let apiMock = {requestA: requestAMock};
-localVue.prototype.$api = apiMock; // electron prototype mock
+localVue.prototype.$api = apiMock;
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
 

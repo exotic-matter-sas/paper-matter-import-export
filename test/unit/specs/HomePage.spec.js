@@ -17,6 +17,7 @@ import HomePage from "../../../src/renderer/components/HomePage";
 import {remote} from "electron";
 import {USER_PROPS} from "../../tools/testValues";
 import * as tv from "../../tools/testValues.js";
+import flushPromises from "flush-promises";
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -28,6 +29,14 @@ localVue.prototype.$t = (text, args = "") => {
 localVue.prototype.$tc = (text, args = "") => {
   return text + args;
 }; // i18n mock
+const mockedGetUserDataResponse = {
+  data: {
+    email: 'fake@email.com'
+  }
+};
+let getUserDataMock = sm.mock().resolveWith(mockedGetUserDataResponse);
+let apiMock = {getUserData: getUserDataMock};
+localVue.prototype.$api = apiMock;
 
 // Attach Vue plugins here (after mocking prototypes)
 localVue.use(Vuex);
@@ -72,39 +81,86 @@ describe("HomePage mounted", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
-  let computed;
-
-  let fakeWidth;
+  let mockedWidth;
   let setContentSizeMock;
   let getContentSizeMock;
   let getCurrentWindowMock;
+  let setAccountNameMock;
+  let accessTokenMock;
+  let mockedAccessToken;
 
   beforeEach(() => {
-    fakeWidth = 100;
+    mockedWidth = 100;
+    mockedAccessToken = 'fakeAccessToken';
     setContentSizeMock = sm.mock();
-    getContentSizeMock = sm.mock().returnWith([fakeWidth, 0]);
+    getContentSizeMock = sm.mock().returnWith([mockedWidth, 0]);
     getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
       {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
     );
+    setAccountNameMock = sm.mock();
+    accessTokenMock = sm.mock().returnWith(mockedAccessToken);
     storeConfigCopy = cloneDeep(storeConfig);
+    storeConfigCopy.modules.auth.mutations.SET_ACCOUNT_NAME = setAccountNameMock;
     store = new Vuex.Store(storeConfigCopy);
   });
 
   afterEach(() => {
     sm.restore();
+    getUserDataMock.reset();
   });
 
   it("electron remote.setContentSize is called to set window size", () => {
     wrapper = shallowMount(HomePage, {
       localVue,
       store,
-      computed
+      computed: {
+        accessToken: accessTokenMock
+      }
     });
 
     expect(getCurrentWindowMock.callCount).to.equal(1);
     expect(setContentSizeMock.callCount).to.equal(1);
-    expect(setContentSizeMock.lastCall.args[0]).to.equal(fakeWidth); // come from getContentSize return, first item
+    expect(setContentSizeMock.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
     expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
+  });
+
+  it("getUserData api is called and SET_ACCOUNT_NAME is commit", async () => {
+    wrapper = shallowMount(HomePage, {
+      localVue,
+      store,
+      computed: {
+        accessToken: accessTokenMock
+      }
+    });
+
+    await flushPromises();
+
+    expect(getUserDataMock.callCount).to.equal(1);
+    expect(getUserDataMock.lastCall.arg).to.equal(mockedAccessToken);
+
+    expect(setAccountNameMock.callCount).to.equal(1);
+    expect(setAccountNameMock.lastCall.args[1]).to.equal(mockedGetUserDataResponse.data.email);
+  });
+
+  it("getUserData errors are handled handled", async () => {
+    // given
+    getUserDataMock.actions = [];
+    getUserDataMock.rejectWith('Boom!');
+    wrapper = shallowMount(HomePage, {
+      localVue,
+      store,
+      computed: {
+        accessToken: accessTokenMock
+      }
+    });
+
+    await flushPromises();
+
+    expect(getUserDataMock.callCount).to.equal(1);
+    expect(getUserDataMock.lastCall.arg).to.equal(mockedAccessToken);
+
+    expect(setAccountNameMock.callCount).to.equal(1);
+    expect(setAccountNameMock.lastCall.args[1]).to.equal('?');
   });
 });
 
@@ -183,10 +239,11 @@ describe("HomePage methods", () => {
     exportDocsInErrorMock.actions = [];
   });
 
-  it("disconnectUser call disconnectUser action", () => {
-    wrapper.vm.disconnectUser();
+  it("logout call disconnectUser action", () => {
+    wrapper.vm.logout();
 
     expect(disconnectUserMock.callCount).to.equal(1);
+    expect(disconnectUserMock.lastCall.args[1]).to.eql({apiClient: wrapper.vm.$api, reason: 'user disconnect himself'});
   });
 
   it("saveFolderPickerSelection commit data to proper store", async () => {
