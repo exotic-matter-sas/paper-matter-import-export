@@ -15,7 +15,7 @@ import cloneDeep from "lodash.clonedeep";
 
 import LoginPage from "../../../src/renderer/components/LoginPage";
 
-import {remote} from "electron";
+import {remote, ipcRenderer} from "electron";
 import {USER_PROPS} from "../../tools/testValues";
 
 // Create clean Vue instance and set installed package to avoid warning
@@ -32,9 +32,27 @@ const openExternalMock = sm.mock();
 localVue.prototype.$electron = {
   shell: {openExternal: openExternalMock}
 }; // electron prototype mock
+
+// Api response mock
+const mockedGetAccessTokenResponse = {
+  data : {
+    access_token: 'fakeAccessToken',
+    expires_in: 'fakeExpiresIn',
+    refresh_token: 'fakeRefreshToken'
+  }
+};
+
+let ipcOnMock, ipcSendMock, ipcRemoveListinersMock;
+function mockIpcRenderer() {
+  ipcOnMock = sm.mock(ipcRenderer, "on").returnWith("");
+  ipcSendMock = sm.mock(ipcRenderer, "send").returnWith("");
+  ipcRemoveListinersMock = sm.mock(ipcRenderer, "removeAllListeners").returnWith("");
+}
+
 let getAccessTokenMock = sm.mock();
 let apiMock = {getAccessToken: getAccessTokenMock};
 localVue.prototype.$api = apiMock; // api prototype mock
+
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
 
@@ -43,49 +61,49 @@ localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
-// Api response mock
-const mockedGetAccessTokenResponse = {
-  data : {
-    access: 'fakeAccess',
-    refresh: 'fakeRefresh'
-  }
-};
+const mockedPmHostName = "https://example.com";
+const mockedClientId = "https://example.com";
+const mockedRedirectUri = "https://example.com/2";
+const mockedWidth = 100;
 
 describe("LoginPage template", () => {
   // define all var needed for the test here
   let wrapper;
   let storeConfigCopy;
   let store;
-  let mockedApiHostName;
-  let apiHostNameMock;
+  let pmHostNameMock;
+  let disconnectUserMock;
 
   beforeEach(() => {
-    // set vars here: vue wrapper args, fake values, mock
-    mockedApiHostName = "https://example.com";
+    mockIpcRenderer();
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    disconnectUserMock = sm.mock().resolveWith();
+
     storeConfigCopy = cloneDeep(storeConfig);
-    apiHostNameMock = sm.mock().returnWith(mockedApiHostName);
+    storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
       store,
       computed: {
-        apiHostName: apiHostNameMock
+        pmHostName: pmHostNameMock
       }
     });
   });
 
   afterEach(() => {
     sm.restore();
+    disconnectUserMock.reset();
   });
 
   it("renders properly html element", () => {
-    const elementSelector = "#login-form";
+    const elementSelector = "#login-page";
     const elem = wrapper.find(elementSelector);
     expect(elem.is(elementSelector)).to.equal(true);
   });
 
   it("renders properly component data", async () => {
-    expect(wrapper.text()).to.contains(mockedApiHostName);
+    expect(wrapper.text()).to.contains(mockedPmHostName);
   });
 });
 
@@ -93,162 +111,237 @@ describe("LoginPage mounted", () => {
   let wrapper;
   let store;
   let storeConfigCopy;
-  let fakeWidth;
+  let pmHostNameMock;
+  let getAndStoreAccessTokenMock;
   let setContentSizeMock;
   let getContentSizeMock;
   let getCurrentWindowMock;
-  let skipLoginIfAuthenticatedMock;
+  let disconnectUserMock;
 
   beforeEach(() => {
-    fakeWidth = 100;
-    setContentSizeMock = sm.mock();
-    getContentSizeMock = sm.mock().returnWith([fakeWidth, 0]);
+    mockIpcRenderer();
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    getAndStoreAccessTokenMock = sm.mock().returnWith("");
+    setContentSizeMock  = sm.mock();
+    getContentSizeMock  = sm.mock().returnWith([mockedWidth, 0]);
     getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
       {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
     );
-    skipLoginIfAuthenticatedMock = sm.mock();
+    disconnectUserMock = sm.mock().resolveWith();
 
     storeConfigCopy = cloneDeep(storeConfig);
+    storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
       store,
+      computed: {
+        pmHostName: pmHostNameMock
+      },
       methods: {
-        skipLoginIfAuthenticated: skipLoginIfAuthenticatedMock
+        getAndStoreAccessToken: getAndStoreAccessTokenMock
       }
     });
   });
 
   afterEach(() => {
     sm.restore();
-    skipLoginIfAuthenticatedMock.reset();
+    disconnectUserMock.reset();
   });
 
   it("electron remote.setContentSize is called to set window size", () => {
     expect(getCurrentWindowMock.callCount).to.equal(1);
     expect(setContentSizeMock.callCount).to.equal(1);
-    expect(setContentSizeMock.lastCall.args[0]).to.equal(fakeWidth); // come from getContentSize return, first item
+    expect(setContentSizeMock.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
     expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
   });
 
-  it("skipLoginIfAuthenticated is called", () => {
-    expect(skipLoginIfAuthenticatedMock.callCount).to.equal(1);
+  it("disconnectUser is called", () => {
+    expect(disconnectUserMock.callCount).to.equal(1);
+    expect(disconnectUserMock.lastCall.args[1]).to.eql({
+      apiClient: wrapper.vm.$api,
+      reason: 'auto disconnect at startup'
+    });
+  });
+
+  it("listen to and emmit Oauth2 events", () => {
+    expect(ipcOnMock.callCount).to.equal(2);
+    expect(ipcSendMock.callCount).to.equal(1);
+    expect(ipcOnMock.calls[0].args[0]).to.equal("oauthFlowSuccess");
+    // event callback is properly defined
+    const oauthFlowSuccessCallBack = ipcOnMock.calls[0].args[1];
+    oauthFlowSuccessCallBack('fakeEvent', 'fakeCode');
+    expect(getAndStoreAccessTokenMock.callCount).to.equal(1);
+    expect(getAndStoreAccessTokenMock.lastCall.arg).to.equal('fakeCode');
+    expect(ipcOnMock.calls[1].args[0]).to.equal("oauthFlowError");
+    // event callback is properly defined
+    const oauthFlowErrorCallBack = ipcOnMock.calls[1].args[1];
+    oauthFlowErrorCallBack('fakeEvent', 'fakeError');
+    expect(wrapper.vm.lastErrorCode).to.equal('fakeError');
+
+    expect(ipcSendMock.lastCall.args).to.eql(["startLocalServer", mockedPmHostName]);
+  });
+});
+
+describe("LoginPage destroyed", () => {
+  let wrapper;
+  let store;
+  let storeConfigCopy;
+  let pmHostNameMock;
+  let disconnectUserMock;
+
+  beforeEach(() => {
+    mockIpcRenderer();
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    disconnectUserMock = sm.mock().resolveWith();
+
+    storeConfigCopy = cloneDeep(storeConfig);
+    storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
+    store = new Vuex.Store(storeConfigCopy);
+    wrapper = shallowMount(LoginPage, {
+      localVue,
+      store,
+      computed: {
+        pmHostName: pmHostNameMock
+      },
+    });
+  });
+
+  afterEach(() => {
+    sm.restore();
+    disconnectUserMock.reset();
+  });
+
+  it("Oauth2 events listener are properly removed, shutdownLocalServer event is sent", () => {
+    ipcSendMock.reset(); // reset call made by mounted
+
+    wrapper.destroy();
+
+    expect(ipcRemoveListinersMock.callCount).to.equal(2);
+    expect(ipcRemoveListinersMock.calls[0].arg).to.equal("oauthFlowSuccess");
+    expect(ipcRemoveListinersMock.calls[1].arg).to.equal("oauthFlowError");
+    expect(ipcSendMock.callCount).to.equal(1);
+    expect(ipcSendMock.lastCall.arg).to.equal("shutdownLocalServer");
   });
 });
 
 describe("LoginPage methods", () => {
   let wrapper;
-  let storeConfigCopy;
   let store;
-  let refreshAccessTokenMock;
-  let accessTokenMock;
+  let storeConfigCopy;
+  let pmHostNameMock;
+  let openMock;
+  let clientIdMock;
+  let redirectUriMock;
   let saveAuthenticationDataMock;
-  let skipLoginIfAuthenticatedMock;
+  let disconnectUserMock;
 
   beforeEach(() => {
-    refreshAccessTokenMock = sm.mock();
-    accessTokenMock = sm.mock();
+    mockIpcRenderer();
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    clientIdMock = sm.mock().returnWith(mockedClientId);
+    redirectUriMock = sm.mock().returnWith(mockedRedirectUri);
+    pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    openMock = sm.mock().returnWith();
     saveAuthenticationDataMock = sm.mock();
-    skipLoginIfAuthenticatedMock = sm.mock();
+    disconnectUserMock = sm.mock().resolveWith();
 
     storeConfigCopy = cloneDeep(storeConfig);
-    storeConfigCopy.modules.auth.actions.refreshAccessToken = refreshAccessTokenMock;
+    storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
     storeConfigCopy.modules.auth.mutations.SAVE_AUTHENTICATION_DATA = saveAuthenticationDataMock;
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(LoginPage, {
       localVue,
       store,
-      methods: {
-        skipLoginIfAuthenticated: skipLoginIfAuthenticatedMock
-      },
       computed: {
-        accessToken: accessTokenMock
+        pmHostName: pmHostNameMock,
+        clientId: clientIdMock,
+        redirectUri: redirectUriMock
+      },
+      methods: {
+        open: openMock
       }
     });
   });
 
   afterEach(() => {
     sm.restore();
+    openMock.reset();
     routerPushMock.reset();
     getAccessTokenMock.reset();
-    getAccessTokenMock.actions = []; // to reset rejectWith / resolveWith actions
+    getAccessTokenMock.actions = [];
+    disconnectUserMock.reset();
   });
 
   it("open call electron openExternal", () => {
-    const fakeLink = 'http://example.com';
-    wrapper.vm.open(fakeLink);
+    // restore original method to test it
+    wrapper.setMethods({ open: LoginPage.methods.open });
+    const mockedLink = 'http://example.com';
+    wrapper.vm.open(mockedLink);
 
     expect(openExternalMock.callCount).to.equal(1);
-    expect(openExternalMock.lastCall.args[0]).to.equal(fakeLink);
+    expect(openExternalMock.lastCall.args[0]).to.equal(mockedLink);
   });
 
-  it("skipLoginIfAuthenticated skip login if not needed", async () => {
-    // restore original method to test it
-    wrapper.setMethods({ skipLoginIfAuthenticated: LoginPage.methods.skipLoginIfAuthenticated });
-    // when accessToken unset
-    accessTokenMock.returnWith('');
+  it("openLoginPage reset lastErrorCode and and call open", () => {
+    // given
+    wrapper.setData({lastErrorCode: 'randomError'});
 
-    wrapper.vm.skipLoginIfAuthenticated();
+    // when
+    wrapper.vm.openLoginPage();
 
-    // NO auto relogin is attempted
-    expect(refreshAccessTokenMock.callCount).to.equal(0);
-    expect(wrapper.vm.refreshPending).to.equal(false);
+    // then
+    expect(wrapper.vm.lastErrorCode).to.equal('');
+    expect(openMock.callCount).to.equal(1);
+    expect(openMock.lastCall.arg).to.equal(
+      `${mockedPmHostName}/oauth2/authorize/?response_type=code&client_id=${mockedClientId}` +
+      `&redirect_uri=${mockedRedirectUri}&scope=read write`
+    );
   });
 
-  it("skipLoginIfAuthenticated let user login if needed", async () => {
-    // restore original method to test it
-    wrapper.setMethods({ skipLoginIfAuthenticated: LoginPage.methods.skipLoginIfAuthenticated });
-    // when accessToken is already set
-    accessTokenMock.returnWith('bingo!');
-
-    wrapper.vm.skipLoginIfAuthenticated();
-
-    // auto relogin is attempted
-    expect(refreshAccessTokenMock.callCount).to.equal(1);
-    expect(refreshAccessTokenMock.lastCall.args[1]).to.equal(apiMock);
-    expect(wrapper.vm.refreshPending).to.equal(true);
-
-    await flushPromises();
-    expect(wrapper.vm.refreshPending).to.equal(false);
-    expect(routerPushMock.callCount).to.equal(1);
-    expect(routerPushMock.lastCall.args[0]).to.eql({name: 'home'});
-  });
-
-  it("login call proper api", () => {
-    wrapper.setData({email: USER_PROPS.email, password: USER_PROPS.password});
-
-    wrapper.vm.login();
-
-    expect(getAccessTokenMock.callCount).to.equal(1);
-    expect(getAccessTokenMock.lastCall.args).to.eql([USER_PROPS.email, USER_PROPS.password]);
-  });
-
-  it("login store data in store and redirect to home on success", async () => {
-    wrapper.setData({email: USER_PROPS.email, password: USER_PROPS.password});
+  it("getAndStoreAccessToken call proper api", async () => {
     getAccessTokenMock.resolveWith(mockedGetAccessTokenResponse);
 
-    wrapper.vm.login();
+    // when
+    const mockedAuthCode = 'fakeAuthCode';
+    await wrapper.vm.getAndStoreAccessToken(mockedAuthCode);
+
+    // then
+    expect(getAccessTokenMock.callCount).to.equal(1);
+    expect(getAccessTokenMock.lastCall.arg).to.equal(mockedAuthCode);
+  });
+
+  it("getAndStoreAccessToken store data in store and redirect to home on success", async () => {
+    // given
+    getAccessTokenMock.resolveWith(mockedGetAccessTokenResponse);
+
+    // when
+    wrapper.vm.getAndStoreAccessToken();
     await flushPromises();
 
+    // then
     expect(saveAuthenticationDataMock.callCount).to.equal(1);
     expect(saveAuthenticationDataMock.lastCall.args[1]).to.eql(
       {
-        accountName: USER_PROPS.email,
-        accessToken: mockedGetAccessTokenResponse.data.access,
-        refreshToken: mockedGetAccessTokenResponse.data.refresh
+        accessToken: mockedGetAccessTokenResponse.data.access_token,
+        accessTokenExpiresIn: mockedGetAccessTokenResponse.data.expires_in,
+        refreshToken: mockedGetAccessTokenResponse.data.refresh_token
       }
     );
     expect(routerPushMock.callCount).to.equal(1);
     expect(routerPushMock.lastCall.args[0]).to.eql({name: 'home'});
   });
 
-  it("login handle API error properly", async () => {
-    const errorDetail = 'boom!';
-    getAccessTokenMock.rejectWith({response: {data: {detail: errorDetail}}});
+  it("getAndStoreAccessToken handle error", async () => {
+    // given
+    getAccessTokenMock.rejectWith("boom!");
+    wrapper.setData({lastErrorCode: ''});
 
-    wrapper.vm.login();
+    // when
+    wrapper.vm.getAndStoreAccessToken();
     await flushPromises();
 
-    expect(wrapper.vm.lastError).to.include(errorDetail);
+    // then
+    expect(wrapper.vm.lastErrorCode).to.equal("cantGetAccessToken");
   });
 });

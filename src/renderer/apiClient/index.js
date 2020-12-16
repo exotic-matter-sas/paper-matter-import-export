@@ -5,25 +5,72 @@
 
 import axios from "axios";
 
-export default class ApiCient {
-  constructor(hostName) {
-    this.http = axios.create({baseURL: hostName})
+export default class ApiClient {
+  constructor({hostName, clientId, redirectUri}) {
+    this.http = axios.create({baseURL: hostName});
+    this.clientId = clientId;
+    this.redirectUri = redirectUri;
   }
 
-  getAccessToken(email, password){
+  updateServerData(hostName, clientId){
+    this.http.defaults.baseURL = hostName;
+    this.clientId = clientId;
+  }
+
+  /*
+   * Oauth2 requests
+   * For theses request we use "Content-Type: application/x-www-form-urlencoded" for POST data
+   * As Oauth2 flow doesn't expect JSON data
+   */
+
+  getAccessToken(code){
+    const data = new URLSearchParams();
+    data.append('client_id', this.clientId);
+    data.append('code', code);
+    data.append('redirect_uri', this.redirectUri);
+    data.append('grant_type', 'authorization_code');
     return this.http.post(
-      '/app/api/token',
-      {email, password}
+      '/oauth2/token',
+      data
     )
   }
 
   refreshAccessToken(refreshToken){
+    // For this request we use "Content-Type: application/x-www-form-urlencoded" for POST data
+    // As Oauth2 flow doesn't expect JSON formatted data
+    const data = new URLSearchParams();
+    data.append('client_id', this.clientId);
+    data.append('refresh_token', refreshToken);
+    data.append('grant_type', 'refresh_token');
     return this.http.post(
-      '/app/api/token/refresh',
-      {refresh: refreshToken}
+      '/oauth2/token',
+      data
     )
   }
 
+  revokeToken(token, token_type_hint="access_token"){
+    // For this request we use "Content-Type: application/x-www-form-urlencoded" for POST data
+    // As Oauth2 flow doesn't expect JSON formatted data
+    const data = new URLSearchParams();
+    data.append('client_id', this.clientId);
+    data.append('token', token);
+    data.append('token_type_hint', token_type_hint);
+    return this.http.post(
+      '/oauth2/revoke_token',
+      data
+    )
+  }
+
+  /*
+   * API REST requests
+   */
+
+  getUserData(accessToken) {
+    return this.http.get(
+      `/app/api/v1/users/me`,
+      {headers: {'Authorization': "Bearer " + accessToken}}
+    )
+  }
 
   createFolder(accessToken, name, parent=null){
     return this.http.post(

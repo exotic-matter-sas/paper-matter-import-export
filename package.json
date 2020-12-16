@@ -1,6 +1,6 @@
 {
     "name": "paper-matter-import-export",
-    "version": "0.2.3",
+    "version": "0.3.0",
     "author": "Exotic Matter SAS <fabien@exotic-matter.fr>",
     "description": "Local client to import/export your documents in/from Paper Matter",
     "homepage": "https://papermatter.app",
@@ -49,7 +49,10 @@
             "icon": "build/resources/icons/icon.png",
             "entitlements": "build/resources/entitlements.mac.plist",
             "entitlementsInherit": "build/resources/entitlements.mac.plist",
-            "target": ["dmg", "zip"],
+            "target": [
+                "dmg",
+                "zip"
+            ],
             "hardenedRuntime": true
         },
         "win": {
@@ -80,7 +83,6 @@
         "electron-updater": "^4.2.0",
         "fast-csv": "^4.3.1",
         "jquery": "^3.4.1",
-        "jwt-decode": "^2.2.0",
         "pdfjs-dist": "^2.2.228",
         "vue": "^2.5.16",
         "vue-electron": "1.0.6",

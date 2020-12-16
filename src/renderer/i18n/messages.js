@@ -9,6 +9,7 @@ export default {
     yourComputer: 'Your computer',
     yourPaperMatterOrg: 'Your Paper Matter organization',
     reportAnIssue: 'Report an issue',
+    loadingSpinnerLabel: 'Loading...',
     bFormFile: {
       BrowseLabel: 'Browse'
     },
@@ -28,23 +29,18 @@ export default {
     },
     loginPage: {
       logoAlt: 'Paper Matter logo',
-      emailInputLabel: 'Email',
-      passwordInputLabel: 'Password',
-      forgotPasswordLink: 'Forgot password?',
       submitInputValue: 'Login',
-      loadingSpinnerLabel: 'Loading...',
-      serverAddressLabel: 'Login to: ',
       loginDomainLinkTitle: 'If you are using a self-hosted Paper Matter, click to set your server address',
-      errorLogin: 'Please enter a correct email address and password.',
-      errorUnexpected: 'Unexpected error ({0}).',
-      errorUnknown: 'Unknown error, please retry later.',
-      errorUnknownCustomHostName: 'Unknown error, please double check the server address set.',
-      errorServerUnreachable: 'The Paper Matter server seems unreachable, please check your internet connection.',
+      loginLinkTitle: 'Will open your browser to log you in',
+      errorAuthorizationFailed: 'Access to your account has been refused, you can retry to login (error code: {0}).',
     },
-    editServerAddressModal: {
-      title: 'Set your server address',
-      inputLabel: 'Server address',
-      inputDescription: 'Copy url displayed in your browser when you are logged into your Paper Matter account (or leave blank to reset default value).',
+    EditServerModal: {
+      title: 'Paper Matter instance settings',
+      serverInputLabel: 'Server address',
+      clientIdInputLabel: 'Client ID',
+      serverInputDescription: 'Copy url displayed in your browser when you are logged into your Paper Matter account (or leave blank to reset default value).',
+      clientIdInputDescription: 'Ask this ID to your self hosted instance admin, he have to create app as {self_hosting_doc_link} (or leave blank to reset default value).',
+      clientIdInputDescriptionLinkText: 'mentioned here',
       errorParseServerAddress: 'Url is not properly formatted (it should be something like https://example.com)',
     },
     homePage: {
@@ -187,6 +183,7 @@ export default {
     yourComputer: 'Votre ordinateur',
     yourPaperMatterOrg: 'Votre organisation Paper Matter',
     reportAnIssue: 'Signaler un bug',
+    loadingSpinnerLabel: 'Chargement...',
     bFormFile: {
       BrowseLabel: 'Parcourir'
     },
@@ -206,23 +203,18 @@ export default {
     },
     loginPage: {
       logoAlt: 'Logo Paper Matter',
-      emailInputLabel: 'Email',
-      passwordInputLabel: 'Mot de passe',
-      forgotPasswordLink: 'Mot de passe oublié ?',
       submitInputValue: 'Se connecter',
-      loadingSpinnerLabel: 'Chargement...',
-      serverAddressLabel: 'Connexion à : ',
       loginDomainLinkTitle: 'Si vous utilisez une version auto-hébergée de Paper Matter, cliquez pour saisir l\'adresse de votre serveur',
-      errorLogin: 'Veuillez saisir une adresse électronique et un mot de passe valides.',
-      errorUnexpected: 'Erreur imprévue ({0})',
-      errorUnknown: 'Erreur inconnue, veuillez réessayer plus tard.',
-      errorUnknownCustomHostName: 'Erreur inconnue, vérifiez l\'adresse du serveur que vous avez défini.',
-      errorServerUnreachable: 'Le serveur Paper Matter semble injoignable, veuillez vérifier votre connexion internet.',
+      loginLinkTitle: 'Votre navigateur sera ouvert pour vous connecter',
+      errorAuthorizationFailed: "L'accès à votre compte a été refusé, vous pouvez essayer de vous reconnecter (code erreur : {0}).",
     },
-    editServerAddressModal: {
-      title: 'Saisissez l\'adresse de votre serveur',
-      inputLabel: 'Adresse du serveur',
-      inputDescription: 'Copiez l\'adresse affichée dans votre navigateur quand vous êtes connecté à votre compte Paper Matter (ou laissez vide pour restaurer la valeur par défaut).',
+    EditServerModal: {
+      title: 'Configuration de l\'instance Paper Matter',
+      serverInputLabel: 'Adresse du serveur',
+      clientIdInputLabel: 'Client ID',
+      serverInputDescription: 'Copiez l\'adresse affichée dans votre navigateur quand vous êtes connecté à votre compte Paper Matter (ou laissez vide pour restaurer la valeur par défaut).',
+      clientIdInputDescription: 'Demandez cet ID à l\'Administarteur de votre instance, celui-ci doit créer l\'application comme {self_hosting_doc_link} (ou laissez vide pour restaurer la valeur par défaut).',
+      clientIdInputDescriptionLinkText: 'mentionné ici',
       errorParseServerAddress: 'L\'adresse n\'est pas correctement formatée (elle devrait ressembler à https://exemple.com)',
     },
     homePage: {

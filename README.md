@@ -34,14 +34,14 @@ If app can't be run, you can also find them by manually opening this folder:
     
 #### Debug local run
 
-Useful logs should appears inside the terminal used to run the app.
+Useful logs should appear inside the terminal used to run the app.
 
 You can also remote debug the app by copying the debugger url which appears in the console at app run.
 
     # line which appears in console at app run
     Debugger listening on ws://127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0
     
-To attach debugger in Chrome, open this url:
+To attach the debugger in Chrome, open this url:
  - devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=`127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0`
 
 _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/debugging-production.html_
@@ -60,7 +60,7 @@ _Run all commands from one Terminal for ENV VAR to be preserved (commands are gi
 1. Restore old value for `package.json` > `version`
 1. Copy `dev-app-update.yml` to `dist/electron/dev-app-update.yml` and update values to use test repo
 1. (Linux only) Set APPIMAGE ENV VAR: `export APPIMAGE=true`
-1. (Mac only) App notarization is needed to test full update process, you have to set `API_KEY_ID` and `API_KEY_ISSUER_ID` (theses values can be generated/retrieved from https://appstoreconnect.apple.com/access/api)
+1. (Mac only) App notarization is needed to test full update process, you have to set `API_KEY_ID` and `API_KEY_ISSUER_ID` (these values can be generated/retrieved from https://appstoreconnect.apple.com/access/api)
 1. Run app in dev mode `npm run dev` to test update process partially or build app `npm run build` and run it (from `build/output`) to test full update process
 
 You should see logs related to update process popping in the terminal.
@@ -75,7 +75,7 @@ _With [Karma](https://karma-runner.github.io/latest/index.html) test runner, [Mo
 
 ### Release and build process on CI
 
- 1. Update package.json `version` (eg. `1.0.0`) and push
+ 1. Update package.json `version` (e.g. `1.0.0`) and push
  1. :warning: Wait for draft release to be created and built app to be attached to it :warning:
  1. Complete and publish/tag release on Github
 

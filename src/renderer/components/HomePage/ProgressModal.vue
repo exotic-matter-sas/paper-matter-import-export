@@ -127,9 +127,7 @@
     width: 100%;
     text-align: center;
   }
-</style>
 
-<style lang="scss" scoped>
   #progress-modal {
     /*Disable transition to prevent bar to go backward when displaying export step2 progressbar in place of step1 one*/
     ::v-deep .progress-bar{

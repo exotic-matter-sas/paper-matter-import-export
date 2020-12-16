@@ -29,13 +29,15 @@ export let debugMode = fs.existsSync(debugFilePath);
 log.transports.file.level =  debugMode ? "silly" : "error";
 log.transports.console.level = "silly";
 
+const appName = "Paper Matter import & export";
+
 function createWindow () {
   /**
    * Initial window options
    */
   let browserWindowOptions = {
     // When using run dev, electron version may be shown instead of packages.json version
-    title: 'Paper Matter import & export - ' + app.getVersion(),
+    title: `${appName} - ${app.getVersion()}`,
     width: 500,
     height: 438,
     useContentSize: false, // width and height set webview content instead of windows size (with borders and title bar)
@@ -44,7 +46,7 @@ function createWindow () {
       webSecurity: process.env.NODE_ENV !== 'development' // to allow requesting API from localhost during development
     }
   };
-  if (process.platform === 'linux') {
+  if (process.env.NODE_ENV !== 'development' && process.platform === 'linux') {
     // Workaround to make icon work for AppImage (in task bar only, icon not appears on .AppImage file)
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-406786917
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-342062462
@@ -70,7 +72,10 @@ function createWindow () {
   });
 
   mainWindow.on('closed', () => {
-    mainWindow = null
+    if (localServer && localServer.listening) {
+      shutdownLocalServer();
+    }
+    mainWindow = null;
   })
 }
 
@@ -137,4 +142,94 @@ autoUpdater.on('download-progress', (progressObj) => {
 autoUpdater.on('update-downloaded', (info) => {
   mainWindow.webContents.send("updateDownloaded");
   autoUpdater.quitAndInstall()
+});
+
+
+/**
+ * Local server to listen to redirect uri for Oauth2 flow
+ *
+ */
+const http = require('http');
+let localServer;
+let localServerSockets;
+let paperMatterHostName;
+
+// We have to kill every socket alive to be able to really close the server
+function shutdownLocalServer () {
+  for (const socket of localServerSockets) {
+    socket.destroy();
+  }
+  localServer.close(() => log.debug("Local server closed"));
+}
+
+ipcMain.on('updateHostName', (event, pmHostName) => {
+  paperMatterHostName = pmHostName;
+});
+
+ipcMain.on('startLocalServer', (event, pmHostName) => {
+  paperMatterHostName = pmHostName;
+  let error;
+  log.debug("Local server started, listening for Oauth2 redirect URI...");
+
+  localServer = http.createServer()
+    .setTimeout(10000)
+    .listen(1612);
+  localServerSockets = new Set();
+
+
+  localServer.on('connection', socket => {
+    localServerSockets.add(socket);
+    socket.once('close', () => {
+      localServerSockets.delete(socket);
+    })
+  });
+
+  localServer.on('request',(req, res) => {
+    log.debug("Oauth2 flow [2]: request received by local server");
+    const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+
+    if (parsedUrl.pathname === '/oauth2/redirect') {
+      if (parsedUrl.searchParams.has('code')) {
+        log.debug("Oauth2 flow [2]: OK, redirect URI properly formatted with authorization code");
+        res.writeHead(302, {
+          'Location': `${paperMatterHostName}/oauth2/authorization_ok/?app_name=${encodeURIComponent(appName)}`
+        });
+        res.end();
+        mainWindow.webContents.send("oauthFlowSuccess", parsedUrl.searchParams.get('code'));
+      }
+      else if (parsedUrl.searchParams.has('error')) {
+        error = parsedUrl.searchParams.get('error');
+        log.error("Oauth2 flow [2]: server returns an error:\n", error);
+        res.writeHead(302, {
+          'Location': `${paperMatterHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
+        });
+        res.end();
+        mainWindow.webContents.send("oauthFlowError", error);
+      }
+      // querystring missing
+      else {
+        error = 'query_string_missing';
+        log.error(`Oauth2 flow [2]: redirect URI malformed (${error})`);
+        res.writeHead(302, {
+          'Location': `${paperMatterHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
+        });
+        res.end();
+        mainWindow.webContents.send("oauthFlowError", error);
+      }
+    }
+    // wrong url called
+    else {
+      error = 'wrong_url_called';
+      log.error(`Oauth2 flow [2]: redirect URI malformed (${error})`);
+      res.writeHead(302, {
+        'Location': `${paperMatterHostName}/oauth2/authorization_ko/?app_name=${encodeURIComponent(appName)}&error=${error}`
+      });
+      res.end();
+      mainWindow.webContents.send("oauthFlowError", error);
+    }
+  });
+});
+
+ipcMain.on('shutdownLocalServer', (event) => {
+  shutdownLocalServer();
 });

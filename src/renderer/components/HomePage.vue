@@ -23,7 +23,7 @@
         </a>
       </li>
       <li id="logged-header" class="col  text-white-50">
-        <button @click.prevent="disconnectUser" type="button" :aria-label="$t('homePage.disconnectTooltip')"
+        <button @click.prevent="logout" type="button" :aria-label="$t('homePage.disconnectTooltip')"
                 class="close text-white-50" :title="$t('homePage.disconnectTooltip')">
           ×
         </button>
@@ -113,11 +113,21 @@
     },
 
     mounted() {
+      const vi = this;
       // to resize window to page content
       const window = remote.getCurrentWindow();
-      window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
+      window.setContentSize(window.getContentSize()[0], vi.windowHeight); // keep same width
 
-      this.displayRetryModalIfNeeded();
+      vi.displayRetryModalIfNeeded();
+
+      vi.$api.getUserData(this.accessToken)
+      .then(response => {
+        vi.$store.commit('auth/SET_ACCOUNT_NAME', response.data.email);
+      })
+      .catch (error => {
+        log.error("Can't retrieve user data:\n", error);
+        vi.$store.commit('auth/SET_ACCOUNT_NAME', '?');
+      })
     },
 
     computed: {
@@ -128,14 +138,14 @@
         return this.action === 'import' ? this.savedImportDestination : this.savedExportSource
       },
       ...mapState('config', ['action']),
-      ...mapState('auth', ['accountName']),
+      ...mapState('auth', ['accountName', 'accessToken', 'refreshToken']),
       ...mapState('import', ['docsToImport', 'importDocsInError', 'savedImportDestination']),
       ...mapState('export', ['docsToExport', 'exportDocsInError', 'savedExportSource']),
     },
 
     methods: {
-      disconnectUser () {
-        this.$store.dispatch('auth/disconnectUser', 'user disconnect himself');
+      logout () {
+        this.$store.dispatch('auth/disconnectUser', {apiClient: this.$api, reason: 'user disconnect himself'});
       },
 
       saveFolderPickerSelection (destinationFolder) {
