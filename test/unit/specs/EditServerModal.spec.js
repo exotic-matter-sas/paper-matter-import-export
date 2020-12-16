@@ -28,8 +28,8 @@ localVue.prototype.$t = (text, args = "") => {
 localVue.prototype.$tc = (text, args = "") => {
   return text + args;
 }; // i18n mock
-let apiSetServerDataMock = sm.mock();
-let apiMock = {setServerData: apiSetServerDataMock};
+let apiUpdateServerDataMock = sm.mock();
+let apiMock = {updateServerData: apiUpdateServerDataMock};
 localVue.prototype.$api = apiMock; // api prototype mock
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
@@ -148,7 +148,7 @@ describe("EditServerModal methods", () => {
   afterEach(() => {
     sm.restore();
     showModalMock.reset();
-    apiSetServerDataMock.reset();
+    apiUpdateServerDataMock.reset();
     ipcSendMock.reset();
   });
 
@@ -176,8 +176,8 @@ describe("EditServerModal methods", () => {
   it("save update hostName in api client and localServer", () => {
     wrapper.vm.save(bvModalEvtMock);
 
-    expect(apiSetServerDataMock.callCount).to.equal(1);
-    expect(apiSetServerDataMock.lastCall.args[0]).to.eql(mockedPmHostName, mockedClientId);
+    expect(apiUpdateServerDataMock.callCount).to.equal(1);
+    expect(apiUpdateServerDataMock.lastCall.args[0]).to.eql(mockedPmHostName, mockedClientId);
 
     expect(ipcSendMock.callCount).to.equal(1);
     expect(ipcSendMock.lastCall.args).to.eql(['updateHostName', mockedPmHostName]);

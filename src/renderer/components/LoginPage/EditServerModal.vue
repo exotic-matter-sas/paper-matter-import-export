@@ -114,7 +114,7 @@
         );
 
         // update server data in api http client
-        this.$api.setServerData(this.pmHostName, this.clientId);
+        this.$api.updateServerData(this.pmHostName, this.clientId);
         // update server data in main process for localServer
         ipcRenderer.send('updateHostName', this.pmHostName);
         log.info('server data updated');

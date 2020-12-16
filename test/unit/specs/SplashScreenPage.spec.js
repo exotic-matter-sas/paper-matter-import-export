@@ -12,11 +12,7 @@ import storeConfig from "../../../src/renderer/store";
 import cloneDeep from "lodash.clonedeep";
 
 import SplashScreenPage from "../../../src/renderer/components/SplashScreenPage";
-import {defaultPmHostName} from "../../../src/renderer/store/modules/config";
-import {defaultClientId} from "../../../src/renderer/store/modules/auth";
 import {ipcRenderer, remote} from "electron";
-
-const log = require('electron-log');
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -28,9 +24,6 @@ localVue.prototype.$t = (text, args = "") => {
 localVue.prototype.$tc = (text, args = "") => {
   return text + args;
 }; // i18n mock
-let apiSetServerDataMock = sm.mock();
-let apiMock = {setServerData: apiSetServerDataMock};
-localVue.prototype.$api = apiMock; // api prototype mock
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
 const showModalMock = sm.mock();
@@ -40,9 +33,6 @@ localVue.prototype.$bvModal = { show: showModalMock }; // bvModal mock
 localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
-
-const mockedPmHostName = "https://example.com";
-const mockedClientId = "fakeClientId";
 
 
 describe("SplashScreenPage template", () => {
