@@ -21,27 +21,6 @@ import {USER_PROPS} from "../../tools/testValues";
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
 
-// Global mocks
-const mockedWidth = 100;
-
-let globalMocks = {
-  setContentSize : sm.mock(),
-  getContentSize : sm.mock().returnWith([mockedWidth, 0]),
-  ipcOn : sm.mock(ipcRenderer, "on").returnWith(""),
-  ipcSend : sm.mock(ipcRenderer, "send").returnWith(""),
-  ipcRemoveAllListeners : sm.mock(ipcRenderer, "removeAllListeners").returnWith(""),
-  openExternal: sm.mock()
-};
-globalMocks.getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
-  {setContentSize: globalMocks.setContentSize, getContentSize: globalMocks.getContentSize}
-);
-
-const disconnectUserMock = sm.mock().resolveWith();
-
-function resetGlobalMocks() {
-  Object.values(globalMocks).forEach(mock => mock.reset());
-}
-
 // Mock prototype and mixin bellow
 localVue.prototype.$t = (text, args = "") => {
   return text + args;
@@ -49,8 +28,9 @@ localVue.prototype.$t = (text, args = "") => {
 localVue.prototype.$tc = (text, args = "") => {
   return text + args;
 }; // i18n mock
+const openExternalMock = sm.mock();
 localVue.prototype.$electron = {
-  shell: {openExternal: globalMocks.openExternal}
+  shell: {openExternal: openExternalMock}
 }; // electron prototype mock
 
 // Api response mock
@@ -61,6 +41,14 @@ const mockedGetAccessTokenResponse = {
     refresh_token: 'fakeRefreshToken'
   }
 };
+
+let ipcOnMock, ipcSendMock, ipcRemoveListinersMock;
+function mockIpcRenderer() {
+  ipcOnMock = sm.mock(ipcRenderer, "on").returnWith("");
+  ipcSendMock = sm.mock(ipcRenderer, "send").returnWith("");
+  ipcRemoveListinersMock = sm.mock(ipcRenderer, "removeAllListeners").returnWith("");
+}
+
 let getAccessTokenMock = sm.mock();
 let apiMock = {getAccessToken: getAccessTokenMock};
 localVue.prototype.$api = apiMock; // api prototype mock
@@ -76,6 +64,7 @@ localVue.component("font-awesome-icon"); // avoid font awesome warnings
 const mockedPmHostName = "https://example.com";
 const mockedClientId = "https://example.com";
 const mockedRedirectUri = "https://example.com/2";
+const mockedWidth = 100;
 
 describe("LoginPage template", () => {
   // define all var needed for the test here
@@ -83,9 +72,13 @@ describe("LoginPage template", () => {
   let storeConfigCopy;
   let store;
   let pmHostNameMock;
+  let disconnectUserMock;
 
   beforeEach(() => {
+    mockIpcRenderer();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    disconnectUserMock = sm.mock().resolveWith();
+
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
     store = new Vuex.Store(storeConfigCopy);
@@ -99,7 +92,7 @@ describe("LoginPage template", () => {
   });
 
   afterEach(() => {
-    resetGlobalMocks();
+    sm.restore();
     disconnectUserMock.reset();
   });
 
@@ -120,11 +113,21 @@ describe("LoginPage mounted", () => {
   let storeConfigCopy;
   let pmHostNameMock;
   let getAndStoreAccessTokenMock;
+  let setContentSizeMock;
+  let getContentSizeMock;
+  let getCurrentWindowMock;
+  let disconnectUserMock;
 
   beforeEach(() => {
-    globalMocks.ipcSend.reset(); // reset call made by electron
+    mockIpcRenderer();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     getAndStoreAccessTokenMock = sm.mock().returnWith("");
+    setContentSizeMock  = sm.mock();
+    getContentSizeMock  = sm.mock().returnWith([mockedWidth, 0]);
+    getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
+      {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
+    );
+    disconnectUserMock = sm.mock().resolveWith();
 
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
@@ -142,15 +145,15 @@ describe("LoginPage mounted", () => {
   });
 
   afterEach(() => {
-    resetGlobalMocks();
+    sm.restore();
     disconnectUserMock.reset();
   });
 
   it("electron remote.setContentSize is called to set window size", () => {
-    expect(globalMocks.getCurrentWindowMock.callCount).to.equal(1);
-    expect(globalMocks.setContentSize.callCount).to.equal(1);
-    expect(globalMocks.setContentSize.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
-    expect(globalMocks.setContentSize.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
+    expect(getCurrentWindowMock.callCount).to.equal(1);
+    expect(setContentSizeMock.callCount).to.equal(1);
+    expect(setContentSizeMock.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
+    expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
   });
 
   it("disconnectUser is called", () => {
@@ -162,21 +165,21 @@ describe("LoginPage mounted", () => {
   });
 
   it("listen to and emmit Oauth2 events", () => {
-    expect(globalMocks.ipcOn.callCount).to.equal(2);
-    expect(globalMocks.ipcSend.callCount).to.equal(1);
-    expect(globalMocks.ipcOn.calls[0].args[0]).to.equal("oauthFlowSuccess");
+    expect(ipcOnMock.callCount).to.equal(2);
+    expect(ipcSendMock.callCount).to.equal(1);
+    expect(ipcOnMock.calls[0].args[0]).to.equal("oauthFlowSuccess");
     // event callback is properly defined
-    const oauthFlowSuccessCallBack = globalMocks.ipcOn.calls[0].args[1];
+    const oauthFlowSuccessCallBack = ipcOnMock.calls[0].args[1];
     oauthFlowSuccessCallBack('fakeEvent', 'fakeCode');
     expect(getAndStoreAccessTokenMock.callCount).to.equal(1);
     expect(getAndStoreAccessTokenMock.lastCall.arg).to.equal('fakeCode');
-    expect(globalMocks.ipcOn.calls[1].args[0]).to.equal("oauthFlowError");
+    expect(ipcOnMock.calls[1].args[0]).to.equal("oauthFlowError");
     // event callback is properly defined
-    const oauthFlowErrorCallBack = globalMocks.ipcOn.calls[1].args[1];
+    const oauthFlowErrorCallBack = ipcOnMock.calls[1].args[1];
     oauthFlowErrorCallBack('fakeEvent', 'fakeError');
     expect(wrapper.vm.lastErrorCode).to.equal('fakeError');
 
-    expect(globalMocks.ipcSend.lastCall.args).to.eql(["startLocalServer", mockedPmHostName]);
+    expect(ipcSendMock.lastCall.args).to.eql(["startLocalServer", mockedPmHostName]);
   });
 });
 
@@ -185,10 +188,12 @@ describe("LoginPage destroyed", () => {
   let store;
   let storeConfigCopy;
   let pmHostNameMock;
+  let disconnectUserMock;
 
   beforeEach(() => {
-    globalMocks.ipcSend.reset(); // reset call made by electron
+    mockIpcRenderer();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
+    disconnectUserMock = sm.mock().resolveWith();
 
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
@@ -203,20 +208,20 @@ describe("LoginPage destroyed", () => {
   });
 
   afterEach(() => {
-    resetGlobalMocks();
+    sm.restore();
     disconnectUserMock.reset();
   });
 
   it("Oauth2 events listener are properly removed, shutdownLocalServer event is sent", () => {
-    globalMocks.ipcSend.reset(); // reset call made by mounted
+    ipcSendMock.reset(); // reset call made by mounted
 
     wrapper.destroy();
 
-    expect(globalMocks.ipcRemoveAllListeners.callCount).to.equal(2);
-    expect(globalMocks.ipcRemoveAllListeners.calls[0].arg).to.equal("oauthFlowSuccess");
-    expect(globalMocks.ipcRemoveAllListeners.calls[1].arg).to.equal("oauthFlowError");
-    expect(globalMocks.ipcSend.callCount).to.equal(1);
-    expect(globalMocks.ipcSend.lastCall.arg).to.equal("shutdownLocalServer");
+    expect(ipcRemoveListinersMock.callCount).to.equal(2);
+    expect(ipcRemoveListinersMock.calls[0].arg).to.equal("oauthFlowSuccess");
+    expect(ipcRemoveListinersMock.calls[1].arg).to.equal("oauthFlowError");
+    expect(ipcSendMock.callCount).to.equal(1);
+    expect(ipcSendMock.lastCall.arg).to.equal("shutdownLocalServer");
   });
 });
 
@@ -229,15 +234,17 @@ describe("LoginPage methods", () => {
   let clientIdMock;
   let redirectUriMock;
   let saveAuthenticationDataMock;
+  let disconnectUserMock;
 
   beforeEach(() => {
-    globalMocks.ipcSend.reset(); // reset call made by electron
+    mockIpcRenderer();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     clientIdMock = sm.mock().returnWith(mockedClientId);
     redirectUriMock = sm.mock().returnWith(mockedRedirectUri);
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     openMock = sm.mock().returnWith();
     saveAuthenticationDataMock = sm.mock();
+    disconnectUserMock = sm.mock().resolveWith();
 
     storeConfigCopy = cloneDeep(storeConfig);
     storeConfigCopy.modules.auth.actions.disconnectUser = disconnectUserMock;
@@ -258,7 +265,7 @@ describe("LoginPage methods", () => {
   });
 
   afterEach(() => {
-    resetGlobalMocks();
+    sm.restore();
     openMock.reset();
     routerPushMock.reset();
     getAccessTokenMock.reset();
@@ -272,8 +279,8 @@ describe("LoginPage methods", () => {
     const mockedLink = 'http://example.com';
     wrapper.vm.open(mockedLink);
 
-    expect(globalMocks.openExternal.callCount).to.equal(1);
-    expect(globalMocks.openExternal.lastCall.args[0]).to.equal(mockedLink);
+    expect(openExternalMock.callCount).to.equal(1);
+    expect(openExternalMock.lastCall.args[0]).to.equal(mockedLink);
   });
 
   it("openLoginPage reset lastErrorCode and and call open", () => {
