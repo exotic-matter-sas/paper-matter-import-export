@@ -146,7 +146,7 @@ autoUpdater.on('update-downloaded', (info) => {
 
 
 /**
- * Local server to listen for redirect uri for Oauth2 flow
+ * Local server to listen to redirect uri for Oauth2 flow
  *
  */
 const http = require('http');

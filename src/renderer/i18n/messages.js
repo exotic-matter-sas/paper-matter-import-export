@@ -35,7 +35,7 @@ export default {
       errorAuthorizationFailed: 'Access to your account has been refused, you can retry to login (error code: {0}).',
     },
     EditServerModal: {
-      title: 'Set your server data',
+      title: 'Paper Matter instance settings',
       serverInputLabel: 'Server address',
       clientIdInputLabel: 'Client ID',
       serverInputDescription: 'Copy url displayed in your browser when you are logged into your Paper Matter account (or leave blank to reset default value).',
@@ -209,7 +209,7 @@ export default {
       errorAuthorizationFailed: "L'accès à votre compte a été refusé, vous pouvez essayer de vous reconnecter (code erreur : {0}).",
     },
     EditServerModal: {
-      title: 'Saisissez les données de votre serveur',
+      title: 'Configuration de l\'instance Paper Matter',
       serverInputLabel: 'Adresse du serveur',
       clientIdInputLabel: 'Client ID',
       serverInputDescription: 'Copiez l\'adresse affichée dans votre navigateur quand vous êtes connecté à votre compte Paper Matter (ou laissez vide pour restaurer la valeur par défaut).',
