@@ -60,7 +60,6 @@
         serverInputPlaceholder: '',
         clientIdModel: '',
         clientIdInputPlaceholder: '',
-        // FIXME: UI is not refreshed when updated to true (it seems to not be responsive but can't figure out why)
         serverAddressError: false
       }
     },
