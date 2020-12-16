@@ -102,8 +102,7 @@
           `?response_type=code` +
           `&client_id=${this.clientId}` +
           `&redirect_uri=${this.redirectUri}` +
-          `&scope=read write` +
-          `&approval_prompt=auto` // to only ask for user approval on first login
+          `&scope=read write`
         );
       },
 

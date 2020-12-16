@@ -295,7 +295,7 @@ describe("LoginPage methods", () => {
     expect(openMock.callCount).to.equal(1);
     expect(openMock.lastCall.arg).to.equal(
       `${mockedPmHostName}/oauth2/authorize/?response_type=code&client_id=${mockedClientId}` +
-      `&redirect_uri=${mockedRedirectUri}&scope=read write&approval_prompt=auto`
+      `&redirect_uri=${mockedRedirectUri}&scope=read write`
     );
   });
 
