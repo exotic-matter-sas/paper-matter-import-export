@@ -112,7 +112,7 @@ app.on('activate', () => {
  *
  * Uncomment the following code below and install `electron-updater` to
  * support auto updating. Code Signing with a valid certificate is required.
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
+ * https://www.electron.build/auto-update
  */
 
 import { autoUpdater } from 'electron-updater'
@@ -126,7 +126,9 @@ ipcMain.on('checkForUpdate', () => {
       mainWindow.webContents.send("updateError");
     });
 });
-
+autoUpdater.on('update-available', (info) => {
+  mainWindow.webContents.send("updateAvailable");
+});
 autoUpdater.on('update-not-available', (info) => {
   mainWindow.webContents.send("updateNotAvailable");
 });
@@ -134,8 +136,8 @@ autoUpdater.on('error', (err) => {
   mainWindow.webContents.send("updateError");
   log.error("Error during update:\n", err)
 });
-// This event is not emitted during differential download so SplashScreen progressbar may not be shown currently
-// https://github.com/electron-userland/electron-builder/issues/2521#issuecomment-363130128
+// This event is not emitted during differential download so we show a 100% animated progressbar on update-available
+// event as a workaround : https://github.com/electron-userland/electron-builder/issues/2521#issuecomment-363130128
 autoUpdater.on('download-progress', (progressObj) => {
   mainWindow.webContents.send("downloadingUpdate", progressObj.transferred, progressObj.total);
 });

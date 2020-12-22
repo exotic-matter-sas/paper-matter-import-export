@@ -15,7 +15,8 @@
           <span v-else>
             {{ $t('splashScreenPage.downloadingUpdate')}}
             <b-progress id="download-progress" class="w-50 mx-auto mt-2" variant="primary"
-                        :value="downloadCurrentProgress" :max="downloadTotalProgress"/>
+                        :value="downloadCurrentProgress" :max="downloadTotalProgress"
+                        :animated="downloadTotalProgress == 100"/>
           </span>
         </div>
       </b-col>
@@ -50,12 +51,18 @@
           ipcRenderer.on('updateNotAvailable', () => {
             this.$router.push({name: 'login'})
           });
+          ipcRenderer.on('updateAvailable', (event) => {
+            // It will display a 100% animated progress bar, in case next event is not emitted (e.g. on differential DL)
+            this.downloadingUpdate = true;
+            this.downloadCurrentProgress = 100;
+            this.downloadTotalProgress = 100;
+          });
           ipcRenderer.on('downloadingUpdate', (event, current, total) => {
             this.downloadingUpdate = true;
             this.downloadCurrentProgress = current;
             this.downloadTotalProgress = total;
           });
-          ipcRenderer.on('update-downloaded', () => {
+          ipcRenderer.on('updateDownloaded', () => {
             this.downloadCurrentProgress = this.downloadTotalProgress;
             // electron-builder will then close > update > restart app
           });
@@ -81,8 +88,7 @@
       vertical-align: middle;
     }
     #download-progress {
-      height: 0.25rem;
-
+      height: 0.35rem;
     }
   }
 </style>
