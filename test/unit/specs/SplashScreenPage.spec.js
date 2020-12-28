@@ -107,12 +107,13 @@ describe("SplashScreenPage mounted", () => {
   });
 
   it("event listener are setup and checkForUpdate event is sent", () => {
-    expect(ipcOnMock.callCount).to.equal(4);
+    expect(ipcOnMock.callCount).to.equal(5);
 
     expect(ipcOnMock.calls[0].arg).to.equal("updateNotAvailable");
-    expect(ipcOnMock.calls[1].arg).to.equal("downloadingUpdate");
-    expect(ipcOnMock.calls[2].arg).to.equal("update-downloaded");
-    expect(ipcOnMock.calls[3].arg).to.equal("updateError");
+    expect(ipcOnMock.calls[1].arg).to.equal("updateAvailable");
+    expect(ipcOnMock.calls[2].arg).to.equal("downloadingUpdate");
+    expect(ipcOnMock.calls[3].arg).to.equal("updateDownloaded");
+    expect(ipcOnMock.calls[4].arg).to.equal("updateError");
 
     expect(ipcSendMock.callCount).to.equal(1);
     expect(ipcSendMock.lastCall.arg).to.equal("checkForUpdate");
@@ -132,9 +133,9 @@ describe("SplashScreenPage mounted", () => {
   it("event downloadingUpdate callback set proper data", () => {
     const mockedCurrent = 42;
     const mockedTotal = 99;
-    expect(ipcOnMock.calls[1].arg).to.equal("downloadingUpdate");
+    expect(ipcOnMock.calls[2].arg).to.equal("downloadingUpdate");
     // check event callback
-    const downloadingUpdateCallBack = ipcOnMock.calls[1].args[1];
+    const downloadingUpdateCallBack = ipcOnMock.calls[2].args[1];
 
     downloadingUpdateCallBack('fakeEvent', mockedCurrent, mockedTotal);
 
@@ -146,9 +147,9 @@ describe("SplashScreenPage mounted", () => {
   it("event update-downloaded callback set proper data", () => {
     const mockedTotal = 98;
     wrapper.setData({downloadTotalProgress: mockedTotal});
-    expect(ipcOnMock.calls[2].arg).to.equal("update-downloaded");
+    expect(ipcOnMock.calls[3].arg).to.equal("updateDownloaded");
     // check event callback
-    const updateDownloadedCallBack = ipcOnMock.calls[2].args[1];
+    const updateDownloadedCallBack = ipcOnMock.calls[3].args[1];
 
     updateDownloadedCallBack();
 
@@ -156,9 +157,9 @@ describe("SplashScreenPage mounted", () => {
   });
 
   it("event updateError callback call router", () => {
-    expect(ipcOnMock.calls[3].arg).to.equal("updateError");
+    expect(ipcOnMock.calls[4].arg).to.equal("updateError");
     // check event callback
-    const updateErrorCallBack = ipcOnMock.calls[3].args[1];
+    const updateErrorCallBack = ipcOnMock.calls[4].args[1];
 
     updateErrorCallBack();
 
