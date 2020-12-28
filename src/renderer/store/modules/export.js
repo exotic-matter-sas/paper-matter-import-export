@@ -10,9 +10,9 @@ const state = {
   docsToExport: [],
   exportDocsInError: [],
   duplicatedFilePathCount: {},
-  savedExportSource: {name: 'Root', id: null},
+  savedExportSource: { name: "Root", id: null },
   savedExportDestination: null,
-  metadataExportSkipped: false
+  metadataExportSkipped: false,
 };
 
 const mutations = {
@@ -25,7 +25,7 @@ const mutations = {
   },
 
   SET_EXPORT_FOLDER_NAME(state) {
-    state.exportFolderName = new Date().toISOString().replace(/[:.]/g, '-');
+    state.exportFolderName = new Date().toISOString().replace(/[:.]/g, "-");
   },
 
   SKIP_METADATA_EXPORT(state) {
@@ -38,7 +38,8 @@ const mutations = {
   },
 
   SET_DUPLICATED_FILE_PATH_COUNT(state, filePathCountArray) {
-    state.duplicatedFilePathCount[filePathCountArray[0]] = filePathCountArray[1];
+    state.duplicatedFilePathCount[filePathCountArray[0]] =
+      filePathCountArray[1];
   },
 
   CONSUME_FIRST_DOC_TO_EXPORT(state) {
@@ -66,7 +67,7 @@ const mutations = {
     state.docsToExport = [];
     state.exportDocsInError = [];
     state.duplicatedFilePathCount = {};
-    state.savedExportSource = {name: 'Root', id: null};
+    state.savedExportSource = { name: "Root", id: null };
     state.metadataExportSkipped = false;
     state.savedExportDestination = null;
   },
@@ -76,4 +77,4 @@ export default {
   namespaced,
   state,
   mutations,
-}
+};

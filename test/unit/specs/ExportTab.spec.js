@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import Vuex from "vuex";
@@ -12,13 +12,13 @@ import storeConfig from "../../../src/renderer/store";
 
 import ExportTab from "../../../src/renderer/components/HomePage/ExportTab";
 import * as tv from "../../tools/testValues";
-import {remote} from "electron";
-import {PassThrough} from "stream";
-import * as fastCsv from '@fast-csv/format'; // to import format into a namespace to be able to mock it
-import {reportTools} from "../../../src/renderer/htmlReport";
+import { remote } from "electron";
+import { PassThrough } from "stream";
+import * as fastCsv from "@fast-csv/format"; // to import format into a namespace to be able to mock it
+import { reportTools } from "../../../src/renderer/htmlReport";
 import fs from "fs";
 import cloneDeep from "lodash.clonedeep";
-import flushPromises from "flush-promises"
+import flushPromises from "flush-promises";
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -35,16 +35,18 @@ const openItemMock = sm.mock();
 localVue.prototype.$electron = {
   shell: {
     openExternal: openExternalMock,
-    openItem: openItemMock
-  }
+    openItem: openItemMock,
+  },
 }; // electron prototype mock
 
 const listDocumentsApiMock = sm.mock();
 const arrayBufferMock = new ArrayBuffer(8);
-const downloadDocumentAsArrayBufferMock = sm.mock().resolveWith({data: arrayBufferMock});
+const downloadDocumentAsArrayBufferMock = sm
+  .mock()
+  .resolveWith({ data: arrayBufferMock });
 const apiMock = {
   listDocuments: listDocumentsApiMock,
-  downloadDocumentAsArrayBuffer: downloadDocumentAsArrayBufferMock
+  downloadDocumentAsArrayBuffer: downloadDocumentAsArrayBufferMock,
 };
 localVue.prototype.$api = apiMock; // api prototype mock
 
@@ -64,9 +66,9 @@ describe("ExportTab template", () => {
     wrapper = shallowMount(ExportTab, {
       localVue,
       store,
-      propsData:{
+      propsData: {
         actionInterrupted: false,
-        performRetry: false
+        performRetry: false,
       },
     });
   });
@@ -98,19 +100,19 @@ describe("ExportTab watchers", () => {
     wrapper = shallowMount(ExportTab, {
       localVue,
       store,
-      propsData:{
+      propsData: {
         actionInterrupted: false,
-        performRetry: false
+        performRetry: false,
       },
       methods: {
-        proceedToExport: proceedToExportMock
+        proceedToExport: proceedToExportMock,
       },
       computed: {
         actionDisabled: {
           cache: false,
-          get: actionDisabledMock
-        }
-      }
+          get: actionDisabledMock,
+        },
+      },
     });
   });
 
@@ -119,20 +121,20 @@ describe("ExportTab watchers", () => {
   });
 
   it("performRetry call proceedToExport if actionDisabled is false", async () => {
-    actionDisabledMock.actions= [];
+    actionDisabledMock.actions = [];
     actionDisabledMock.returnWith(false);
 
-    wrapper.setData({performRetry:true});
+    wrapper.setData({ performRetry: true });
     await flushPromises();
 
     expect(proceedToExportMock.callCount).to.equal(1);
   });
 
-  it("performRetry doesn\'t call proceedToExport if actionDisabled is true", async () => {
-    actionDisabledMock.actions= [];
+  it("performRetry doesn't call proceedToExport if actionDisabled is true", async () => {
+    actionDisabledMock.actions = [];
     actionDisabledMock.returnWith(true);
 
-    wrapper.setData({performRetry:true});
+    wrapper.setData({ performRetry: true });
     await flushPromises();
 
     expect(proceedToExportMock.callCount).to.equal(0);
@@ -140,7 +142,7 @@ describe("ExportTab watchers", () => {
 
   it("performRetry emit update:performRetry", async () => {
     const testedEvent = "update:performRetry";
-    wrapper.setData({performRetry:true});
+    wrapper.setData({ performRetry: true });
     await flushPromises();
 
     expect(wrapper.emitted(testedEvent)).to.not.be.undefined;
@@ -161,16 +163,18 @@ describe("ExportTab computed", () => {
   beforeEach(() => {
     savedExportDestinationMock = sm.mock();
     savedExportSourceMock = sm.mock();
-    showMessageBoxMock = sm.mock(remote.dialog, "showMessageBox").returnWith('');
+    showMessageBoxMock = sm
+      .mock(remote.dialog, "showMessageBox")
+      .returnWith("");
     store = new Vuex.Store(storeConfig);
     computed = {
       savedExportDestination: {
         cache: false,
-        get: savedExportDestinationMock
+        get: savedExportDestinationMock,
       },
       savedExportSource: {
         cache: false,
-        get: savedExportSourceMock
+        get: savedExportSourceMock,
       },
     };
   });
@@ -182,33 +186,33 @@ describe("ExportTab computed", () => {
   });
 
   it("folderSourceName return proper value when folder is Root", () => {
-    savedExportSourceMock.returnWith({name: 'Root', id: null});
+    savedExportSourceMock.returnWith({ name: "Root", id: null });
     wrapper = shallowMount(ExportTab, {
       localVue,
       store,
-      propsData:{
+      propsData: {
         actionInterrupted: false,
-        performRetry: false
+        performRetry: false,
       },
-      computed
+      computed,
     });
 
     let testedValue = wrapper.vm.folderSourceName;
 
-    expect(testedValue).to.be.equal('rootFolderName');
+    expect(testedValue).to.be.equal("rootFolderName");
   });
 
   it("folderSourceName return proper value when folder is NOT Root", () => {
-    const fakeFolderName = 'FakeFolder';
-    savedExportSourceMock.returnWith({name: fakeFolderName, id: null});
+    const fakeFolderName = "FakeFolder";
+    savedExportSourceMock.returnWith({ name: fakeFolderName, id: null });
     wrapper = shallowMount(ExportTab, {
       localVue,
       store,
-      propsData:{
+      propsData: {
         actionInterrupted: false,
-        performRetry: false
+        performRetry: false,
       },
-      computed
+      computed,
     });
 
     let testedValue = wrapper.vm.folderSourceName;
@@ -276,38 +280,60 @@ describe("ExporTab methods", () => {
     setExportDestinationMock = sm.mock();
     setExportFolderNameMock = sm.mock();
     skipMetadataExportMock = sm.mock();
-    mockedSavedExportSourceMockValue = {id: null, name: 'Root'};
-    savedExportSourceMock = sm.mock().returnWith(mockedSavedExportSourceMockValue);
+    mockedSavedExportSourceMockValue = { id: null, name: "Root" };
+    savedExportSourceMock = sm
+      .mock()
+      .returnWith(mockedSavedExportSourceMockValue);
     exportDocsInErrorMock = sm.mock().returnWith([]);
-    accessTokenMock = sm.mock().returnWith('fakeAccessToken');
-    folderSourceNameMock = sm.mock().returnWith('fakeSource');
+    accessTokenMock = sm.mock().returnWith("fakeAccessToken");
+    folderSourceNameMock = sm.mock().returnWith("fakeSource");
     proceedToExportMock = sm.mock();
-    listAllDocumentsMock = sm.mock().resolveWith([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT]);
-    promiseMkdirMock = sm.mock(fs.promises, "mkdir").resolveWith('');
-    savedExportDestinationMock = sm.mock().returnWith('/fakeExportDestination');
-    exportFolderNameMock = sm.mock().returnWith('fake-export-folder');
+    listAllDocumentsMock = sm
+      .mock()
+      .resolveWith([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT]);
+    promiseMkdirMock = sm.mock(fs.promises, "mkdir").resolveWith("");
+    savedExportDestinationMock = sm.mock().returnWith("/fakeExportDestination");
+    exportFolderNameMock = sm.mock().returnWith("fake-export-folder");
     metadataExportSkippedMock = sm.mock().returnWith(false);
     duplicatedFilePathCountMock = sm.mock().returnWith({});
     resetDataExportStartMock = sm.mock();
-    showOpenDialogMock = sm.mock(remote.dialog, "showOpenDialog").resolveWith({canceled: false, filePaths: ['fakePath']});
-    getDocDirAbsolutePathMock = sm.mock().returnWith('/fake/absolute/path');
-    getDocAbsolutePathMock = sm.mock().returnWith('/fake/absolute/path/Document title.pdf');
-    downloadAndIntegrityCheckDocumentMock = sm.mock().resolveWith('/fake/absolute/path');
+    showOpenDialogMock = sm
+      .mock(remote.dialog, "showOpenDialog")
+      .resolveWith({ canceled: false, filePaths: ["fakePath"] });
+    getDocDirAbsolutePathMock = sm.mock().returnWith("/fake/absolute/path");
+    getDocAbsolutePathMock = sm
+      .mock()
+      .returnWith("/fake/absolute/path/Document title.pdf");
+    downloadAndIntegrityCheckDocumentMock = sm
+      .mock()
+      .resolveWith("/fake/absolute/path");
     displayFatalErrorMock = sm.mock();
     displayExportErrorPromptMock = sm.mock();
     displayExportErrorReportMock = sm.mock();
     notifyExportEndMock = sm.mock();
-    hashFileMock = sm.mock().resolveWith('fakeMd5');
-    hashStringMock = sm.mock().resolveWith('fakeMd5');
-    promiseWriteFileMock = sm.mock(fs.promises, "writeFile").resolveWith('');
-    promiseUtimesMock = sm.mock(fs.promises, "utimes").resolveWith('');
-    mkdirSyncMock = sm.mock(fs, "mkdirSync").returnWith('');
-    createWriteStreamMock = sm.mock(fs, "createWriteStream").returnWith(new PassThrough());
-    mockedCsvFormatStreamMockValue = {pipe: sm.mock(), write: sm.mock(), end: sm.mock()};
-    csvFormatStreamMock = sm.mock(fastCsv, "format").returnWith(mockedCsvFormatStreamMockValue);
-    showMessageBoxMock = sm.mock(remote.dialog, "showMessageBox").resolveWith('');
-    htmlReportSaveMock = sm.mock().returnWith('fakeReportPath');
-    htmlReportConstructorMock = sm.mock(reportTools, 'HtmlReport').returnWith({save: htmlReportSaveMock});
+    hashFileMock = sm.mock().resolveWith("fakeMd5");
+    hashStringMock = sm.mock().resolveWith("fakeMd5");
+    promiseWriteFileMock = sm.mock(fs.promises, "writeFile").resolveWith("");
+    promiseUtimesMock = sm.mock(fs.promises, "utimes").resolveWith("");
+    mkdirSyncMock = sm.mock(fs, "mkdirSync").returnWith("");
+    createWriteStreamMock = sm
+      .mock(fs, "createWriteStream")
+      .returnWith(new PassThrough());
+    mockedCsvFormatStreamMockValue = {
+      pipe: sm.mock(),
+      write: sm.mock(),
+      end: sm.mock(),
+    };
+    csvFormatStreamMock = sm
+      .mock(fastCsv, "format")
+      .returnWith(mockedCsvFormatStreamMockValue);
+    showMessageBoxMock = sm
+      .mock(remote.dialog, "showMessageBox")
+      .resolveWith("");
+    htmlReportSaveMock = sm.mock().returnWith("fakeReportPath");
+    htmlReportConstructorMock = sm
+      .mock(reportTools, "HtmlReport")
+      .returnWith({ save: htmlReportSaveMock });
     resetExportDataForNextRun = sm.mock();
 
     storeConfigCopy = cloneDeep(storeConfig);
@@ -328,41 +354,41 @@ describe("ExporTab methods", () => {
       localVue,
       store,
       propsData: {
-        exportInterrupted: false
+        exportInterrupted: false,
       },
       computed: {
         docsToExport: {
           cache: false,
-          get: docsToExportMock
+          get: docsToExportMock,
         },
         savedExportSource: {
           cache: false,
-          get: savedExportSourceMock
+          get: savedExportSourceMock,
         },
         exportDocsInError: {
           cache: false,
-          get: exportDocsInErrorMock
+          get: exportDocsInErrorMock,
         },
         accessToken: {
           cache: false,
-          get: accessTokenMock
+          get: accessTokenMock,
         },
         folderSourceName: folderSourceNameMock,
         savedExportDestination: {
           cache: false,
-          get: savedExportDestinationMock
+          get: savedExportDestinationMock,
         },
         exportFolderName: {
           cache: false,
-          get: exportFolderNameMock
+          get: exportFolderNameMock,
         },
         duplicatedFilePathCount: {
           cache: false,
-          get: duplicatedFilePathCountMock
+          get: duplicatedFilePathCountMock,
         },
         metadataExportSkipped: {
           cache: false,
-          get: metadataExportSkippedMock
+          get: metadataExportSkippedMock,
         },
       },
       methods: {
@@ -375,8 +401,8 @@ describe("ExporTab methods", () => {
         displayFatalError: displayFatalErrorMock,
         displayExportErrorPrompt: displayExportErrorPromptMock,
         displayExportErrorReport: displayExportErrorReportMock,
-        notifyExportEnd: notifyExportEndMock
-      }
+        notifyExportEnd: notifyExportEndMock,
+      },
     });
   });
 
@@ -412,13 +438,13 @@ describe("ExporTab methods", () => {
     expect(showOpenDialogMock.callCount).to.eql(1);
     // export destination is set
     expect(setExportDestinationMock.callCount).to.eql(1);
-    expect(setExportDestinationMock.lastCall.args[1]).to.equal('fakePath');
+    expect(setExportDestinationMock.lastCall.args[1]).to.equal("fakePath");
   });
 
   it("setDestinationFolder does not store destination if user cancel showOpenDialog", () => {
     // given user cancel dialog
     showOpenDialogMock.actions = [];
-    showOpenDialogMock.resolveWith({canceled: true});
+    showOpenDialogMock.resolveWith({ canceled: true });
 
     wrapper.vm.setDestinationFolder(tv.DOCUMENT_PROPS_WITH_FOLDER_PATH);
 
@@ -450,10 +476,12 @@ describe("ExporTab methods", () => {
 
     expect(wrapper.emitted(testedEvent1)).to.not.be.undefined;
     expect(wrapper.emitted(testedEvent1).length).to.equal(1);
-    expect(wrapper.emitted(testedEvent1)[0]).to.be.eql([{
-      "currentCount": 0,
-      "totalCount": 1
-    }]);
+    expect(wrapper.emitted(testedEvent1)[0]).to.be.eql([
+      {
+        currentCount: 0,
+        totalCount: 1,
+      },
+    ]);
     expect(wrapper.emitted(testedEvent2)).to.not.be.undefined;
     expect(wrapper.emitted(testedEvent2).length).to.equal(1);
   });
@@ -477,13 +505,16 @@ describe("ExporTab methods", () => {
     // Mock behavior of setExportFolderName by updating exportFolderNameMock return value
     setExportFolderNameMock.callFn(() => {
       exportFolderNameMock.actions = [];
-      exportFolderNameMock.returnWith('fake-export-folder');
+      exportFolderNameMock.returnWith("fake-export-folder");
     });
 
     await wrapper.vm.proceedToExport();
 
     expect(mkdirSyncMock.callCount).to.equal(1);
-    expect(mkdirSyncMock.lastCall.args).to.eql(['/fakeExportDestination/fake-export-folder', {recursive: true}]);
+    expect(mkdirSyncMock.lastCall.args).to.eql([
+      "/fakeExportDestination/fake-export-folder",
+      { recursive: true },
+    ]);
   });
 
   it("proceedToExport handle mkdirSync error", async () => {
@@ -505,19 +536,19 @@ describe("ExporTab methods", () => {
     // Mock behavior of setExportFolderName by updating exportFolderNameMock return value
     setExportFolderNameMock.callFn(() => {
       exportFolderNameMock.actions = [];
-      exportFolderNameMock.returnWith('fake-export-folder');
+      exportFolderNameMock.returnWith("fake-export-folder");
     });
 
     // given mkdirSync throw an error
     mkdirSyncMock.actions = [];
-    mkdirSyncMock.throwWith(new Error('boom!'));
+    mkdirSyncMock.throwWith(new Error("boom!"));
 
     await wrapper.vm.proceedToExport();
 
     expect(displayFatalErrorMock.callCount).to.equal(1);
     expect(displayFatalErrorMock.lastCall.arg).to.contains({
-      message: 'exportFolderCreationFailed',
-      name: 'PMISetupError'
+      message: "exportFolderCreationFailed",
+      name: "PMISetupError",
     });
   });
 
@@ -539,11 +570,15 @@ describe("ExporTab methods", () => {
     await wrapper.vm.proceedToExport();
 
     expect(createWriteStreamMock.callCount).to.equal(1);
-    expect(createWriteStreamMock.lastCall.arg).to.eql('/fakeExportDestination/fake-export-folder/import.csv');
+    expect(createWriteStreamMock.lastCall.arg).to.eql(
+      "/fakeExportDestination/fake-export-folder/import.csv"
+    );
     expect(csvFormatStreamMock.callCount).to.equal(1);
     expect(csvFormatStreamMock.lastCall.arg).to.eql({ headers: true });
     expect(mockedCsvFormatStreamMockValue.pipe.callCount).to.equal(1);
-    expect(mockedCsvFormatStreamMockValue.pipe.lastCall.arg).to.be.an.instanceof(PassThrough);
+    expect(
+      mockedCsvFormatStreamMockValue.pipe.lastCall.arg
+    ).to.be.an.instanceof(PassThrough);
   });
 
   it("proceedToExport handle error during csv file creation", async () => {
@@ -568,7 +603,7 @@ describe("ExporTab methods", () => {
 
     // given mkdirSync throw an error
     createWriteStreamMock.actions = [];
-    createWriteStreamMock.throwWith(new Error('boom!'));
+    createWriteStreamMock.throwWith(new Error("boom!"));
 
     await wrapper.vm.proceedToExport();
 
@@ -594,7 +629,7 @@ describe("ExporTab methods", () => {
         path: tv.DOCUMENT_PROPS.path,
         md5: tv.DOCUMENT_PROPS.md5,
         ext: tv.DOCUMENT_PROPS.ext,
-        download_url: tv.DOCUMENT_PROPS.download_url
+        download_url: tv.DOCUMENT_PROPS.download_url,
       },
       {
         pid: tv.DOCUMENT_PROPS_VARIANT.pid,
@@ -604,8 +639,8 @@ describe("ExporTab methods", () => {
         path: tv.DOCUMENT_PROPS_VARIANT.path,
         md5: tv.DOCUMENT_PROPS_VARIANT.md5,
         ext: tv.DOCUMENT_PROPS_VARIANT.ext,
-        download_url: tv.DOCUMENT_PROPS_VARIANT.download_url
-      }
+        download_url: tv.DOCUMENT_PROPS_VARIANT.download_url,
+      },
     ]);
 
     // if there already documentsToExport
@@ -632,7 +667,7 @@ describe("ExporTab methods", () => {
 
     // given listAllDocumentsMock throw an interruptedByUser error
     listAllDocumentsMock.actions = [];
-    listAllDocumentsMock.rejectWith(new Error('interruptedByUser'));
+    listAllDocumentsMock.rejectWith(new Error("interruptedByUser"));
 
     await wrapper.vm.proceedToExport();
 
@@ -641,15 +676,15 @@ describe("ExporTab methods", () => {
 
     // given listAllDocumentsMock throw another error
     listAllDocumentsMock.actions = [];
-    listAllDocumentsMock.rejectWith(new Error('boom!'));
+    listAllDocumentsMock.rejectWith(new Error("boom!"));
 
     await wrapper.vm.proceedToExport();
 
     // then error is reported to user
     expect(displayFatalErrorMock.callCount).to.equal(1);
     expect(displayFatalErrorMock.lastCall.arg).to.contains({
-      message: 'documentsListingFailed',
-      name: 'PMISetupError'
+      message: "documentsListingFailed",
+      name: "PMISetupError",
     });
   });
 
@@ -657,7 +692,10 @@ describe("ExporTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
@@ -671,15 +709,24 @@ describe("ExporTab methods", () => {
     await wrapper.vm.proceedToExport();
 
     expect(promiseMkdirMock.callCount).to.equal(2);
-    expect(promiseMkdirMock.calls[0].args).to.eql(['/fake/absolute/path', {recursive: true}]);
-    expect(promiseMkdirMock.calls[1].args).to.eql(['/fake/absolute/path', {recursive: true}]);
+    expect(promiseMkdirMock.calls[0].args).to.eql([
+      "/fake/absolute/path",
+      { recursive: true },
+    ]);
+    expect(promiseMkdirMock.calls[1].args).to.eql([
+      "/fake/absolute/path",
+      { recursive: true },
+    ]);
   });
 
   it("proceedToExport handle fs.promises.mkdir error", async () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of moveFirstDocFromExportToError by consuming first mockedDocsToExportValue item at each call
@@ -691,13 +738,17 @@ describe("ExporTab methods", () => {
     });
     // given promiseMkdir reject
     promiseMkdirMock.actions = [];
-    promiseMkdirMock.rejectWith(new Error('boom!'));
+    promiseMkdirMock.rejectWith(new Error("boom!"));
 
     await wrapper.vm.proceedToExport();
 
     expect(moveFirstDocFromExportToErrorMock.callCount).to.equal(2);
-    expect(moveFirstDocFromExportToErrorMock.calls[0].args[1]).to.eql('Parent folder creation failed');
-    expect(moveFirstDocFromExportToErrorMock.calls[1].args[1]).to.eql('Parent folder creation failed');
+    expect(moveFirstDocFromExportToErrorMock.calls[0].args[1]).to.eql(
+      "Parent folder creation failed"
+    );
+    expect(moveFirstDocFromExportToErrorMock.calls[1].args[1]).to.eql(
+      "Parent folder creation failed"
+    );
     // next code is not called as documents get skipped due to error
     expect(downloadAndIntegrityCheckDocumentMock.callCount).to.equal(0);
   });
@@ -706,7 +757,10 @@ describe("ExporTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
@@ -722,11 +776,11 @@ describe("ExporTab methods", () => {
     expect(downloadAndIntegrityCheckDocumentMock.callCount).to.equal(2);
     expect(downloadAndIntegrityCheckDocumentMock.calls[0].args).to.eql([
       tv.DOCUMENT_PROPS,
-      '/fake/absolute/path'
+      "/fake/absolute/path",
     ]);
     expect(downloadAndIntegrityCheckDocumentMock.calls[1].args).to.eql([
       tv.DOCUMENT_PROPS_VARIANT,
-      '/fake/absolute/path'
+      "/fake/absolute/path",
     ]);
   });
 
@@ -734,7 +788,10 @@ describe("ExporTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of moveFirstDocFromExportToErrorMock by consuming first mockedDocsToExportValue item at each call
@@ -746,13 +803,17 @@ describe("ExporTab methods", () => {
     });
 
     downloadAndIntegrityCheckDocumentMock.actions = [];
-    downloadAndIntegrityCheckDocumentMock.rejectWith(new Error('boom!'));
+    downloadAndIntegrityCheckDocumentMock.rejectWith(new Error("boom!"));
 
     await wrapper.vm.proceedToExport();
 
     expect(moveFirstDocFromExportToErrorMock.callCount).to.equal(2);
-    expect(moveFirstDocFromExportToErrorMock.calls[0].args[1]).to.eql('Download failed');
-    expect(moveFirstDocFromExportToErrorMock.calls[1].args[1]).to.eql('Download failed');
+    expect(moveFirstDocFromExportToErrorMock.calls[0].args[1]).to.eql(
+      "Download failed"
+    );
+    expect(moveFirstDocFromExportToErrorMock.calls[1].args[1]).to.eql(
+      "Download failed"
+    );
     // next code is not called as documents get skipped due to error
     expect(consumeFirstDocToExportMock.callCount).to.equal(0);
   });
@@ -761,7 +822,10 @@ describe("ExporTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
@@ -778,14 +842,14 @@ describe("ExporTab methods", () => {
 
     expect(mockedCsvFormatStreamMockValue.write.callCount).to.equal(2);
     expect(mockedCsvFormatStreamMockValue.write.calls[0].arg).to.eql({
-      path: '/fake/absolute/path',
+      path: "/fake/absolute/path",
       name: tv.DOCUMENT_PROPS.title,
-      notes: tv.DOCUMENT_PROPS.note
+      notes: tv.DOCUMENT_PROPS.note,
     });
     expect(mockedCsvFormatStreamMockValue.write.calls[1].arg).to.eql({
-      path: '/fake/absolute/path',
+      path: "/fake/absolute/path",
       name: tv.DOCUMENT_PROPS_VARIANT.title,
-      notes: tv.DOCUMENT_PROPS_VARIANT.note
+      notes: tv.DOCUMENT_PROPS_VARIANT.note,
     });
 
     // given metadataExportSkipped is true
@@ -802,7 +866,10 @@ describe("ExporTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
@@ -822,7 +889,10 @@ describe("ExporTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
@@ -837,14 +907,20 @@ describe("ExporTab methods", () => {
 
     // call only one time at the end
     expect(notifyExportEndMock.callCount).to.equal(1);
-    expect(notifyExportEndMock.lastCall.args).to.eql([2, '/fakeExportDestination/fake-export-folder']);
+    expect(notifyExportEndMock.lastCall.args).to.eql([
+      2,
+      "/fakeExportDestination/fake-export-folder",
+    ]);
   });
 
   it("proceedToExport commit RESET_EXPORT_DATA_FOR_NEXT_RUN if needed", async () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
@@ -864,7 +940,7 @@ describe("ExporTab methods", () => {
     // given there is error
     resetExportDataForNextRun.reset();
     exportDocsInErrorMock.actions = [];
-    exportDocsInErrorMock.returnWith(['boom!']);
+    exportDocsInErrorMock.returnWith(["boom!"]);
 
     await wrapper.vm.proceedToExport();
 
@@ -876,7 +952,10 @@ describe("ExporTab methods", () => {
     // restore original method to test it
     wrapper.setMethods({ proceedToExport: ExportTab.methods.proceedToExport });
     // set new return value for docsToExportMock
-    let mockedDocsToExportValue = [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT];
+    let mockedDocsToExportValue = [
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+    ];
     docsToExportMock.actions = [];
     docsToExportMock.returnWith(mockedDocsToExportValue);
     // Mock behavior of consumeFirstDocToExport by consuming first mockedDocsToExportValue item at each call
@@ -894,125 +973,202 @@ describe("ExporTab methods", () => {
   });
 
   it("listAllDocuments call API properly and emit proper events", async () => {
-    const testedEvent = 'event-exporting';
+    const testedEvent = "event-exporting";
 
     // restore original method to test it
-    wrapper.setMethods({ listAllDocuments: ExportTab.methods.listAllDocuments });
+    wrapper.setMethods({
+      listAllDocuments: ExportTab.methods.listAllDocuments,
+    });
     // given API return only one page of document
-    listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], count: 2, next: null}});
+    listDocumentsApiMock.resolveWith({
+      data: {
+        results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT],
+        count: 2,
+        next: null,
+      },
+    });
 
     let testedResult = await wrapper.vm.listAllDocuments(1, 0, null);
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(1);
-    expect(listDocumentsApiMock.lastCall.args).to.eql(['fakeAccessToken', 1, null]);
+    expect(listDocumentsApiMock.lastCall.args).to.eql([
+      "fakeAccessToken",
+      1,
+      null,
+    ]);
     expect(testedResult).to.eql([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT]);
     expect(wrapper.emitted(testedEvent)).to.not.be.undefined;
     expect(wrapper.emitted(testedEvent).length).to.equal(1);
-    expect(wrapper.emitted(testedEvent)[0]).to.be.eql([{
-      "currentCount": 0,
-      "totalCount": 2
-    }]);
+    expect(wrapper.emitted(testedEvent)[0]).to.be.eql([
+      {
+        currentCount: 0,
+        totalCount: 2,
+      },
+    ]);
 
     // given API return 3 pages of documents
     listDocumentsApiMock.reset();
     listDocumentsApiMock.actions = [];
-    listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], count: 6, next: 'fakeUrl'}});
-    listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], count: 6, next: 'fakeUrl'}});
-    listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], count: 6, next: null}});
+    listDocumentsApiMock.resolveWith({
+      data: {
+        results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT],
+        count: 6,
+        next: "fakeUrl",
+      },
+    });
+    listDocumentsApiMock.resolveWith({
+      data: {
+        results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT],
+        count: 6,
+        next: "fakeUrl",
+      },
+    });
+    listDocumentsApiMock.resolveWith({
+      data: {
+        results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT],
+        count: 6,
+        next: null,
+      },
+    });
 
     testedResult = await wrapper.vm.listAllDocuments(1, 0, null);
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(3);
-    expect(listDocumentsApiMock.calls[0].args).to.eql(['fakeAccessToken', 1, null]);
-    expect(listDocumentsApiMock.calls[1].args).to.eql(['fakeAccessToken', 2, null]);
-    expect(listDocumentsApiMock.calls[2].args).to.eql(['fakeAccessToken', 3, null]);
+    expect(listDocumentsApiMock.calls[0].args).to.eql([
+      "fakeAccessToken",
+      1,
+      null,
+    ]);
+    expect(listDocumentsApiMock.calls[1].args).to.eql([
+      "fakeAccessToken",
+      2,
+      null,
+    ]);
+    expect(listDocumentsApiMock.calls[2].args).to.eql([
+      "fakeAccessToken",
+      3,
+      null,
+    ]);
     // it return the merged results of the 3 api calls
     expect(testedResult).to.eql([
-      tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT,
-      tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT,
-      tv.DOCUMENT_PROPS,  tv.DOCUMENT_PROPS_VARIANT
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS_VARIANT,
     ]);
     expect(wrapper.emitted(testedEvent).length).to.equal(4); // 1 + 3 pages
-    expect(wrapper.emitted(testedEvent)[1]).to.be.eql([{
-      "currentCount": 0,
-      "totalCount": 6
-    }]);
-    expect(wrapper.emitted(testedEvent)[2]).to.be.eql([{
-      "currentCount": 2,
-      "totalCount": 6
-    }]);
-    expect(wrapper.emitted(testedEvent)[3]).to.be.eql([{
-      "currentCount": 4,
-      "totalCount": 6
-    }]);
+    expect(wrapper.emitted(testedEvent)[1]).to.be.eql([
+      {
+        currentCount: 0,
+        totalCount: 6,
+      },
+    ]);
+    expect(wrapper.emitted(testedEvent)[2]).to.be.eql([
+      {
+        currentCount: 2,
+        totalCount: 6,
+      },
+    ]);
+    expect(wrapper.emitted(testedEvent)[3]).to.be.eql([
+      {
+        currentCount: 4,
+        totalCount: 6,
+      },
+    ]);
   });
 
   it("listAllDocuments handle API error", async () => {
     // restore original method to test it
-    wrapper.setMethods({ listAllDocuments: ExportTab.methods.listAllDocuments });
+    wrapper.setMethods({
+      listAllDocuments: ExportTab.methods.listAllDocuments,
+    });
     // given an error occurred during first listDocuments API call
     listDocumentsApiMock.actions = [];
-    listDocumentsApiMock.rejectWith('Boom!');
+    listDocumentsApiMock.rejectWith("Boom!");
 
     let testedResult;
-    await await wrapper.vm.listAllDocuments(1, 0, null).catch(error => testedResult = error);
+    await await wrapper.vm
+      .listAllDocuments(1, 0, null)
+      .catch((error) => (testedResult = error));
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(1);
     // Documents are committed to store properly
-    expect(testedResult).to.includes('Boom!');
+    expect(testedResult).to.includes("Boom!");
 
     // given an error occurred during second listDocuments API call
-    testedResult = '';
+    testedResult = "";
     listDocumentsApiMock.actions = [];
-    listDocumentsApiMock.resolveWith({data: { results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT], next: 'fakeUrl'}});
-    listDocumentsApiMock.rejectWith('Boom!');
+    listDocumentsApiMock.resolveWith({
+      data: {
+        results: [tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS_VARIANT],
+        next: "fakeUrl",
+      },
+    });
+    listDocumentsApiMock.rejectWith("Boom!");
 
-    await await wrapper.vm.listAllDocuments(1, 0, null).catch(error => testedResult = error);
+    await await wrapper.vm
+      .listAllDocuments(1, 0, null)
+      .catch((error) => (testedResult = error));
 
     // then
     expect(listDocumentsApiMock.callCount).to.eql(2);
     // Documents are committed to store properly
-    expect(testedResult).to.includes('Boom!');
+    expect(testedResult).to.includes("Boom!");
   });
 
   it("getDocDirAbsolutePath return proper value", () => {
     // restore original method to test it
-    wrapper.setMethods({ getDocDirAbsolutePath: ExportTab.methods.getDocDirAbsolutePath });
+    wrapper.setMethods({
+      getDocDirAbsolutePath: ExportTab.methods.getDocDirAbsolutePath,
+    });
     // given user export default source (Root)
 
-    let testedResult = wrapper.vm.getDocDirAbsolutePath(tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.path);
+    let testedResult = wrapper.vm.getDocDirAbsolutePath(
+      tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.path
+    );
 
     // then
-    expect(testedResult).to.equal('/fakeExportDestination/fake-export-folder/Folder 1/Folder 2/Folder 3');
+    expect(testedResult).to.equal(
+      "/fakeExportDestination/fake-export-folder/Folder 1/Folder 2/Folder 3"
+    );
 
     // given user export a specific folder
     savedExportSourceMock.actions = [];
-    savedExportSourceMock.returnWith( {id: 2, name: 'Folder 2'});
+    savedExportSourceMock.returnWith({ id: 2, name: "Folder 2" });
 
-    testedResult = wrapper.vm.getDocDirAbsolutePath(tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.path);
+    testedResult = wrapper.vm.getDocDirAbsolutePath(
+      tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.path
+    );
 
     // then
-    expect(testedResult).to.equal('/fakeExportDestination/fake-export-folder/Folder 3');
+    expect(testedResult).to.equal(
+      "/fakeExportDestination/fake-export-folder/Folder 3"
+    );
   });
 
   it("getDocAbsolutePath return proper value", () => {
     // restore original method to test it
-    wrapper.setMethods({ getDocAbsolutePath: ExportTab.methods.getDocAbsolutePath });
-    const docDirAbsolutePath = '/fakeExportDestination/fake-export-date/Folder 1/Folder 2/Folder 3';
+    wrapper.setMethods({
+      getDocAbsolutePath: ExportTab.methods.getDocAbsolutePath,
+    });
+    const docDirAbsolutePath =
+      "/fakeExportDestination/fake-export-date/Folder 1/Folder 2/Folder 3";
 
     // when fileNameCount isn't set
     let testedResult = wrapper.vm.getDocAbsolutePath(
       docDirAbsolutePath,
       tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.title,
-      tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.ext,
+      tv.DOCUMENT_PROPS_WITH_FOLDER_PATH.ext
     );
 
     // then
     expect(testedResult).to.equal(
-      '/fakeExportDestination/fake-export-date/Folder 1/Folder 2/Folder 3/Document title.pdf'
+      "/fakeExportDestination/fake-export-date/Folder 1/Folder 2/Folder 3/Document title.pdf"
     );
 
     // when fileNameCount is set
@@ -1025,201 +1181,279 @@ describe("ExporTab methods", () => {
 
     // then
     expect(testedResult).to.equal(
-      '/fakeExportDestination/fake-export-date/Folder 1/Folder 2/Folder 3/Document title (1).pdf'
+      "/fakeExportDestination/fake-export-date/Folder 1/Folder 2/Folder 3/Document title (1).pdf"
     );
   });
 
   it("downloadAndIntegrityCheckDocument resolve proper value", async () => {
     // restore original method to test it
-    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
-    const dirAbsolutePath = '/fake/absolute/path';
+    wrapper.setMethods({
+      downloadAndIntegrityCheckDocument:
+        ExportTab.methods.downloadAndIntegrityCheckDocument,
+    });
+    const dirAbsolutePath = "/fake/absolute/path";
 
     // then
     let testedValue;
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, dirAbsolutePath)
-      .then(absolutePath => {testedValue = absolutePath});
+    await wrapper.vm
+      .downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, dirAbsolutePath)
+      .then((absolutePath) => {
+        testedValue = absolutePath;
+      });
 
     // then
-    expect(testedValue).to.eql('/fake/absolute/path/Document title.pdf');
+    expect(testedValue).to.eql("/fake/absolute/path/Document title.pdf");
   });
 
   it("downloadAndIntegrityCheckDocument call getDocAbsolutePath", async () => {
     // restore original method to test it
-    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
-    const dirAbsolutePath = '/fake/absolute/path';
+    wrapper.setMethods({
+      downloadAndIntegrityCheckDocument:
+        ExportTab.methods.downloadAndIntegrityCheckDocument,
+    });
+    const dirAbsolutePath = "/fake/absolute/path";
 
     // then
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, dirAbsolutePath);
+    await wrapper.vm.downloadAndIntegrityCheckDocument(
+      tv.DOCUMENT_PROPS,
+      dirAbsolutePath
+    );
 
     // then
     expect(getDocAbsolutePathMock.callCount).to.eql(1);
-    expect(getDocAbsolutePathMock.lastCall.args).to.eql([dirAbsolutePath, tv.DOCUMENT_PROPS.title, tv.DOCUMENT_PROPS.ext]);
+    expect(getDocAbsolutePathMock.lastCall.args).to.eql([
+      dirAbsolutePath,
+      tv.DOCUMENT_PROPS.title,
+      tv.DOCUMENT_PROPS.ext,
+    ]);
   });
 
   it("downloadAndIntegrityCheckDocument call API properly", async () => {
     // restore original method to test it
-    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
+    wrapper.setMethods({
+      downloadAndIntegrityCheckDocument:
+        ExportTab.methods.downloadAndIntegrityCheckDocument,
+    });
 
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path');
+    await wrapper.vm.downloadAndIntegrityCheckDocument(
+      tv.DOCUMENT_PROPS,
+      "/fake/absolute/path"
+    );
 
     // then
     expect(downloadDocumentAsArrayBufferMock.callCount).to.eql(1);
-    expect(downloadDocumentAsArrayBufferMock.lastCall.args).to.eql(['fakeAccessToken', tv.DOCUMENT_PROPS.download_url]);
+    expect(downloadDocumentAsArrayBufferMock.lastCall.args).to.eql([
+      "fakeAccessToken",
+      tv.DOCUMENT_PROPS.download_url,
+    ]);
   });
 
   it("downloadAndIntegrityCheckDocument call hashFile properly to make integrity check", async () => {
     // restore original method to test it
-    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
+    wrapper.setMethods({
+      downloadAndIntegrityCheckDocument:
+        ExportTab.methods.downloadAndIntegrityCheckDocument,
+    });
     // given computed md5 match expected md5
-    hashFileMock.actions =[];
+    hashFileMock.actions = [];
     hashFileMock.resolveWith(tv.DOCUMENT_PROPS.md5);
 
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path');
+    await wrapper.vm.downloadAndIntegrityCheckDocument(
+      tv.DOCUMENT_PROPS,
+      "/fake/absolute/path"
+    );
 
     // then file is save to the disk
     expect(hashFileMock.callCount).to.eql(1);
-    expect(hashFileMock.lastCall.args[1]).to.eql({algorithm: 'md5', file: Buffer.from(arrayBufferMock)});
+    expect(hashFileMock.lastCall.args[1]).to.eql({
+      algorithm: "md5",
+      file: Buffer.from(arrayBufferMock),
+    });
     expect(promiseWriteFileMock.callCount).to.eql(1);
 
     // given computed md5 does not match expected md5
-    hashFileMock.actions =[];
-    hashFileMock.resolveWith('boom!');
+    hashFileMock.actions = [];
+    hashFileMock.resolveWith("boom!");
     promiseWriteFileMock.reset();
 
     let testedResult;
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path').catch(error => {
-      testedResult = error
-    });
+    await wrapper.vm
+      .downloadAndIntegrityCheckDocument(
+        tv.DOCUMENT_PROPS,
+        "/fake/absolute/path"
+      )
+      .catch((error) => {
+        testedResult = error;
+      });
 
     // then file is not save to the disk
     expect(promiseWriteFileMock.callCount).to.eql(0);
-    expect(testedResult).to.includes('md5 mismatch');
+    expect(testedResult).to.includes("md5 mismatch");
   });
 
   it("downloadAndIntegrityCheckDocument call writeFile", async () => {
     // restore original method to test it
-    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
+    wrapper.setMethods({
+      downloadAndIntegrityCheckDocument:
+        ExportTab.methods.downloadAndIntegrityCheckDocument,
+    });
 
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path');
+    await wrapper.vm.downloadAndIntegrityCheckDocument(
+      tv.DOCUMENT_PROPS,
+      "/fake/absolute/path"
+    );
 
     // then
     expect(promiseWriteFileMock.callCount).to.eql(1);
     expect(promiseWriteFileMock.lastCall.args).to.eql([
-      '/fake/absolute/path/Document title.pdf',
+      "/fake/absolute/path/Document title.pdf",
       Buffer.from(arrayBufferMock),
-      {flag: 'wx'}
+      { flag: "wx" },
     ]);
   });
 
   it("downloadAndIntegrityCheckDocument handle writeFile errors", async () => {
     // restore original method to test it
-    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
+    wrapper.setMethods({
+      downloadAndIntegrityCheckDocument:
+        ExportTab.methods.downloadAndIntegrityCheckDocument,
+    });
     // given writeFile return a file already exist error
     promiseWriteFileMock.actions = [];
-    promiseWriteFileMock.rejectWith({code: 'EEXIST'});
-    promiseWriteFileMock.resolveWith('');
+    promiseWriteFileMock.rejectWith({ code: "EEXIST" });
+    promiseWriteFileMock.resolveWith("");
     getDocAbsolutePathMock.actions = [];
-    getDocAbsolutePathMock.returnWith('/fake/absolute/path/Document title.pdf');
-    getDocAbsolutePathMock.returnWith('/fake/absolute/path/Document title (1).pdf');
+    getDocAbsolutePathMock.returnWith("/fake/absolute/path/Document title.pdf");
+    getDocAbsolutePathMock.returnWith(
+      "/fake/absolute/path/Document title (1).pdf"
+    );
 
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path');
+    await wrapper.vm.downloadAndIntegrityCheckDocument(
+      tv.DOCUMENT_PROPS,
+      "/fake/absolute/path"
+    );
 
     // then write file and getDocAbsolutePath are called a second time to add a count to the file name
     expect(promiseWriteFileMock.callCount).to.eql(2);
     expect(promiseWriteFileMock.lastCall.args).to.eql([
-      '/fake/absolute/path/Document title (1).pdf',
+      "/fake/absolute/path/Document title (1).pdf",
       Buffer.from(arrayBufferMock),
-      {flag: 'wx'}
+      { flag: "wx" },
     ]);
     expect(getDocAbsolutePathMock.callCount).to.eql(2);
-    expect(setDuplicatedFilePathCountMock.lastCall.args[1]).to.eql(['fakeMd5', 1]);
+    expect(setDuplicatedFilePathCountMock.lastCall.args[1]).to.eql([
+      "fakeMd5",
+      1,
+    ]);
     expect(getDocAbsolutePathMock.lastCall.args).to.eql([
-      '/fake/absolute/path',
+      "/fake/absolute/path",
       tv.DOCUMENT_PROPS.title,
       tv.DOCUMENT_PROPS.ext,
-      1
+      1,
     ]);
 
     // if download the same document again the count is incremented
     duplicatedFilePathCountMock.actions = [];
-    duplicatedFilePathCountMock.returnWith({'fakeMd5': 1});
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path');
+    duplicatedFilePathCountMock.returnWith({ fakeMd5: 1 });
+    await wrapper.vm.downloadAndIntegrityCheckDocument(
+      tv.DOCUMENT_PROPS,
+      "/fake/absolute/path"
+    );
     expect(getDocAbsolutePathMock.lastCall.args).to.eql([
-      '/fake/absolute/path',
+      "/fake/absolute/path",
       tv.DOCUMENT_PROPS.title,
       tv.DOCUMENT_PROPS.ext,
-      2
+      2,
     ]);
 
     // given writeFile return a unknown error
     promiseWriteFileMock.actions = [];
     promiseWriteFileMock.reset();
-    promiseWriteFileMock.rejectWith({code: 'boom!'});
+    promiseWriteFileMock.rejectWith({ code: "boom!" });
 
     let testedResult;
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path').catch(error => {
-      testedResult = error
-    });
+    await wrapper.vm
+      .downloadAndIntegrityCheckDocument(
+        tv.DOCUMENT_PROPS,
+        "/fake/absolute/path"
+      )
+      .catch((error) => {
+        testedResult = error;
+      });
 
     // then error is returned
     expect(promiseWriteFileMock.callCount).to.eql(1);
-    expect(testedResult.code).to.eql('boom!');
+    expect(testedResult.code).to.eql("boom!");
   });
 
   it("downloadAndIntegrityCheckDocument call utimes", async () => {
     // restore original method to test it
-    wrapper.setMethods({ downloadAndIntegrityCheckDocument: ExportTab.methods.downloadAndIntegrityCheckDocument });
+    wrapper.setMethods({
+      downloadAndIntegrityCheckDocument:
+        ExportTab.methods.downloadAndIntegrityCheckDocument,
+    });
 
-    await wrapper.vm.downloadAndIntegrityCheckDocument(tv.DOCUMENT_PROPS, '/fake/absolute/path');
+    await wrapper.vm.downloadAndIntegrityCheckDocument(
+      tv.DOCUMENT_PROPS,
+      "/fake/absolute/path"
+    );
 
     // then
     expect(promiseUtimesMock.callCount).to.eql(1);
     expect(promiseUtimesMock.lastCall.args).to.eql([
-      '/fake/absolute/path/Document title.pdf',
+      "/fake/absolute/path/Document title.pdf",
       new Date(tv.DOCUMENT_PROPS.created),
-      new Date(tv.DOCUMENT_PROPS.created)
+      new Date(tv.DOCUMENT_PROPS.created),
     ]);
   });
 
   it("displayFatalError call remote.dialog.showMessageBox", async () => {
     // restore original method to test it
-    wrapper.setMethods({ displayFatalError: ExportTab.methods.displayFatalError });
+    wrapper.setMethods({
+      displayFatalError: ExportTab.methods.displayFatalError,
+    });
 
-    await wrapper.vm.displayFatalError({name: 'PMISetupError'});
+    await wrapper.vm.displayFatalError({ name: "PMISetupError" });
 
     // api is call to list folders inside parent
     expect(showMessageBoxMock.callCount).to.be.equal(1);
-    expect(showMessageBoxMock.lastCall.args[1]).to.includes({type: 'error'});
+    expect(showMessageBoxMock.lastCall.args[1]).to.includes({ type: "error" });
   });
 
   it("displayFatalError call openExternal if needed", async () => {
     // restore original method to test it
-    wrapper.setMethods({ displayFatalError: ExportTab.methods.displayFatalError });
+    wrapper.setMethods({
+      displayFatalError: ExportTab.methods.displayFatalError,
+    });
     showMessageBoxMock.actions = [];
-    showMessageBoxMock.resolveWith({response: 1}); // report issue button clicked on the message box
+    showMessageBoxMock.resolveWith({ response: 1 }); // report issue button clicked on the message box
 
-    await wrapper.vm.displayFatalError({name: 'UnexpectedError'});
+    await wrapper.vm.displayFatalError({ name: "UnexpectedError" });
 
     expect(openExternalMock.callCount).to.be.equal(1);
-    expect(openExternalMock.lastCall.arg).to.includes('github.com');
+    expect(openExternalMock.lastCall.arg).to.includes("github.com");
   });
 
   it("displayExportErrorPrompt call remote.dialog.showMessageBox", async () => {
     // restore original method to test it
-    wrapper.setMethods({ displayExportErrorPrompt: ExportTab.methods.displayExportErrorPrompt });
+    wrapper.setMethods({
+      displayExportErrorPrompt: ExportTab.methods.displayExportErrorPrompt,
+    });
 
     await wrapper.vm.displayExportErrorPrompt();
 
     // api is call to list folders inside parent
     expect(showMessageBoxMock.callCount).to.be.equal(1);
-    expect(showMessageBoxMock.lastCall.args[1]).to.includes({type: 'error'});
+    expect(showMessageBoxMock.lastCall.args[1]).to.includes({ type: "error" });
   });
 
-  it("displayExportErrorPrompt call displayExportErrorReport if needed and commit MOVE_DOCS_FROM_ERROR_TO_EXPORT to store",  async () => {
+  it("displayExportErrorPrompt call displayExportErrorReport if needed and commit MOVE_DOCS_FROM_ERROR_TO_EXPORT to store", async () => {
     // restore original method to test it
-    wrapper.setMethods({ displayExportErrorPrompt: ExportTab.methods.displayExportErrorPrompt });
+    wrapper.setMethods({
+      displayExportErrorPrompt: ExportTab.methods.displayExportErrorPrompt,
+    });
     showMessageBoxMock.actions = [];
-    showMessageBoxMock.resolveWith({response: 1}); // confirmation button clicked on the message box
+    showMessageBoxMock.resolveWith({ response: 1 }); // confirmation button clicked on the message box
 
     await wrapper.vm.displayExportErrorPrompt();
 
@@ -1227,52 +1461,54 @@ describe("ExporTab methods", () => {
     expect(moveDocsFromErrorToExportMock.callCount).to.be.equal(1);
   });
 
-  it("notifyExportEnd call displayExportErrorReport or electron showMessageBox if needed",  async () => {
+  it("notifyExportEnd call displayExportErrorReport or electron showMessageBox if needed", async () => {
     // restore original method to test it
     wrapper.setMethods({ notifyExportEnd: ExportTab.methods.notifyExportEnd });
 
     // if has been disconnected during import
     accessTokenMock.actions = [];
-    accessTokenMock.returnWith('');
+    accessTokenMock.returnWith("");
 
-    wrapper.vm.notifyExportEnd(1, '/fakeExportDestination/fake-export-folder');
+    wrapper.vm.notifyExportEnd(1, "/fakeExportDestination/fake-export-folder");
 
     // a message indicate user that import have been interrupted and can be resumed
     expect(displayExportErrorPromptMock.callCount).to.be.equal(0);
     expect(showMessageBoxMock.callCount).to.be.equal(1);
-    expect(showMessageBoxMock.lastCall.args[1]).to.includes({type: 'error'});
+    expect(showMessageBoxMock.lastCall.args[1]).to.includes({ type: "error" });
 
     showMessageBoxMock.reset();
 
     // when user is still logged and there is no error and he click on display folder button
     accessTokenMock.actions = [];
-    accessTokenMock.returnWith('fakeAccessToken');
+    accessTokenMock.returnWith("fakeAccessToken");
     exportDocsInErrorMock.actions = [];
     exportDocsInErrorMock.returnWith([]);
     showMessageBoxMock.actions = [];
-    showMessageBoxMock.resolveWith({response: 1}); // user click on folder button
+    showMessageBoxMock.resolveWith({ response: 1 }); // user click on folder button
 
-    wrapper.vm.notifyExportEnd(1, '/fakeExportDestination/fake-export-folder');
+    wrapper.vm.notifyExportEnd(1, "/fakeExportDestination/fake-export-folder");
     await flushPromises();
 
     // success message is displayed
     expect(displayExportErrorPromptMock.callCount).to.be.equal(0);
     expect(showMessageBoxMock.callCount).to.be.equal(1);
-    expect(showMessageBoxMock.lastCall.args[1]).to.includes({type: 'info'});
+    expect(showMessageBoxMock.lastCall.args[1]).to.includes({ type: "info" });
     expect(openItemMock.callCount).to.be.equal(1);
-    expect(openItemMock.lastCall.arg).to.eql('/fakeExportDestination/fake-export-folder');
+    expect(openItemMock.lastCall.arg).to.eql(
+      "/fakeExportDestination/fake-export-folder"
+    );
 
     showMessageBoxMock.actions = [];
-    showMessageBoxMock.resolveWith('');
+    showMessageBoxMock.resolveWith("");
     showMessageBoxMock.reset();
 
     // when user is still logged and there is at least one error
     accessTokenMock.actions = [];
-    accessTokenMock.returnWith('fakeAccessToken');
+    accessTokenMock.returnWith("fakeAccessToken");
     exportDocsInErrorMock.actions = [];
-    exportDocsInErrorMock.returnWith(['doc1']);
+    exportDocsInErrorMock.returnWith(["doc1"]);
 
-    wrapper.vm.notifyExportEnd(1, '/fakeExportDestination/fake-export-folder');
+    wrapper.vm.notifyExportEnd(1, "/fakeExportDestination/fake-export-folder");
 
     // error message is displayed
     expect(displayExportErrorPromptMock.callCount).to.be.equal(1);
@@ -1284,18 +1520,20 @@ describe("ExporTab methods", () => {
 
   it("displayExportErrorReport instantiate Html report, save it and open it", async () => {
     // restore original method to test it
-    wrapper.setMethods({ displayExportErrorReport: ExportTab.methods.displayExportErrorReport });
+    wrapper.setMethods({
+      displayExportErrorReport: ExportTab.methods.displayExportErrorReport,
+    });
     exportDocsInErrorMock.actions = [];
     exportDocsInErrorMock.returnWith([
       {
         title: tv.DOCUMENT_PROPS.title,
         pid: tv.DOCUMENT_PROPS.pid,
-        reason: 'boom',
+        reason: "boom",
       },
       {
         title: tv.DOCUMENT_PROPS_VARIANT.title,
         pid: tv.DOCUMENT_PROPS_VARIANT.pid,
-        reason: 'kaBoom',
+        reason: "kaBoom",
       },
     ]);
 
@@ -1304,11 +1542,17 @@ describe("ExporTab methods", () => {
     // File object and md5 of file is returned
     expect(htmlReportConstructorMock.callCount).to.be.equal(1);
     expect(htmlReportConstructorMock.lastCall.args[1]).to.be.eql([
-      [`<a href="https://papermatter.app/app/#/home?doc=${tv.DOCUMENT_PROPS.pid}" target="_blank">${tv.DOCUMENT_PROPS.title}</a>`, 'boom'],
-      [`<a href="https://papermatter.app/app/#/home?doc=${tv.DOCUMENT_PROPS_VARIANT.pid}" target="_blank">${tv.DOCUMENT_PROPS_VARIANT.title}</a>`, 'kaBoom'],
+      [
+        `<a href="https://papermatter.app/app/#/home?doc=${tv.DOCUMENT_PROPS.pid}" target="_blank">${tv.DOCUMENT_PROPS.title}</a>`,
+        "boom",
+      ],
+      [
+        `<a href="https://papermatter.app/app/#/home?doc=${tv.DOCUMENT_PROPS_VARIANT.pid}" target="_blank">${tv.DOCUMENT_PROPS_VARIANT.title}</a>`,
+        "kaBoom",
+      ],
     ]);
     expect(htmlReportSaveMock.callCount).to.be.equal(1);
     expect(openExternalMock.callCount).to.be.equal(1);
-    expect(openExternalMock.lastCall.arg).to.be.equal('file:///fakeReportPath');
+    expect(openExternalMock.lastCall.arg).to.be.equal("file:///fakeReportPath");
   });
 });

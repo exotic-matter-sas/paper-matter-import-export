@@ -4,12 +4,11 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import Vuex from "vuex";
 import storeConfig from "../../../src/renderer/store";
-
 
 import * as tv from "../../tools/testValues.js";
 import RetryModal from "../../../src/renderer/components/HomePage/RetryModal";
@@ -25,13 +24,12 @@ localVue.prototype.$tc = (text, args = "") => {
 }; // i18n mock
 const showModalMock = sm.mock();
 const hideModalMock = sm.mock();
-localVue.prototype.$bvModal = { show: showModalMock, hide: hideModalMock}; // bvModal mock
+localVue.prototype.$bvModal = { show: showModalMock, hide: hideModalMock }; // bvModal mock
 
 // Attach Vue plugins bellow (after prototype mocks)
 localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
-
 
 describe("RetryModal template", () => {
   // define all vars common to the describe block here
@@ -49,18 +47,18 @@ describe("RetryModal template", () => {
       localVue,
       store,
       propsData: {
-        action: 'import'
+        action: "import",
       },
       computed: {
         actionNotCompleted: {
           cache: false,
-          get: actionNotCompletedMock
+          get: actionNotCompletedMock,
         },
         itemsLeftCount: {
           cache: false,
-          get: itemsLeftMock
+          get: itemsLeftMock,
         },
-      }
+      },
     });
   });
 
@@ -95,14 +93,14 @@ describe("RetryModal mounted", () => {
       localVue,
       store,
       propsData: {
-        action: 'import'
+        action: "import",
       },
       computed: {
         actionNotCompleted: {
           cache: false,
-          get: actionNotCompletedMock
+          get: actionNotCompletedMock,
         },
-      }
+      },
     });
   });
 
@@ -113,7 +111,7 @@ describe("RetryModal mounted", () => {
 
   it("modal is shown", () => {
     expect(showModalMock.callCount).to.equal(1);
-    expect(showModalMock.lastCall.arg).to.equal('retry-modal');
+    expect(showModalMock.lastCall.arg).to.equal("retry-modal");
   });
 });
 
@@ -141,34 +139,34 @@ describe("RetryModal computed", () => {
       localVue,
       store,
       propsData: {
-        action: 'import'
+        action: "import",
       },
       computed: {
         actionNotCompleted: {
           cache: false,
-          get: actionNotCompletedMock
+          get: actionNotCompletedMock,
         },
         itemsLeftCount: {
           cache: false,
-          get: itemsLeftCountMock
+          get: itemsLeftCountMock,
         },
         docsToImport: {
           cache: false,
-          get: docsToImportMock
+          get: docsToImportMock,
         },
         docsToExport: {
           cache: false,
-          get: docsToExportMock
+          get: docsToExportMock,
         },
         importDocsInError: {
           cache: false,
-          get: importDocsInErrorMock
+          get: importDocsInErrorMock,
         },
         exportDocsInError: {
           cache: false,
-          get: exportDocsInErrorMock
-        }
-      }
+          get: exportDocsInErrorMock,
+        },
+      },
     });
   });
 
@@ -186,7 +184,7 @@ describe("RetryModal computed", () => {
     actionNotCompletedMock.callFn(RetryModal.computed.actionNotCompleted);
 
     // given there is no docsToImport
-    wrapper.setData({action: 'import'});
+    wrapper.setData({ action: "import" });
     docsToImportMock.actions = [];
     docsToImportMock.returnWith([]);
 
@@ -195,7 +193,7 @@ describe("RetryModal computed", () => {
     expect(testedValue).to.equal(false);
 
     // given action is import and there is docsToImport
-    wrapper.setData({action: 'import'});
+    wrapper.setData({ action: "import" });
     docsToImportMock.actions = [];
     docsToImportMock.returnWith([tv.DOCUMENT_PROPS]);
 
@@ -204,7 +202,7 @@ describe("RetryModal computed", () => {
     expect(testedValue).to.equal(true);
 
     // given action is export and there is docsToExport
-    wrapper.setData({action: 'export'});
+    wrapper.setData({ action: "export" });
     docsToExportMock.actions = [];
     docsToExportMock.returnWith([tv.DOCUMENT_PROPS]);
 
@@ -218,10 +216,10 @@ describe("RetryModal computed", () => {
     itemsLeftCountMock.callFn(RetryModal.computed.itemsLeftCount);
 
     // given actionNotCompleted and action is import
-    wrapper.setData({action: 'import'});
+    wrapper.setData({ action: "import" });
     docsToImportMock.actions = [];
     docsToImportMock.returnWith([tv.DOCUMENT_PROPS]);
-    actionNotCompletedMock.actions= [];
+    actionNotCompletedMock.actions = [];
     actionNotCompletedMock.returnWith(true);
 
     let testedValue = wrapper.vm.itemsLeftCount;
@@ -229,10 +227,10 @@ describe("RetryModal computed", () => {
     expect(testedValue).to.equal(1);
 
     // given actionNotCompleted and action is export
-    wrapper.setData({action: 'export'});
+    wrapper.setData({ action: "export" });
     docsToExportMock.actions = [];
     docsToExportMock.returnWith([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS]);
-    actionNotCompletedMock.actions= [];
+    actionNotCompletedMock.actions = [];
     actionNotCompletedMock.returnWith(true);
 
     testedValue = wrapper.vm.itemsLeftCount;
@@ -240,10 +238,14 @@ describe("RetryModal computed", () => {
     expect(testedValue).to.equal(2);
 
     // given actionNotCompleted is false and action is import
-    wrapper.setData({action: 'import'});
+    wrapper.setData({ action: "import" });
     importDocsInErrorMock.actions = [];
-    importDocsInErrorMock.returnWith([tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS, tv.DOCUMENT_PROPS]);
-    actionNotCompletedMock.actions= [];
+    importDocsInErrorMock.returnWith([
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS,
+    ]);
+    actionNotCompletedMock.actions = [];
     actionNotCompletedMock.returnWith(false);
 
     testedValue = wrapper.vm.itemsLeftCount;
@@ -251,11 +253,15 @@ describe("RetryModal computed", () => {
     expect(testedValue).to.equal(3);
 
     // given actionNotCompleted is false and action is export
-    wrapper.setData({action: 'export'});
+    wrapper.setData({ action: "export" });
     exportDocsInErrorMock.actions = [];
-    exportDocsInErrorMock.returnWith(
-      [tv.DOCUMENT_PROPS,tv.DOCUMENT_PROPS,tv.DOCUMENT_PROPS,tv.DOCUMENT_PROPS]);
-    actionNotCompletedMock.actions= [];
+    exportDocsInErrorMock.returnWith([
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS,
+      tv.DOCUMENT_PROPS,
+    ]);
+    actionNotCompletedMock.actions = [];
     actionNotCompletedMock.returnWith(false);
 
     testedValue = wrapper.vm.itemsLeftCount;
@@ -282,22 +288,22 @@ describe("RetryModal methods", () => {
       localVue,
       store,
       propsData: {
-        action: 'import'
+        action: "import",
       },
       computed: {
         actionNotCompleted: {
           cache: false,
-          get: actionNotCompletedMock
+          get: actionNotCompletedMock,
         },
         docsToImport: {
           cache: false,
-          get: docsToImportMock
+          get: docsToImportMock,
         },
         docsToExport: {
           cache: false,
-          get: docsToExportMock
+          get: docsToExportMock,
         },
-      }
+      },
     });
   });
 
@@ -310,7 +316,7 @@ describe("RetryModal methods", () => {
     wrapper.vm.abortRetry();
 
     expect(hideModalMock.callCount).to.equal(1);
-    expect(hideModalMock.lastCall.arg).to.equal('retry-modal');
+    expect(hideModalMock.lastCall.arg).to.equal("retry-modal");
   });
 
   it("abortRetry emit event", () => {

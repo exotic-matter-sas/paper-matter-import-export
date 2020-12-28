@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import Vuex from "vuex";
@@ -26,15 +26,14 @@ localVue.prototype.$tc = (text, args = "") => {
 }; // i18n mock
 const showModalMock = sm.mock();
 const hideModalMock = sm.mock();
-localVue.prototype.$bvModal = { show: showModalMock, hide: hideModalMock}; // bvModal mock
+localVue.prototype.$bvModal = { show: showModalMock, hide: hideModalMock }; // bvModal mock
 
 // Attach Vue plugins here (after mocking prototypes)
 localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
-const fakeModalTitle = 'fakeModalTitle';
-
+const fakeModalTitle = "fakeModalTitle";
 
 describe("FolderPickerModal template", () => {
   // define all var needed for the test here
@@ -48,8 +47,8 @@ describe("FolderPickerModal template", () => {
       localVue,
       store,
       propsData: {
-        title: fakeModalTitle
-      }
+        title: fakeModalTitle,
+      },
     });
   });
 
@@ -64,7 +63,6 @@ describe("FolderPickerModal template", () => {
     expect(elem.is(elementSelector)).to.equal(true);
   });
 
-
   it("renders properly component data", () => {
     expect(wrapper.text()).to.contains(fakeModalTitle);
   });
@@ -77,7 +75,7 @@ describe("FolderPickerModal mounted", () => {
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
-    fakeDefaultDestination = 'fakeDefaultDestination';
+    fakeDefaultDestination = "fakeDefaultDestination";
 
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(FolderPickerModal, {
@@ -85,8 +83,8 @@ describe("FolderPickerModal mounted", () => {
       store,
       propsData: {
         title: fakeModalTitle,
-        defaultDestination: fakeDefaultDestination
-      }
+        defaultDestination: fakeDefaultDestination,
+      },
     });
   });
 
@@ -97,7 +95,7 @@ describe("FolderPickerModal mounted", () => {
 
   it("modal is shown and proper values are set", () => {
     expect(showModalMock.callCount).to.equal(1);
-    expect(showModalMock.lastCall.args[0]).to.equal('folder-picker-modal');
+    expect(showModalMock.lastCall.args[0]).to.equal("folder-picker-modal");
     expect(wrapper.vm.unsavedDestination).to.equal(fakeDefaultDestination);
   });
 });
@@ -109,7 +107,7 @@ describe("FolderPickerModal methods", () => {
 
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
-    fakeDefaultDestination = 'fakeDefaultDestination';
+    fakeDefaultDestination = "fakeDefaultDestination";
 
     store = new Vuex.Store(storeConfig);
 
@@ -118,7 +116,7 @@ describe("FolderPickerModal methods", () => {
       store,
       propsData: {
         title: fakeModalTitle,
-        defaultDestination: fakeDefaultDestination
+        defaultDestination: fakeDefaultDestination,
       },
     });
   });
@@ -144,6 +142,6 @@ describe("FolderPickerModal methods", () => {
     wrapper.vm.savePickedFolder();
 
     expect(hideModalMock.callCount).to.be.equal(1);
-    expect(hideModalMock.lastCall.arg).to.be.equal('folder-picker-modal');
+    expect(hideModalMock.lastCall.arg).to.be.equal("folder-picker-modal");
   });
 });

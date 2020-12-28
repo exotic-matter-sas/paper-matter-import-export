@@ -4,26 +4,24 @@
  */
 
 const namespaced = true;
-const defaultPmHostName = 'https://papermatter.app'; // prod
+const defaultPmHostName = "https://papermatter.app"; // prod
 // const defaultPmHostName = 'http://127.0.0.1:8000'; // local
 
 const state = {
   pmHostName: defaultPmHostName,
-  action: 'import'
+  action: "import",
 };
 
 const mutations = {
-  SET_PM_HOST_NAME (state, pmHostName) {
-    state.pmHostName = pmHostName
+  SET_PM_HOST_NAME(state, pmHostName) {
+    state.pmHostName = pmHostName;
   },
-  SET_ACTION (state, action) {
-    state.action = action
+  SET_ACTION(state, action) {
+    state.action = action;
   },
 };
 
-export {
-  defaultPmHostName
-};
+export { defaultPmHostName };
 
 export default {
   namespaced,

@@ -9,7 +9,7 @@ const state = {
   docsToImport: [],
   importDocsInError: [],
   docsMetadataToImport: {},
-  savedImportDestination: {name: 'Root', id: null}
+  savedImportDestination: { name: "Root", id: null },
 };
 
 const mutations = {
@@ -23,7 +23,8 @@ const mutations = {
   },
 
   ADD_DOC_METADATA_TO_IMPORT(state, metadataKeyValuesPair) {
-    state.docsMetadataToImport[metadataKeyValuesPair[0]] = metadataKeyValuesPair[1];
+    state.docsMetadataToImport[metadataKeyValuesPair[0]] =
+      metadataKeyValuesPair[1];
   },
 
   SET_IMPORT_DESTINATION(state, folder) {
@@ -52,40 +53,51 @@ const mutations = {
     state.docsToImport = [];
     state.importDocsInError = [];
     state.docsMetadataToImport = {};
-    state.savedImportDestination = {name: 'Root', id: null};
+    state.savedImportDestination = { name: "Root", id: null };
   },
 };
 
 const actions = {
-  addDocMetadataToImport({commit, state, dispatch}, docMetadataDict) {
+  addDocMetadataToImport({ commit, state, dispatch }, docMetadataDict) {
     // if metadata path match a path in docsToImport
-    if (state.docsToImport.some(({path}) => path === docMetadataDict['filePath'])) {
+    if (
+      state.docsToImport.some(
+        ({ path }) => path === docMetadataDict["filePath"]
+      )
+    ) {
       const metadataDocPath = docMetadataDict.filePath;
       delete docMetadataDict.filePath;
       // generate a unique key to store meta in docsMetadataToImport by hashing metadataDocPath
-      return dispatch('tools/hashString', {algorithm: 'md5', string: metadataDocPath}, {root:true}).then(
-        uniqueMetadataKey => {
-          commit('ADD_DOC_METADATA_TO_IMPORT', [uniqueMetadataKey, docMetadataDict]);
-        }
-      );
+      return dispatch(
+        "tools/hashString",
+        { algorithm: "md5", string: metadataDocPath },
+        { root: true }
+      ).then((uniqueMetadataKey) => {
+        commit("ADD_DOC_METADATA_TO_IMPORT", [
+          uniqueMetadataKey,
+          docMetadataDict,
+        ]);
+      });
     }
   },
 
-  consumeFirstDocToImport({commit, state, dispatch}){
+  consumeFirstDocToImport({ commit, state, dispatch }) {
     const firstDocPath = state.docsToImport[0].path;
-    commit('CONSUME_FIRST_DOC_TO_IMPORT');
+    commit("CONSUME_FIRST_DOC_TO_IMPORT");
     // consume eventual doc metadata too
-    dispatch('tools/hashString', {algorithm: 'md5', string: firstDocPath}, {root:true}).then(
-      uniqueMetadataKey => {
-        commit('CONSUME_DOC_METADATA_TO_IMPORT', uniqueMetadataKey);
-      }
-    );
-  }
+    dispatch(
+      "tools/hashString",
+      { algorithm: "md5", string: firstDocPath },
+      { root: true }
+    ).then((uniqueMetadataKey) => {
+      commit("CONSUME_DOC_METADATA_TO_IMPORT", uniqueMetadataKey);
+    });
+  },
 };
 
 export default {
   namespaced,
   state,
   mutations,
-  actions
-}
+  actions,
+};

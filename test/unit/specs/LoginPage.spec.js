@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import flushPromises from "flush-promises";
@@ -12,11 +12,10 @@ import Vuex from "vuex";
 import storeConfig from "../../../src/renderer/store";
 import cloneDeep from "lodash.clonedeep";
 
-
 import LoginPage from "../../../src/renderer/components/LoginPage";
 
-import {remote, ipcRenderer} from "electron";
-import {USER_PROPS} from "../../tools/testValues";
+import { remote, ipcRenderer } from "electron";
+import { USER_PROPS } from "../../tools/testValues";
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -30,27 +29,29 @@ localVue.prototype.$tc = (text, args = "") => {
 }; // i18n mock
 const openExternalMock = sm.mock();
 localVue.prototype.$electron = {
-  shell: {openExternal: openExternalMock}
+  shell: { openExternal: openExternalMock },
 }; // electron prototype mock
 
 // Api response mock
 const mockedGetAccessTokenResponse = {
-  data : {
-    access_token: 'fakeAccessToken',
-    expires_in: 'fakeExpiresIn',
-    refresh_token: 'fakeRefreshToken'
-  }
+  data: {
+    access_token: "fakeAccessToken",
+    expires_in: "fakeExpiresIn",
+    refresh_token: "fakeRefreshToken",
+  },
 };
 
 let ipcOnMock, ipcSendMock, ipcRemoveListinersMock;
 function mockIpcRenderer() {
   ipcOnMock = sm.mock(ipcRenderer, "on").returnWith("");
   ipcSendMock = sm.mock(ipcRenderer, "send").returnWith("");
-  ipcRemoveListinersMock = sm.mock(ipcRenderer, "removeAllListeners").returnWith("");
+  ipcRemoveListinersMock = sm
+    .mock(ipcRenderer, "removeAllListeners")
+    .returnWith("");
 }
 
 let getAccessTokenMock = sm.mock();
-let apiMock = {getAccessToken: getAccessTokenMock};
+let apiMock = { getAccessToken: getAccessTokenMock };
 localVue.prototype.$api = apiMock; // api prototype mock
 
 const routerPushMock = sm.mock();
@@ -86,8 +87,8 @@ describe("LoginPage template", () => {
       localVue,
       store,
       computed: {
-        pmHostName: pmHostNameMock
-      }
+        pmHostName: pmHostNameMock,
+      },
     });
   });
 
@@ -122,11 +123,12 @@ describe("LoginPage mounted", () => {
     mockIpcRenderer();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
     getAndStoreAccessTokenMock = sm.mock().returnWith("");
-    setContentSizeMock  = sm.mock();
-    getContentSizeMock  = sm.mock().returnWith([mockedWidth, 0]);
-    getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
-      {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
-    );
+    setContentSizeMock = sm.mock();
+    getContentSizeMock = sm.mock().returnWith([mockedWidth, 0]);
+    getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith({
+      setContentSize: setContentSizeMock,
+      getContentSize: getContentSizeMock,
+    });
     disconnectUserMock = sm.mock().resolveWith();
 
     storeConfigCopy = cloneDeep(storeConfig);
@@ -136,11 +138,11 @@ describe("LoginPage mounted", () => {
       localVue,
       store,
       computed: {
-        pmHostName: pmHostNameMock
+        pmHostName: pmHostNameMock,
       },
       methods: {
-        getAndStoreAccessToken: getAndStoreAccessTokenMock
-      }
+        getAndStoreAccessToken: getAndStoreAccessTokenMock,
+      },
     });
   });
 
@@ -153,14 +155,16 @@ describe("LoginPage mounted", () => {
     expect(getCurrentWindowMock.callCount).to.equal(1);
     expect(setContentSizeMock.callCount).to.equal(1);
     expect(setContentSizeMock.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
-    expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
+    expect(setContentSizeMock.lastCall.args[1]).to.equal(
+      wrapper.vm.windowHeight
+    ); // come from windowHeight data
   });
 
   it("disconnectUser is called", () => {
     expect(disconnectUserMock.callCount).to.equal(1);
     expect(disconnectUserMock.lastCall.args[1]).to.eql({
       apiClient: wrapper.vm.$api,
-      reason: 'auto disconnect at startup'
+      reason: "auto disconnect at startup",
     });
   });
 
@@ -170,16 +174,19 @@ describe("LoginPage mounted", () => {
     expect(ipcOnMock.calls[0].args[0]).to.equal("oauthFlowSuccess");
     // event callback is properly defined
     const oauthFlowSuccessCallBack = ipcOnMock.calls[0].args[1];
-    oauthFlowSuccessCallBack('fakeEvent', 'fakeCode');
+    oauthFlowSuccessCallBack("fakeEvent", "fakeCode");
     expect(getAndStoreAccessTokenMock.callCount).to.equal(1);
-    expect(getAndStoreAccessTokenMock.lastCall.arg).to.equal('fakeCode');
+    expect(getAndStoreAccessTokenMock.lastCall.arg).to.equal("fakeCode");
     expect(ipcOnMock.calls[1].args[0]).to.equal("oauthFlowError");
     // event callback is properly defined
     const oauthFlowErrorCallBack = ipcOnMock.calls[1].args[1];
-    oauthFlowErrorCallBack('fakeEvent', 'fakeError');
-    expect(wrapper.vm.lastErrorCode).to.equal('fakeError');
+    oauthFlowErrorCallBack("fakeEvent", "fakeError");
+    expect(wrapper.vm.lastErrorCode).to.equal("fakeError");
 
-    expect(ipcSendMock.lastCall.args).to.eql(["startLocalServer", mockedPmHostName]);
+    expect(ipcSendMock.lastCall.args).to.eql([
+      "startLocalServer",
+      mockedPmHostName,
+    ]);
   });
 });
 
@@ -202,7 +209,7 @@ describe("LoginPage destroyed", () => {
       localVue,
       store,
       computed: {
-        pmHostName: pmHostNameMock
+        pmHostName: pmHostNameMock,
       },
     });
   });
@@ -256,11 +263,11 @@ describe("LoginPage methods", () => {
       computed: {
         pmHostName: pmHostNameMock,
         clientId: clientIdMock,
-        redirectUri: redirectUriMock
+        redirectUri: redirectUriMock,
       },
       methods: {
-        open: openMock
-      }
+        open: openMock,
+      },
     });
   });
 
@@ -276,7 +283,7 @@ describe("LoginPage methods", () => {
   it("open call electron openExternal", () => {
     // restore original method to test it
     wrapper.setMethods({ open: LoginPage.methods.open });
-    const mockedLink = 'http://example.com';
+    const mockedLink = "http://example.com";
     wrapper.vm.open(mockedLink);
 
     expect(openExternalMock.callCount).to.equal(1);
@@ -285,17 +292,17 @@ describe("LoginPage methods", () => {
 
   it("openLoginPage reset lastErrorCode and and call open", () => {
     // given
-    wrapper.setData({lastErrorCode: 'randomError'});
+    wrapper.setData({ lastErrorCode: "randomError" });
 
     // when
     wrapper.vm.openLoginPage();
 
     // then
-    expect(wrapper.vm.lastErrorCode).to.equal('');
+    expect(wrapper.vm.lastErrorCode).to.equal("");
     expect(openMock.callCount).to.equal(1);
     expect(openMock.lastCall.arg).to.equal(
       `${mockedPmHostName}/oauth2/authorize/?response_type=code&client_id=${mockedClientId}` +
-      `&redirect_uri=${mockedRedirectUri}&scope=read write`
+        `&redirect_uri=${mockedRedirectUri}&scope=read write`
     );
   });
 
@@ -303,7 +310,7 @@ describe("LoginPage methods", () => {
     getAccessTokenMock.resolveWith(mockedGetAccessTokenResponse);
 
     // when
-    const mockedAuthCode = 'fakeAuthCode';
+    const mockedAuthCode = "fakeAuthCode";
     await wrapper.vm.getAndStoreAccessToken(mockedAuthCode);
 
     // then
@@ -321,21 +328,19 @@ describe("LoginPage methods", () => {
 
     // then
     expect(saveAuthenticationDataMock.callCount).to.equal(1);
-    expect(saveAuthenticationDataMock.lastCall.args[1]).to.eql(
-      {
-        accessToken: mockedGetAccessTokenResponse.data.access_token,
-        accessTokenExpiresIn: mockedGetAccessTokenResponse.data.expires_in,
-        refreshToken: mockedGetAccessTokenResponse.data.refresh_token
-      }
-    );
+    expect(saveAuthenticationDataMock.lastCall.args[1]).to.eql({
+      accessToken: mockedGetAccessTokenResponse.data.access_token,
+      accessTokenExpiresIn: mockedGetAccessTokenResponse.data.expires_in,
+      refreshToken: mockedGetAccessTokenResponse.data.refresh_token,
+    });
     expect(routerPushMock.callCount).to.equal(1);
-    expect(routerPushMock.lastCall.args[0]).to.eql({name: 'home'});
+    expect(routerPushMock.lastCall.args[0]).to.eql({ name: "home" });
   });
 
   it("getAndStoreAccessToken handle error", async () => {
     // given
     getAccessTokenMock.rejectWith("boom!");
-    wrapper.setData({lastErrorCode: ''});
+    wrapper.setData({ lastErrorCode: "" });
 
     // when
     wrapper.vm.getAndStoreAccessToken();

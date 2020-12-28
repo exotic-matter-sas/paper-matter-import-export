@@ -5,51 +5,51 @@
 
 $em-purple: #313851;
 $em-orange: #f99947;
-$white-50: hsla(0,0%,100%,.5);
-$white-75: hsla(0,0%,100%,.75);
+$white-50: hsla(0, 0%, 100%, 0.5);
+$white-75: hsla(0, 0%, 100%, 0.75);
 
 $theme-colors: (
-    "primary": lighten($em-purple, 28%),
-    "secondary": #ced4da,
-    "dark": $em-purple,
-    "active": darken($em-orange, 10%),
-    "light-gray": #6c757d,
-    "dark-gray": #343a40
+  "primary": lighten($em-purple, 28%),
+  "secondary": #ced4da,
+  "dark": $em-purple,
+  "active": darken($em-orange, 10%),
+  "light-gray": #6c757d,
+  "dark-gray": #343a40,
 );
 
-@import '../../node_modules/bootstrap/scss/bootstrap';
+@import "../../node_modules/bootstrap/scss/bootstrap";
 
 body {
-    background: $light;
+  background: $light;
 }
 
 .highlight {
-    color: map_get($theme-colors, 'active');
-    font-weight: bold;
+  color: map_get($theme-colors, "active");
+  font-weight: bold;
 }
 
 button svg {
-    vertical-align: -0.125em;
+  vertical-align: -0.125em;
 }
 
 .align-content-evenly {
-    align-content: space-evenly;
+  align-content: space-evenly;
 }
 
-.b-form-file label{
-    white-space: nowrap;
-    overflow: hidden;
+.b-form-file label {
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .modal-backdrop {
-opacity: .5;
+  opacity: 0.5;
 }
 
-a.disabled{
-    color: map_get($theme-colors, 'light-gray');
-    cursor: default;
+a.disabled {
+  color: map_get($theme-colors, "light-gray");
+  cursor: default;
 
-    &:hover{
-        text-decoration: none;
-    }
+  &:hover {
+    text-decoration: none;
+  }
 }

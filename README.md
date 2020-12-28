@@ -10,7 +10,7 @@ You can download and install client from this page (Windows, Linux, macOS): [htt
 
 ### Logs location
 
-In case you report a bug, it could be useful to join the log files. The easiest way to get them is to display *Advanced* menu by hitting `Alt` key (not needed on macOS) and click on *Open logs folder* item.
+In case you report a bug, it could be useful to join the log files. The easiest way to get them is to display _Advanced_ menu by hitting `Alt` key (not needed on macOS) and click on _Open logs folder_ item.
 
 If app can't be run, you can also find them by manually opening this folder:
 
@@ -31,7 +31,7 @@ If app can't be run, you can also find them by manually opening this folder:
 ### Run locally
 
     npm run dev
-    
+
 #### Debug local run
 
 Useful logs should appear inside the terminal used to run the app.
@@ -40,9 +40,10 @@ You can also remote debug the app by copying the debugger url which appears in t
 
     # line which appears in console at app run
     Debugger listening on ws://127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0
-    
+
 To attach the debugger in Chrome, open this url:
- - devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=`127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0`
+
+- devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=`127.0.0.1:5858/0b935d7b-0f11-4c23-92f7-221310dfbaa0`
 
 _For more infos see https://simulatedgreg.gitbooks.io/electron-vue/content/en/debugging-production.html_
 
@@ -65,6 +66,12 @@ _Run all commands from one Terminal for ENV VAR to be preserved (commands are gi
 
 You should see logs related to update process popping in the terminal.
 
+### Code formatting
+
+[Prettier](https://prettier.io/) is used to format all files (some folders/files are excluded in `.prettierignore`).
+
+    prettier --write .
+
 ### Run tests
 
 #### Unit tests
@@ -75,9 +82,9 @@ _With [Karma](https://karma-runner.github.io/latest/index.html) test runner, [Mo
 
 ### Release and build process on CI
 
- 1. Update package.json `version` (e.g. `1.0.0`) and push
- 1. :warning: Wait for draft release to be created and built app to be attached to it :warning:
- 1. Complete and publish/tag release on Github
+1.  Update package.json `version` (e.g. `1.0.0`) and push
+1.  :warning: Wait for draft release to be created and built app to be attached to it :warning:
+1.  Complete and publish/tag release on Github
 
 #### Debug app build locally
 
@@ -97,7 +104,7 @@ _With [Karma](https://karma-runner.github.io/latest/index.html) test runner, [Mo
 
 - Main technologies used:
 
-  - Software framework: 
+  - Software framework:
     - [Electron](https://www.electronjs.org/)
     - [electron-vue](https://github.com/SimulatedGREG/electron-vue)
   - PDF document thumbnail generation: [PDF.js](https://mozilla.github.io/pdf.js/)
