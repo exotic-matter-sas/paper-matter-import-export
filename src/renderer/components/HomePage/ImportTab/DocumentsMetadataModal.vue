@@ -145,8 +145,7 @@ export default {
 
   props: {
     detectedMetadataFile: {
-      type: Object,
-      required: true,
+      type: File,
     },
   },
 
