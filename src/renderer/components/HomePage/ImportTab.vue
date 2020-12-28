@@ -30,7 +30,8 @@
                     "importTab.sourcesFormGroupDescriptionWarning1",
                     unsupportedFilesInsideFolder.length
                   )
-                }}</a>
+                }}</a
+              >
               {{
                 $tc(
                   "importTab.sourcesFormGroupDescriptionWarning2",
