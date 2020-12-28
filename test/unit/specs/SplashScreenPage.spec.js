@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import Vuex from "vuex";
@@ -12,7 +12,7 @@ import storeConfig from "../../../src/renderer/store";
 import cloneDeep from "lodash.clonedeep";
 
 import SplashScreenPage from "../../../src/renderer/components/SplashScreenPage";
-import {ipcRenderer, remote} from "electron";
+import { ipcRenderer, remote } from "electron";
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -34,7 +34,6 @@ localVue.use(Vuex);
 localVue.use(BootstrapVue); // avoid bootstrap vue warnings
 localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
-
 describe("SplashScreenPage template", () => {
   // define all var needed for the test here
   let wrapper;
@@ -47,7 +46,7 @@ describe("SplashScreenPage template", () => {
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(SplashScreenPage, {
       localVue,
-      store
+      store,
     });
   });
 
@@ -75,13 +74,14 @@ describe("SplashScreenPage mounted", () => {
   let ipcSendMock;
 
   beforeEach(() => {
-    process.env['DEBUG'] = 'electron-builder'; // force update check in dev mode for these tests
+    process.env["DEBUG"] = "electron-builder"; // force update check in dev mode for these tests
     mockedWidth = 100;
     setContentSizeMock = sm.mock();
     getContentSizeMock = sm.mock().returnWith([mockedWidth, 0]);
-    getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith(
-      {setContentSize: setContentSizeMock, getContentSize: getContentSizeMock}
-    );
+    getCurrentWindowMock = sm.mock(remote, "getCurrentWindow").returnWith({
+      setContentSize: setContentSizeMock,
+      getContentSize: getContentSizeMock,
+    });
     ipcOnMock = sm.mock(ipcRenderer, "on").returnWith("");
     ipcSendMock = sm.mock(ipcRenderer, "send").returnWith("");
 
@@ -103,7 +103,9 @@ describe("SplashScreenPage mounted", () => {
     expect(getCurrentWindowMock.callCount).to.equal(1);
     expect(setContentSizeMock.callCount).to.equal(1);
     expect(setContentSizeMock.lastCall.args[0]).to.equal(mockedWidth); // come from getContentSize return, first item
-    expect(setContentSizeMock.lastCall.args[1]).to.equal(wrapper.vm.windowHeight); // come from windowHeight data
+    expect(setContentSizeMock.lastCall.args[1]).to.equal(
+      wrapper.vm.windowHeight
+    ); // come from windowHeight data
   });
 
   it("event listener are setup and checkForUpdate event is sent", () => {
@@ -127,7 +129,7 @@ describe("SplashScreenPage mounted", () => {
     updateNotAvailableCallBack();
 
     expect(routerPushMock.callCount).to.equal(1);
-    expect(routerPushMock.lastCall.arg).to.eql({name: 'login'});
+    expect(routerPushMock.lastCall.arg).to.eql({ name: "login" });
   });
 
   it("event downloadingUpdate callback set proper data", () => {
@@ -137,7 +139,7 @@ describe("SplashScreenPage mounted", () => {
     // check event callback
     const downloadingUpdateCallBack = ipcOnMock.calls[2].args[1];
 
-    downloadingUpdateCallBack('fakeEvent', mockedCurrent, mockedTotal);
+    downloadingUpdateCallBack("fakeEvent", mockedCurrent, mockedTotal);
 
     expect(wrapper.vm.downloadingUpdate).to.equal(true);
     expect(wrapper.vm.downloadCurrentProgress).to.equal(mockedCurrent);
@@ -146,7 +148,7 @@ describe("SplashScreenPage mounted", () => {
 
   it("event update-downloaded callback set proper data", () => {
     const mockedTotal = 98;
-    wrapper.setData({downloadTotalProgress: mockedTotal});
+    wrapper.setData({ downloadTotalProgress: mockedTotal });
     expect(ipcOnMock.calls[3].arg).to.equal("updateDownloaded");
     // check event callback
     const updateDownloadedCallBack = ipcOnMock.calls[3].args[1];
@@ -164,6 +166,6 @@ describe("SplashScreenPage mounted", () => {
     updateErrorCallBack();
 
     expect(routerPushMock.callCount).to.equal(1);
-    expect(routerPushMock.lastCall.arg).to.eql({name: 'login'});
+    expect(routerPushMock.lastCall.arg).to.eql({ name: "login" });
   });
 });

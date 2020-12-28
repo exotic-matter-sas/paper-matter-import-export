@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import Vuex from "vuex";
@@ -33,7 +33,6 @@ localVue.component("font-awesome-icon"); // avoid font awesome warnings
 let docsToImportMock;
 let importDocsInErrorMock;
 
-
 describe("ProgressModal import template", () => {
   // define all var needed for the test here
   let wrapper;
@@ -51,10 +50,10 @@ describe("ProgressModal import template", () => {
         importDocsInError: importDocsInErrorMock,
       },
       propsData: {
-        action: 'import',
+        action: "import",
         currentCount: 0,
-        totalCount: 100
-      }
+        totalCount: 100,
+      },
     });
   });
 
@@ -74,7 +73,9 @@ describe("ProgressModal import template", () => {
   });
 
   it("renders properly component data", () => {
-    expect(wrapper.text()).to.contains(`${wrapper.vm.currentCount}/${wrapper.vm.totalCount}`);
+    expect(wrapper.text()).to.contains(
+      `${wrapper.vm.currentCount}/${wrapper.vm.totalCount}`
+    );
   });
 });
 
@@ -95,11 +96,11 @@ describe("ProgressModal export template", () => {
         importDocsInError: importDocsInErrorMock,
       },
       propsData: {
-        action: 'export',
+        action: "export",
         currentStep: 2,
         currentCount: 0,
-        totalCount: 100
-      }
+        totalCount: 100,
+      },
     });
   });
 
@@ -119,7 +120,9 @@ describe("ProgressModal export template", () => {
   });
 
   it("renders properly component data", () => {
-    expect(wrapper.text()).to.contains(`${wrapper.vm.currentCount}/${wrapper.vm.totalCount}`);
+    expect(wrapper.text()).to.contains(
+      `${wrapper.vm.currentCount}/${wrapper.vm.totalCount}`
+    );
   });
 });
 
@@ -139,10 +142,10 @@ describe("ProgressModal mounted", () => {
         importDocsInError: importDocsInErrorMock,
       },
       propsData: {
-        action: 'import',
+        action: "import",
         currentCount: 0,
-        totalCount: 100
-      }
+        totalCount: 100,
+      },
     });
   });
 
@@ -153,7 +156,7 @@ describe("ProgressModal mounted", () => {
 
   it("modal is shown", () => {
     expect(showModalMock.callCount).to.equal(1);
-    expect(showModalMock.lastCall.arg).to.equal('progress-modal');
+    expect(showModalMock.lastCall.arg).to.equal("progress-modal");
   });
 });
 
@@ -173,10 +176,10 @@ describe("ProgressModal methods", () => {
         importDocsInError: importDocsInErrorMock,
       },
       propsData: {
-        action: 'import',
+        action: "import",
         currentCount: 0,
-        totalCount: 100
-      }
+        totalCount: 100,
+      },
     });
   });
 

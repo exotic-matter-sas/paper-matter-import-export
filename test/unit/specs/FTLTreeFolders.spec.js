@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import Vuex from "vuex";
@@ -17,7 +17,7 @@ import flushPromises from "flush-promises";
 const localVue = createLocalVue();
 
 let listFoldersMock = sm.mock();
-let apiMock = {listFolders: listFoldersMock};
+let apiMock = { listFolders: listFoldersMock };
 localVue.prototype.$api = apiMock; // api prototype mock
 
 // Attach Vue plugins here (after mocking prototypes)
@@ -32,7 +32,7 @@ describe("FTLTreeFolders template", () => {
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
     listFoldersMock.resolveWith({
-      data: [tv.FOLDER_TREE_ITEM, tv.FOLDER_TREE_ITEM_WITH_DESCENDANT]
+      data: [tv.FOLDER_TREE_ITEM, tv.FOLDER_TREE_ITEM_WITH_DESCENDANT],
     });
     wrapper = shallowMount(FTLTreeFolders, {
       localVue,
@@ -41,14 +41,14 @@ describe("FTLTreeFolders template", () => {
         store: {
           state: {
             auth: {
-              accessToken: 'fakeAccessToken'
-            }
-          }
+              accessToken: "fakeAccessToken",
+            },
+          },
         },
         i18n: {
-          t: sm.mock().returnWith('')
-        }
-      }
+          t: sm.mock().returnWith(""),
+        },
+      },
     });
   });
 
@@ -71,7 +71,7 @@ describe("FTLTreeFolders mounted", () => {
   beforeEach(() => {
     // set vars here: vue wrapper args, fake values, mock
     listFoldersMock.resolveWith({
-      data: [tv.FOLDER_TREE_ITEM, tv.FOLDER_TREE_ITEM_WITH_DESCENDANT]
+      data: [tv.FOLDER_TREE_ITEM, tv.FOLDER_TREE_ITEM_WITH_DESCENDANT],
     });
     wrapper = shallowMount(FTLTreeFolders, {
       localVue,
@@ -80,14 +80,14 @@ describe("FTLTreeFolders mounted", () => {
         store: {
           state: {
             auth: {
-              accessToken: 'fakeAccessToken'
-            }
-          }
+              accessToken: "fakeAccessToken",
+            },
+          },
         },
         i18n: {
-          t: sm.mock().returnWith('')
-        }
-      }
+          t: sm.mock().returnWith(""),
+        },
+      },
     });
   });
 
@@ -99,7 +99,7 @@ describe("FTLTreeFolders mounted", () => {
 
   it("listFolders is called", () => {
     expect(listFoldersMock.callCount).to.equal(1);
-    expect(listFoldersMock.lastCall.arg).to.equal('fakeAccessToken');
+    expect(listFoldersMock.lastCall.arg).to.equal("fakeAccessToken");
   });
 
   it("handle properly listFolders success", async () => {
@@ -110,7 +110,7 @@ describe("FTLTreeFolders mounted", () => {
     expect(wrapper.vm.folders).to.eql([
       {
         id: null,
-        name: '',
+        name: "",
         has_descendant: true,
         is_root: true,
         children: [
@@ -118,22 +118,22 @@ describe("FTLTreeFolders mounted", () => {
             id: tv.FOLDER_TREE_ITEM.id,
             name: tv.FOLDER_TREE_ITEM.name,
             has_descendant: tv.FOLDER_TREE_ITEM.has_descendant,
-            children: []
+            children: [],
           },
           {
             id: tv.FOLDER_TREE_ITEM_WITH_DESCENDANT.id,
             name: tv.FOLDER_TREE_ITEM_WITH_DESCENDANT.name,
             has_descendant: tv.FOLDER_TREE_ITEM_WITH_DESCENDANT.has_descendant,
-            children: []
+            children: [],
           },
-        ]
+        ],
       },
     ]);
   });
 
   it("handle properly listFolders error", async () => {
     // redefine wrapper here for listFoldersMock to reject before mounted called
-    listFoldersMock.rejectWith('Boom!');
+    listFoldersMock.rejectWith("Boom!");
     wrapper = shallowMount(FTLTreeFolders, {
       localVue,
       propsData: {
@@ -141,14 +141,14 @@ describe("FTLTreeFolders mounted", () => {
         store: {
           state: {
             auth: {
-              accessToken: 'fakeAccessToken'
-            }
-          }
+              accessToken: "fakeAccessToken",
+            },
+          },
         },
         i18n: {
-          t: sm.mock().returnWith('')
-        }
-      }
+          t: sm.mock().returnWith(""),
+        },
+      },
     });
 
     await flushPromises();

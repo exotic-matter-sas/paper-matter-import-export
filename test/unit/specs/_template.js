@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import flushPromises from "flush-promises";
@@ -12,8 +12,7 @@ import Vuex from "vuex";
 import storeConfig from "../../../src/renderer/store";
 import cloneDeep from "lodash.clonedeep";
 
-
-import {remote} from "electron";
+import { remote } from "electron";
 import * as tv from "../../tools/testValues.js";
 
 // Create clean Vue instance and set installed package to avoid warning
@@ -28,10 +27,10 @@ localVue.prototype.$tc = (text, args = "") => {
 }; // i18n mock
 const openExternalMock = sm.mock();
 localVue.prototype.$electron = {
-  shell: {openExternal: openExternalMock}
+  shell: { openExternal: openExternalMock },
 }; // electron prototype mock
 let requestAMock = sm.mock();
-let apiMock = {requestA: requestAMock};
+let apiMock = { requestA: requestAMock };
 localVue.prototype.$api = apiMock;
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
@@ -43,18 +42,18 @@ localVue.component("font-awesome-icon"); // avoid font awesome warnings
 
 // TODO define Api response mock bellow
 const mockedRequestASuccessResponse = {
-  data : {
-    access: 'fakeAccess',
-    refresh: 'fakeRefresh'
-  }
+  data: {
+    access: "fakeAccess",
+    refresh: "fakeRefresh",
+  },
 };
 
 const mockedRequestAErrorResponse = {
-  response : {
+  response: {
     data: {
-      detail: 'boom!'
-    }
-  }
+      detail: "boom!",
+    },
+  },
 };
 
 describe("Component template", () => {
@@ -75,9 +74,9 @@ describe("Component template", () => {
       computed: {
         computedA: {
           cache: false,
-          get: computedAMock
+          get: computedAMock,
         },
-      }
+      },
     });
   });
 
@@ -116,7 +115,7 @@ describe("Component mounted", () => {
     computedBMock = sm.mock().returnWith(mockedComputeBValue);
     methodAMock = sm.mock();
     methodBMock = sm.mock();
-    libraryMethodMock = sm.mock(remote.dialog, "showMessageBox").returnWith('');
+    libraryMethodMock = sm.mock(remote.dialog, "showMessageBox").returnWith("");
     store = new Vuex.Store(storeConfig);
     wrapper = shallowMount(Component, {
       localVue,
@@ -124,17 +123,17 @@ describe("Component mounted", () => {
       computed: {
         computedA: {
           cache: false,
-          get: computedAMock
+          get: computedAMock,
         },
         computedB: {
           cache: false,
-          get: computedBMock
+          get: computedBMock,
         },
       },
       methods: {
         methodA: methodAMock,
-        methodB: methodBMock
-      }
+        methodB: methodBMock,
+      },
     });
   });
 
@@ -165,17 +164,17 @@ describe("Component mounted", () => {
       computed: {
         computedA: {
           cache: false,
-          get: computedAMock
+          get: computedAMock,
         },
         computedB: {
           cache: false,
-          get: computedBMock
+          get: computedBMock,
         },
       },
       methods: {
         methodA: methodAMock,
-        methodB: methodBMock
-      }
+        methodB: methodBMock,
+      },
     });
 
     // then only method A is called
@@ -196,8 +195,8 @@ describe("Component computed", () => {
       localVue,
       store,
       propsData: {
-        propsA: true
-      }
+        propsA: true,
+      },
     });
   });
 
@@ -207,9 +206,9 @@ describe("Component computed", () => {
 
   it("test computed based on data return proper value", () => {
     // FIXME not tested !!! computed cache may prevent this test to work
-    wrapper.setData({dataA: 'A', dataB: 'B'});
+    wrapper.setData({ dataA: "A", dataB: "B" });
 
-    expect(wrapper.vm.computedA).to.equal('A+B');
+    expect(wrapper.vm.computedA).to.equal("A+B");
   });
 });
 
@@ -236,7 +235,7 @@ describe("Component methods", () => {
     computedBMock = sm.mock().returnWith(mockedComputeBValue);
     methodAMock = sm.mock();
     methodBMock = sm.mock();
-    libraryMethodMock = sm.mock(remote.dialog, "showMessageBox").returnWith('');
+    libraryMethodMock = sm.mock(remote.dialog, "showMessageBox").returnWith("");
 
     // Copy store config to mock some mutations and actions
     storeConfigCopy = cloneDeep(storeConfig);
@@ -250,17 +249,17 @@ describe("Component methods", () => {
       computed: {
         computedA: {
           cache: false,
-          get: computedAMock
+          get: computedAMock,
         },
         computedB: {
           cache: false,
-          get: computedBMock
+          get: computedBMock,
         },
       },
       methods: {
         methodA: methodAMock,
-        methodB: methodBMock
-      }
+        methodB: methodBMock,
+      },
     });
   });
 
@@ -284,12 +283,12 @@ describe("Component methods", () => {
   it("test methodA logic/conditions", () => {
     // given computed A is true and dataA empty
     computedAMock.returnWith(true);
-    wrapper.setData({dataA: ''});
+    wrapper.setData({ dataA: "" });
 
     wrapper.vm.methodA();
 
     // then method A set dataA to true
-    expect(wrapper.vm.dataA).to.equal('Im all set');
+    expect(wrapper.vm.dataA).to.equal("Im all set");
   });
 
   it("methodA call api", async () => {
@@ -297,7 +296,10 @@ describe("Component methods", () => {
 
     // then request A is called with proper params
     expect(requestAMock.callCount).to.equal(1);
-    expect(requestAMock.lastCall.args).to.eql([tv.USER_PROPS.email, tv.USER_PROPS.password]);
+    expect(requestAMock.lastCall.args).to.eql([
+      tv.USER_PROPS.email,
+      tv.USER_PROPS.password,
+    ]);
   });
 
   it("methodA handle api success", async () => {
@@ -309,7 +311,7 @@ describe("Component methods", () => {
 
     // then user is redirect to home page
     expect(routerPushMock.callCount).to.equal(1);
-    expect(routerPushMock.lastCall.args[0]).to.eql({name: 'home'});
+    expect(routerPushMock.lastCall.args[0]).to.eql({ name: "home" });
   });
 
   it("methodA handle api error", async () => {
@@ -319,7 +321,7 @@ describe("Component methods", () => {
     await flushPromises();
 
     // then request A is called with proper params
-    expect(wrapper.vm.lastError).to.include('boom!');
+    expect(wrapper.vm.lastError).to.include("boom!");
   });
 
   it("methodA commit/dispatch data to store", async () => {
@@ -328,9 +330,9 @@ describe("Component methods", () => {
 
     // then commitA and actionA are called with proper params
     expect(mutationAMock.callCount).to.equal(1);
-    expect(mutationAMock.lastCall.args[1]).to.equal('commitA arg');
+    expect(mutationAMock.lastCall.args[1]).to.equal("commitA arg");
     expect(actionAMock.callCount).to.equal(1);
-    expect(actionAMock.lastCall.args[1]).to.equal('actionA arg');
+    expect(actionAMock.lastCall.args[1]).to.equal("actionA arg");
   });
 
   it("methodA emit eventA", async () => {
@@ -347,15 +349,14 @@ describe("Component methods", () => {
   });
 
   it("watcherA set dataB properly", async () => {
-    wrapper.setData({watcherA: 42});
+    wrapper.setData({ watcherA: 42 });
     await flushPromises();
 
     expect(wrapper.vm.dataB).to.be.equal(true);
 
-    wrapper.setData({watcherA: 43});
+    wrapper.setData({ watcherA: 43 });
     await flushPromises();
 
     expect(wrapper.vm.metadataFileDetected).to.be.equal(false);
   });
 });
-

@@ -4,11 +4,10 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import App from "../../../src/renderer/App";
-
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();

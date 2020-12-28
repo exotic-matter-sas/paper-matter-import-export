@@ -4,7 +4,7 @@
  */
 
 const namespaced = true;
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 const actions = {
   /**
@@ -13,7 +13,9 @@ const actions = {
    * @param {String} payload.string - string to hash.
    */
   hashString({}, payload) {
-    return Promise.resolve(crypto.createHash(payload.algorithm).update(payload.string).digest("hex"));
+    return Promise.resolve(
+      crypto.createHash(payload.algorithm).update(payload.string).digest("hex")
+    );
   },
   /**
    * @param {Object} payload
@@ -21,11 +23,13 @@ const actions = {
    * @param {Object} payload.file - Node file Buffer object to hash.
    */
   hashFile({}, payload) {
-    return Promise.resolve(crypto.createHash(payload.algorithm).update(payload.file).digest("hex"));
-  }
+    return Promise.resolve(
+      crypto.createHash(payload.algorithm).update(payload.file).digest("hex")
+    );
+  },
 };
 
 export default {
   namespaced,
-  actions
-}
+  actions,
+};

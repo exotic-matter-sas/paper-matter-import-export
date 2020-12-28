@@ -4,7 +4,7 @@
  */
 
 import { createLocalVue, shallowMount } from "@vue/test-utils";
-import sm from "simple-mock"
+import sm from "simple-mock";
 
 import BootstrapVue from "bootstrap-vue";
 import Vuex from "vuex";
@@ -12,11 +12,11 @@ import storeConfig from "../../../src/renderer/store";
 import cloneDeep from "lodash.clonedeep";
 
 import EditServerModal from "../../../src/renderer/components/LoginPage/EditServerModal";
-import {defaultPmHostName} from "../../../src/renderer/store/modules/config";
-import {defaultClientId} from "../../../src/renderer/store/modules/auth";
-import {ipcRenderer} from "electron";
+import { defaultPmHostName } from "../../../src/renderer/store/modules/config";
+import { defaultClientId } from "../../../src/renderer/store/modules/auth";
+import { ipcRenderer } from "electron";
 
-const log = require('electron-log');
+const log = require("electron-log");
 
 // Create clean Vue instance and set installed package to avoid warning
 const localVue = createLocalVue();
@@ -29,7 +29,7 @@ localVue.prototype.$tc = (text, args = "") => {
   return text + args;
 }; // i18n mock
 let apiUpdateServerDataMock = sm.mock();
-let apiMock = {updateServerData: apiUpdateServerDataMock};
+let apiMock = { updateServerData: apiUpdateServerDataMock };
 localVue.prototype.$api = apiMock; // api prototype mock
 const routerPushMock = sm.mock();
 localVue.prototype.$router = { push: routerPushMock }; // router mock
@@ -44,7 +44,6 @@ localVue.component("font-awesome-icon"); // avoid font awesome warnings
 const mockedPmHostName = "https://example.com";
 const mockedClientId = "fakeClientId";
 
-
 describe("EditServerModal template", () => {
   // define all var needed for the test here
   let wrapper;
@@ -57,7 +56,7 @@ describe("EditServerModal template", () => {
     store = new Vuex.Store(storeConfigCopy);
     wrapper = shallowMount(EditServerModal, {
       localVue,
-      store
+      store,
     });
   });
 
@@ -90,8 +89,8 @@ describe("EditServerModal mounted", () => {
       store,
       computed: {
         pmHostName: pmHostNameMock,
-        clientId: clientIdMock
-      }
+        clientId: clientIdMock,
+      },
     });
   });
 
@@ -102,7 +101,7 @@ describe("EditServerModal mounted", () => {
 
   it("modal is shown and proper values are set", () => {
     expect(showModalMock.callCount).to.equal(1);
-    expect(showModalMock.lastCall.args[0]).to.equal('edit-server-modal');
+    expect(showModalMock.lastCall.args[0]).to.equal("edit-server-modal");
 
     expect(wrapper.vm.serverAddress).to.equal(mockedPmHostName);
     expect(wrapper.vm.serverInputPlaceholder).to.equal(defaultPmHostName);
@@ -124,7 +123,7 @@ describe("EditServerModal methods", () => {
   let logInfoMock;
 
   beforeEach(() => {
-    bvModalEvtMock = {preventDefault: sm.mock()};
+    bvModalEvtMock = { preventDefault: sm.mock() };
     setPmHostNameMock = sm.mock();
     setClientIdMock = sm.mock();
     pmHostNameMock = sm.mock().returnWith(mockedPmHostName);
@@ -140,8 +139,8 @@ describe("EditServerModal methods", () => {
       store,
       computed: {
         pmHostName: pmHostNameMock,
-        clientId: clientIdMock
-      }
+        clientId: clientIdMock,
+      },
     });
   });
 
@@ -153,7 +152,7 @@ describe("EditServerModal methods", () => {
   });
 
   it("save set defaultPmHostname and defaultClientId if no input", () => {
-    wrapper.setData({serverAddress: '', clientIdModel: ''});
+    wrapper.setData({ serverAddress: "", clientIdModel: "" });
 
     wrapper.vm.save(bvModalEvtMock);
 
@@ -177,16 +176,22 @@ describe("EditServerModal methods", () => {
     wrapper.vm.save(bvModalEvtMock);
 
     expect(apiUpdateServerDataMock.callCount).to.equal(1);
-    expect(apiUpdateServerDataMock.lastCall.args[0]).to.eql(mockedPmHostName, mockedClientId);
+    expect(apiUpdateServerDataMock.lastCall.args[0]).to.eql(
+      mockedPmHostName,
+      mockedClientId
+    );
 
     expect(ipcSendMock.callCount).to.equal(1);
-    expect(ipcSendMock.lastCall.args).to.eql(['updateHostName', mockedPmHostName]);
+    expect(ipcSendMock.lastCall.args).to.eql([
+      "updateHostName",
+      mockedPmHostName,
+    ]);
   });
 
   it("save return set error flag if host name NOT properly formatted", () => {
-    wrapper.setData({serverAddress: 'boom!'});
+    wrapper.setData({ serverAddress: "boom!" });
 
-    expect(() => wrapper.vm.save(bvModalEvtMock)).to.throw('cantParseHostName');
+    expect(() => wrapper.vm.save(bvModalEvtMock)).to.throw("cantParseHostName");
 
     expect(setPmHostNameMock.callCount).to.equal(0);
     expect(wrapper.vm.serverAddressError).to.equal(true);
