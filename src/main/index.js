@@ -51,6 +51,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true, // not an issue as long as we do not display third party web page through the app
       webSecurity: process.env.NODE_ENV !== "development", // to allow requesting API from localhost during development
+      allowRunningInsecureContent: false,
     },
   };
   if (process.env.NODE_ENV !== "development" && process.platform === "linux") {
