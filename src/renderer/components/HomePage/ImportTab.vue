@@ -16,7 +16,7 @@
             <span v-else-if="unsupportedFilesInsideFolder.length > 0">
               <a
                 href="#"
-                class="text-danger font-weight-bold"
+                class="text-danger"
                 @click.prevent="displayUnsupportedFilesInsideFolderReport"
                 :title="
                   $tc(
@@ -30,8 +30,8 @@
                     "importTab.sourcesFormGroupDescriptionWarning1",
                     unsupportedFilesInsideFolder.length
                   )
-                }}
-              </a>
+                }}</a
+              >
               {{
                 $tc(
                   "importTab.sourcesFormGroupDescriptionWarning2",
@@ -40,7 +40,7 @@
               }}
             </span>
             <span v-else>
-              <!--to keep same UI height when no description is displayed-->
+              <!--hack using white space to keep same UI height when no description is displayed-->
               &nbsp;
             </span>
           </template>
@@ -716,10 +716,8 @@ img {
     margin-right: 0.5em;
   }
 }
-</style>
 
-<style lang="scss">
-#import-button > button:first-child {
-  width: 100%;
+#import-tab-content ::v-deep small a {
+  text-decoration: underline;
 }
 </style>

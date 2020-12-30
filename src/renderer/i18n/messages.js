@@ -60,7 +60,7 @@ export default {
       sourcesFormGroupDescriptionCheck: "Checking files inside folder...",
       sourcesFormGroupDescriptionWarning1: " | One file | {n} files",
       sourcesFormGroupDescriptionWarning1Title:
-        " | Click to display a report of concerned file | Click to display a report of concerned files",
+        " | Click to display file details | Click to display files details",
       sourcesFormGroupDescriptionWarning2:
         " | won't be imported in selected folder, its type isn't supported.| won't be imported in selected folder, their types aren't supported.",
       displayUnsupportedFilesInsideFolderReportIntro:

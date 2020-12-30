@@ -70,7 +70,7 @@ You should see logs related to update process popping in the terminal.
 
 [Prettier](https://prettier.io/) is used to format all files (some folders/files are excluded in `.prettierignore`).
 
-    prettier --write .
+    npm run reformat
 
 ### Run tests
 

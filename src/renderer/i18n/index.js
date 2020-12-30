@@ -14,7 +14,7 @@ const log = require("electron-log");
 // language detection by electron
 // strip eventual lang variant to avoid vuei18n falling always falling back to en when a lang variant is set (eg. fr-CA)
 const locale = remote.app.getLocale().split("-")[0];
-log.debug(`Detected locale: ${locale}`);
+log.debug(`detected locale: ${locale}`);
 // const locale = 'fr'; // force language for test purpose
 
 export default new VueI18n({

@@ -17,7 +17,8 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "",
-    "unit": "karma start test/unit/karma.conf.js"
+    "unit": "karma start test/unit/karma.conf.js",
+    "reformat": "prettier --write ."
   },
   "build": {
     "productName": "Paper Matter import & export",
