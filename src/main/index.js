@@ -54,7 +54,7 @@ function createWindow() {
       allowRunningInsecureContent: false,
     },
   };
-  if (process.env.NODE_ENV !== "development" && process.platform === "linux") {
+  if (process.env.NODE_ENV !== "development" && process.platform === "linux" && process.env.APPDIR !== undefined) {
     // Workaround to make icon work for AppImage (in task bar only, icon not appears on .AppImage file)
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-406786917
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-342062462
@@ -64,6 +64,9 @@ function createWindow() {
     );
   }
   mainWindow = new BrowserWindow(browserWindowOptions);
+
+  // force devtools to open in Prod mode for debug purpose
+  // mainWindow.webContents.openDevTools();
 
   // Set custom menu
   menu = Menu.buildFromTemplate(getTemplate(debugMode));

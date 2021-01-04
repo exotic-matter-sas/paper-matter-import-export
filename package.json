@@ -4,7 +4,8 @@
   "author": "Exotic Matter SAS <fabien@exotic-matter.fr>",
   "description": "Local client to import/export your documents in/from Paper Matter",
   "homepage": "https://papermatter.app",
-  "license": null,
+  "license": "MIT",
+  "repository": "https://github.com/exotic-matter-sas/paper-matter-import-export",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder -p always",
