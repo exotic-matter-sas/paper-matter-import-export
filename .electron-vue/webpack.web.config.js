@@ -12,7 +12,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 
 let webConfig = {
-  devtool: "#cheap-module-eval-source-map",
+  // for webpack not to use eval in Production mode
+  devtool: process.env.NODE_ENV === "development" ? "#cheap-module-eval-source-map" : "source-map",
   entry: {
     web: path.join(__dirname, "../src/renderer/main.js"),
   },

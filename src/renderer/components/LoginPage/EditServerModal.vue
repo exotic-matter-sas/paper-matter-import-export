@@ -21,7 +21,7 @@
           >
             <b-form-input
               v-model="serverAddress"
-              onfocus="this.select()"
+              @focus="(event) => event.target.select()"
               :placeholder="serverInputPlaceholder"
               :class="{ 'text-danger': serverAddressError }"
               :title="
@@ -37,7 +37,7 @@
           <b-form-group :label="$t('EditServerModal.clientIdInputLabel')">
             <b-form-input
               v-model="clientIdModel"
-              onfocus="this.select()"
+              @focus="(event) => event.target.select()"
               :placeholder="clientIdInputPlaceholder"
               trim
             ></b-form-input>

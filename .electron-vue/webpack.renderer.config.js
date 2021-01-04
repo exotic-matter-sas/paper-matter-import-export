@@ -23,7 +23,8 @@ const crypto = require("crypto");
 let whiteListedModules = ["vue", "bootstrap-vue"];
 
 let rendererConfig = {
-  devtool: "#cheap-module-eval-source-map",
+  // for webpack not to use eval in Production mode
+  devtool: process.env.NODE_ENV === "development" ? "#cheap-module-eval-source-map" : "source-map",
   entry: {
     renderer: path.join(__dirname, "../src/renderer/main.js"),
   },

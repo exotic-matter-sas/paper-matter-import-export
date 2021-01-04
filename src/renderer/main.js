@@ -80,6 +80,7 @@ Vue.api = Vue.prototype.$api = new ApiClient({
 
 /* eslint-disable no-new */
 const vi = new Vue({
+  render: h => h(App),
   components: { App },
   i18n,
   router,
