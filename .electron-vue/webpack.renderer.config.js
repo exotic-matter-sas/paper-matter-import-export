@@ -11,6 +11,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
+const crypto = require("crypto");
 
 /**
  * List of node_modules to include in webpack bundle
@@ -178,5 +179,14 @@ if (process.env.NODE_ENV === "production") {
     })
   );
 }
+
+/**
+ * Generate secure CSP nonce for inline scripts in index.ejs
+ */
+rendererConfig.plugins.push(
+  new webpack.DefinePlugin({
+    "process.env.SCRIPT_NONCE": `"${crypto.randomBytes(12).toString('hex')}"`,
+  })
+);
 
 module.exports = rendererConfig;

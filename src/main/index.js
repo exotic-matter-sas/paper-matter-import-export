@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, session } from "electron";
 import { getTemplate } from "./appMenuTemplate";
 
 /**
@@ -89,6 +89,25 @@ function createWindow() {
     mainWindow = null;
   });
 }
+
+function updateDefaultCSP(pmHostName) {
+  // complete Content Security Policy (set in index.ejs) to restrict connect-src
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy':
+          process.env.NODE_ENV === "development" ?
+          [`connect-src ${pmHostName} http://localhost:9080 ws:`] :
+          [`connect-src ${pmHostName}`]
+      }
+    })
+  })
+}
+
+ipcMain.on("setCSP", (event, pmHostName) => {
+  updateDefaultCSP(pmHostName);
+});
 
 export function toggleDebugFileLogLevel() {
   let level;
@@ -183,6 +202,8 @@ function shutdownLocalServer() {
 
 ipcMain.on("updateHostName", (event, pmHostName) => {
   paperMatterHostName = pmHostName;
+  // update CSP too
+  updateDefaultCSP(pmHostName);
 });
 
 ipcMain.on("startLocalServer", (event, pmHostName) => {
