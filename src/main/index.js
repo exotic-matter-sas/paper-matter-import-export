@@ -36,6 +36,10 @@ export let debugMode = fs.existsSync(debugFilePath);
 log.transports.file.level = debugMode ? "silly" : "error";
 log.transports.console.level = "silly";
 
+// default false value is deprecated
+// see https://github.com/electron/electron/issues/18397
+app.allowRendererProcessReuse = true;
+
 const appName = "Paper Matter import & export";
 
 function createWindow() {
