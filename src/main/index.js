@@ -69,7 +69,7 @@ function createWindow() {
   }
   mainWindow = new BrowserWindow(browserWindowOptions);
 
-  // force devtools to open in Prod mode for debug purpose
+  // force devtools to open in Prod mode, useful for debug purpose
   // mainWindow.webContents.openDevTools();
 
   // Set custom menu
