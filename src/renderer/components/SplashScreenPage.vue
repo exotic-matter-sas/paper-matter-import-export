@@ -40,6 +40,7 @@
 
 <script>
 import { remote, ipcRenderer } from "electron";
+import { mapState } from "vuex";
 
 const log = require("electron-log");
 
@@ -58,6 +59,9 @@ export default {
     // to resize window to page content
     const window = remote.getCurrentWindow();
     window.setContentSize(window.getContentSize()[0], this.windowHeight); // keep same width
+
+    // set ContentSecurity in main process to allow API calls to current pmHostName
+    ipcRenderer.send("setCSP", this.pmHostName);
 
     if (
       process.env.NODE_ENV === "production" ||
@@ -94,6 +98,10 @@ export default {
       );
     }
   },
+
+  computed: {
+    ...mapState("config", ["pmHostName"]),
+  }
 };
 </script>
 

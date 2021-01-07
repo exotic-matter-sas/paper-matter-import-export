@@ -2,9 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <% if (process.env.NODE_ENV === 'development') { %>
+      <meta http-equiv="Content-Security-Policy"
+      content="script-src http://localhost:9080 ws: devtools: 'nonce-<%= process.env.SCRIPT_NONCE %>';"/>
+    <% } else { %>
+      <meta http-equiv="Content-Security-Policy"
+      content="script-src file: 'nonce-<%= process.env.SCRIPT_NONCE %>';"/>
+    <% } %>
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
-      <script>
+      <script nonce="<%= process.env.SCRIPT_NONCE %>">
         require('module').globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
       </script>
     <% } %>
@@ -13,7 +20,7 @@
     <div id="app"></div>
     <!-- Set `__static` path to static files in production -->
     <% if (!require('process').browser) { %>
-      <script>
+      <script nonce="<%= process.env.SCRIPT_NONCE %>">
         if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
       </script>
     <% } %>

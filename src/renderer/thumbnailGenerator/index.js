@@ -3,7 +3,20 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
-import pdfjsLib from "pdfjs-dist/webpack";
+// import pdfjsLib from "pdfjs-dist/webpack";
+// FIXME restore import above when
+//  https://github.com/mozilla/pdf.js/issues/12813 fix is available in NPM
+// Workaround: pdfjs-dist/webpack does not pass filename option to worker-loader
+// so worker-loader tell webpack to generate a entry named pdf.worker.worker.js
+// instead of expected pdf.worker.js (as default work-loader filename is
+// [name].worker.js)
+var pdfjsLib = require("pdfjs-dist/build/pdf.js");
+var PdfjsWorker = require("worker-loader?esModule=false&filename=[name].js!pdfjs-dist/build/pdf.worker.js");
+
+if (typeof window !== "undefined" && "Worker" in window) {
+  pdfjsLib.GlobalWorkerOptions.workerPort = new PdfjsWorker();
+}
+// Workaround end here
 
 window.URL = window.URL || window.webkitURL;
 
