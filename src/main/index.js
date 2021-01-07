@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  */
 
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, session } from "electron";
 import { getTemplate } from "./appMenuTemplate";
 
 /**
@@ -36,6 +36,10 @@ export let debugMode = fs.existsSync(debugFilePath);
 log.transports.file.level = debugMode ? "silly" : "error";
 log.transports.console.level = "silly";
 
+// default false value is deprecated
+// see https://github.com/electron/electron/issues/18397
+app.allowRendererProcessReuse = true;
+
 const appName = "Paper Matter import & export";
 
 function createWindow() {
@@ -51,9 +55,10 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true, // not an issue as long as we do not display third party web page through the app
       webSecurity: process.env.NODE_ENV !== "development", // to allow requesting API from localhost during development
+      allowRunningInsecureContent: false,
     },
   };
-  if (process.env.NODE_ENV !== "development" && process.platform === "linux") {
+  if (process.env.NODE_ENV !== "development" && process.platform === "linux" && process.env.APPDIR !== undefined) {
     // Workaround to make icon work for AppImage (in task bar only, icon not appears on .AppImage file)
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-406786917
     // https://github.com/electron-userland/electron-builder/issues/748#issuecomment-342062462
@@ -63,6 +68,9 @@ function createWindow() {
     );
   }
   mainWindow = new BrowserWindow(browserWindowOptions);
+
+  // force devtools to open in Prod mode, useful for debug purpose
+  // mainWindow.webContents.openDevTools();
 
   // Set custom menu
   menu = Menu.buildFromTemplate(getTemplate(debugMode));
@@ -88,6 +96,25 @@ function createWindow() {
     mainWindow = null;
   });
 }
+
+function updateDefaultCSP(pmHostName) {
+  // complete Content Security Policy (set in index.ejs) to restrict connect-src
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy':
+          process.env.NODE_ENV === "development" ?
+          [`connect-src ${pmHostName} http://localhost:9080 ws:`] :
+          [`connect-src ${pmHostName}`]
+      }
+    })
+  })
+}
+
+ipcMain.on("setCSP", (event, pmHostName) => {
+  updateDefaultCSP(pmHostName);
+});
 
 export function toggleDebugFileLogLevel() {
   let level;
@@ -182,6 +209,8 @@ function shutdownLocalServer() {
 
 ipcMain.on("updateHostName", (event, pmHostName) => {
   paperMatterHostName = pmHostName;
+  // update CSP too
+  updateDefaultCSP(pmHostName);
 });
 
 ipcMain.on("startLocalServer", (event, pmHostName) => {

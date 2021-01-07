@@ -21,7 +21,7 @@
           >
             <b-form-input
               v-model="serverAddress"
-              onfocus="this.select()"
+              @focus="(event) => event.target.select()"
               :placeholder="serverInputPlaceholder"
               :class="{ 'text-danger': serverAddressError }"
               :title="
@@ -37,7 +37,7 @@
           <b-form-group :label="$t('EditServerModal.clientIdInputLabel')">
             <b-form-input
               v-model="clientIdModel"
-              onfocus="this.select()"
+              @focus="(event) => event.target.select()"
               :placeholder="clientIdInputPlaceholder"
               trim
             ></b-form-input>
@@ -135,7 +135,7 @@ export default {
 
       // update server data in api http client
       this.$api.updateServerData(this.pmHostName, this.clientId);
-      // update server data in main process for localServer
+      // update server data in main process for localServer and for CSP header
       ipcRenderer.send("updateHostName", this.pmHostName);
       log.info("server data updated");
     },

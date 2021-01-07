@@ -108,7 +108,7 @@ describe("SplashScreenPage mounted", () => {
     ); // come from windowHeight data
   });
 
-  it("event listener are setup and checkForUpdate event is sent", () => {
+  it("event listener are setup and setCSP, checkForUpdate event are sent", () => {
     expect(ipcOnMock.callCount).to.equal(5);
 
     expect(ipcOnMock.calls[0].arg).to.equal("updateNotAvailable");
@@ -117,8 +117,9 @@ describe("SplashScreenPage mounted", () => {
     expect(ipcOnMock.calls[3].arg).to.equal("updateDownloaded");
     expect(ipcOnMock.calls[4].arg).to.equal("updateError");
 
-    expect(ipcSendMock.callCount).to.equal(1);
-    expect(ipcSendMock.lastCall.arg).to.equal("checkForUpdate");
+    expect(ipcSendMock.callCount).to.equal(2);
+    expect(ipcSendMock.calls[0].arg).to.equal("setCSP");
+    expect(ipcSendMock.calls[1].arg).to.equal("checkForUpdate");
   });
 
   it("event updateNotAvailable callback call router", () => {
